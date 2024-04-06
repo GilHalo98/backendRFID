@@ -40,8 +40,8 @@ module.exports = (sequelize, DataTypes) => {
                 {foreignKey: 'idEmpleadoVinculado', onDelete: 'cascade'}
             )
 
-            empleado.hasMany(
-                models.semanaLaboral,
+            empleado.hasOne(
+                models.horario,
                 {foreignKey: 'idEmpleadoVinculado', onDelete: 'cascade'}
             )
         }

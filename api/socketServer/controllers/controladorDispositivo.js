@@ -122,20 +122,24 @@ exports.peticionAcceso = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => 
 
         // Por cada cliente en la sala.
         clientesSala.forEach(cliente => {
-            // Si el cliente no esta ocupado.
-            if(DISPOSITIVOS[CLIENTES[cliente.id]].status == ESTATUS_DISPOSITIVOS.LIBRE) {
-                // Emitimos el evento de la resolucion del acceso.
-                if(consulta.resolucion) {
-                    socket.broadcast.to(
-                        cliente.id
-                    ).emit(EVENTOS.GARANTIZAR_ACCESO, null);
+            const dispositivo = DISPOSITIVOS[CLIENTES[cliente.id]];
 
-                } else {
-                    socket.broadcast.to(
-                        cliente.id
-                    ).emit(EVENTOS.NEGAR_ACCESO, null);
+            if(dispositivo) {
+                // Si el cliente no esta ocupado.
+                if(dispositivo.status == ESTATUS_DISPOSITIVOS.LIBRE) {
+                    // Emitimos el evento de la resolucion del acceso.
+                    if(consulta.resolucion) {
+                        socket.broadcast.to(
+                            cliente.id
+                        ).emit(EVENTOS.GARANTIZAR_ACCESO, null);
+
+                    } else {
+                        socket.broadcast.to(
+                            cliente.id
+                        ).emit(EVENTOS.NEGAR_ACCESO, null);
+                    }
+
                 }
-
             }
         });
 
