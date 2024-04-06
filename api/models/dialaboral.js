@@ -18,7 +18,7 @@ module.exports = (sequelize, DataTypes) => {
             // define association here
             diaLaboral.belongsTo(
                 models.horario,
-                {foreignKey: 'idHorarioVinculada', onDelete: 'cascade'}
+                {foreignKey: 'idHorarioVinculado', onDelete: 'cascade'}
             )
         }
     }
@@ -82,7 +82,7 @@ module.exports = (sequelize, DataTypes) => {
             }
         },
 
-        idHorarioVinculada: DataTypes.INTEGER
+        idHorarioVinculado: DataTypes.INTEGER
     }, {
         sequelize,
         modelName: 'diaLaboral',

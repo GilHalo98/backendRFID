@@ -39,7 +39,7 @@ module.exports = {
                 type: Sequelize.DATE
             },
 
-            idHorarioVinculada: {
+            idHorarioVinculado: {
                 type: Sequelize.INTEGER,
                 required: true,
                 allowNull: false,
