@@ -1,0 +1,27 @@
+contenido del .env
+DB_DATABASE=AC_AUTOMATIZACION
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=
+DB_DIALECT=mysql
+DB_PORT=3306
+
+PORT=3001
+HOST=127.0.0.1
+
+SECRET=secret
+
+API_URL=/apiV0.1.0/
+API_KEY=apiKey
+
+BASE_DIR=/home/halo98/Documentos/codigo/proyectoRFID/backend/api/
+
+MAIL_DIR=
+MAIL_PASS=
+
+
+npm run build
+node --experimental-sea-config sea-config.json 
+cp $(command -v node) backend 
+npx postject hello NODE_SEA_BLOB sea-prep.blob \
+    --sentinel-fuse NODE_SEA_FUSE_fce680ab2cc467b6e072b8b5df1996b2 
