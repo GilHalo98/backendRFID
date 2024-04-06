@@ -394,7 +394,7 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
         const diaLaboral = await DiasLaborales.findOne({
             where: {
                 dia: dia,
-                idSemanaLaboralVinculada: horario.id
+                idHorarioVinculado: horario.id
             }
         })
 
