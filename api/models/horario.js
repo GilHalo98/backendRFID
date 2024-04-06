@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
 
             horario.hasMany(
                 models.diaLaboral,
-                {foreignKey: 'idHorarioVinculada', onDelete: 'cascade'}
+                {foreignKey: 'idHorarioVinculado', onDelete: 'cascade'}
             )
         }
     }
