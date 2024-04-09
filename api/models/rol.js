@@ -4,7 +4,7 @@
 const { toSQLDate } = require("../utils/utils");
 
 const {
-    Model
+    Model, INTEGER
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class rol extends Model {
@@ -30,6 +30,8 @@ module.exports = (sequelize, DataTypes) => {
         // Atributos
         rolTrabajador: DataTypes.STRING,
         descripcionRol: DataTypes.STRING,
+        bitRol: DataTypes.INTEGER,
+
         fechaRegistroRol: {
             type: DataTypes.DATE,
             set(fecha) {

@@ -70,6 +70,10 @@ exports.consultaRol = async(request, respuesta) => {
             };
         }
 
+        if(consulta.bitRol) {
+            datos.bitRol = consulta.bitRol;
+        }
+
         if(consulta.idPermisoVinculado) {
             // Si no existe.
             if(! await existeRegistro(Permisos, consulta.idPermisoVinculado)) {
@@ -137,6 +141,7 @@ exports.registrarRol = async(request, respuesta) => {
         // Recuperamos la informacion del registro.
         const rolTrabajador = cuerpo.rolTrabajador;
         const descripcionRol = cuerpo.descripcionRol;
+        const bitRol = cuerpo.bitRol;
         const idPermisoVinculado = cuerpo.idPermisoVinculado;
 
         // Validamos que exista la informacion necesaria para
@@ -145,6 +150,7 @@ exports.registrarRol = async(request, respuesta) => {
             !rolTrabajador
             || !descripcionRol
             || !idPermisoVinculado
+            || !bitRol
         ) {
             // Si no estan completos mandamos
             // un mensaje de datos incompletos.
@@ -181,6 +187,7 @@ exports.registrarRol = async(request, respuesta) => {
             rolTrabajador: rolTrabajador,
             descripcionRol: descripcionRol,
             fechaRegistroRol: fecha,
+            bitRol: bitRol,
             idPermisoVinculado: idPermisoVinculado
         };
 
@@ -229,6 +236,7 @@ exports.modificarRol = async(request, respuesta) => {
         const id = consulta.id;
         const rolTrabajador = cuerpo.rolTrabajador;
         const descripcionRol = cuerpo.descripcionRol;
+        const bitRol = cuerpo.bitRol;
         const idPermisoVinculado = cuerpo.idPermisoVinculado;
 
         // Verificamos que exista un id del registro a modificar.
@@ -257,6 +265,9 @@ exports.modificarRol = async(request, respuesta) => {
         }
         if(descripcionRol) {
             rol.descripcionRol = descripcionRol;
+        }
+        if(bitRol) {
+            rol.bitRol = bitRol;
         }
         if(idPermisoVinculado) {
             // Si no existe.

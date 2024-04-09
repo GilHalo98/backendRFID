@@ -18,6 +18,10 @@ module.exports = {
                 type: Sequelize.STRING
             },
 
+            bitRol: {
+                type: Sequelize.INTEGER,
+            },
+
             fechaRegistroRol: {
                 type: Sequelize.DATE
             },
