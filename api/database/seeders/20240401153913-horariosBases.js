@@ -33,7 +33,7 @@ function generarDiasLaborales(cantidadUsuarios) {
                     horaEntradaDescanso: "13:00:00",
                     horaSalidaDescanso: "14:00:00",
                     horaSalida: "18:00:00",
-                    idHorarioVinculada: i
+                    idHorarioVinculad0: i
                 }
             );
         }
