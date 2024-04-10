@@ -65,6 +65,7 @@ module.exports = {
                 descripcionTipoReporte: 'Chequeo de salida de empleado con horas extras',
                 fechaRegistroTipoReporte: toSQLDate(fecha),
             },
+
             {
                 nombreTipoReporte: 'Actividad iniciada',
                 descripcionTipoReporte: 'Actividad inciada por empleado',
@@ -78,6 +79,17 @@ module.exports = {
             {
                 nombreTipoReporte: 'Credenciales invalidas para actividad',
                 descripcionTipoReporte: 'Credenciales de empleado invalidas para el inicio de actividad ',
+                fechaRegistroTipoReporte: toSQLDate(fecha),
+            },
+
+            {
+                nombreTipoReporte: 'Chequeo de inicio de descanso',
+                descripcionTipoReporte: 'Chequeo de inicio de descanso del empleado',
+                fechaRegistroTipoReporte: toSQLDate(fecha),
+            },
+            {
+                nombreTipoReporte: 'Chequeo de fin de descanso',
+                descripcionTipoReporte: 'Chequeo de fin de descanso del empleado',
                 fechaRegistroTipoReporte: toSQLDate(fecha),
             },
         ], {});
