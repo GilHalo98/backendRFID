@@ -36,7 +36,6 @@ exports.peticionAccesoBloquear = async (io, socket, payload, DISPOSITIVOS, CLIEN
     const consulta = !payload ? {} : payload;
 
     try {
-        console.log('peticion de acceso con bloqueo de puerta');
         const sala = DISPOSITIVOS[CLIENTES[socket.id]].sala;
         // socket.broadcast.to(sala);
 
@@ -49,7 +48,13 @@ exports.peticionAccesoBloquear = async (io, socket, payload, DISPOSITIVOS, CLIEN
             // Si el cliente no esta ocupado.
             if(DISPOSITIVOS[CLIENTES[cliente.id]].status == ESTATUS_DISPOSITIVOS.LIBRE) {
                 // Emitimos el evento de la resolucion del acceso.
-                if(consulta.resolucion) {
+                const resolucion = (
+                    !consulta.resolucion ? consulta.resolucion : parseInt(consulta.resolucion)
+                );
+
+                console.log('peticion de acceso con bloqueo de puerta: ' + resolucion.toString());
+        
+                if(resolucion) {
                     socket.broadcast.to(
                         cliente.id
                     ).emit(EVENTOS.GARANTIZAR_ACCESO_BLOQUEAR, null);
@@ -74,7 +79,6 @@ exports.peticionAccesoDesbloquear = async (io, socket, payload, DISPOSITIVOS, CL
     const consulta = !payload ? {} : payload;
 
     try {
-        console.log('peticion de acceso con bloqueo de puerta');
         const sala = DISPOSITIVOS[CLIENTES[socket.id]].sala;
         // socket.broadcast.to(sala);
 
@@ -87,7 +91,13 @@ exports.peticionAccesoDesbloquear = async (io, socket, payload, DISPOSITIVOS, CL
             // Si el cliente no esta ocupado.
             if(DISPOSITIVOS[CLIENTES[cliente.id]].status == ESTATUS_DISPOSITIVOS.BLOQUEADO) {
                 // Emitimos el evento de la resolucion del acceso.
-                if(consulta.resolucion) {
+                const resolucion = (
+                    !consulta.resolucion ? consulta.resolucion : parseInt(consulta.resolucion)
+                );
+
+                console.log('peticion de acceso con bloqueo de puerta: ' + resolucion.toString());
+        
+                if(resolucion) {
                     socket.broadcast.to(
                         cliente.id
                     ).emit(EVENTOS.NEGAR_ACCESO_DESBLOQUEAR, null);
@@ -112,7 +122,6 @@ exports.peticionAcceso = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => 
     const consulta = !payload ? {} : payload;
 
     try {
-        console.log('peticion de acceso');
         const sala = DISPOSITIVOS[CLIENTES[socket.id]].sala;
         // socket.broadcast.to(sala);
 
@@ -128,7 +137,13 @@ exports.peticionAcceso = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => 
                 // Si el cliente no esta ocupado.
                 if(dispositivo.status == ESTATUS_DISPOSITIVOS.LIBRE) {
                     // Emitimos el evento de la resolucion del acceso.
-                    if(consulta.resolucion) {
+                    const resolucion = (
+                        !consulta.resolucion ? consulta.resolucion : parseInt(consulta.resolucion)
+                    );
+
+                    console.log('peticion de acceso: ' + resolucion.toString());
+            
+                    if(resolucion) {
                         socket.broadcast.to(
                             cliente.id
                         ).emit(EVENTOS.GARANTIZAR_ACCESO, null);

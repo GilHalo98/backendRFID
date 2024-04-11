@@ -56,12 +56,15 @@ exports.registrarReporteAcceso = async(request, respuesta) => {
         const fecha = new Date();
 
         // Recuperamos los datos del reporte.
-        const resolucionAcceso = cuerpo.resolucionAcceso;
+        const resolucion = (
+            !cuerpo.resolucion ? cuerpo.resolucion : parseInt(cuerpo.resolucion)
+        );
+
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
         // Verificamos que los datos para el registro del reporte esten
         // completos, sino es asi, retornamos un mensaje de error.
-        if(!resolucionAcceso || !idEmpleadoVinculado) {
+        if(!resolucion || !idEmpleadoVinculado) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
             });
@@ -95,10 +98,9 @@ exports.registrarReporteAcceso = async(request, respuesta) => {
         let idReporteVinculado = undefined;
 
         // Verificamos la resolucion de la peticion de acceso al area.
-        if(resolucionAcceso) {
+        if(resolucion) {
             // Si se le dio acceso a la zona, se genera un reporte de acceso
             // concedido.
-
             descripcionReporte = "Acceso concedido al empleado a zona";
             idTipoReporteVinculado = 1;
 
@@ -241,17 +243,17 @@ exports.validarRegistroEmpleado = async(request, respuesta) => {
         }
 
         // Recuperamos los datos del cuerpo.
-        const idEmpelado = cuerpo.idEmpleadoVinculado;
+        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
         // Verificamos que existan los datos para realizar la busqueda.
-        if(!idEmpleado) {
+        if(!idEmpleadoVinculado) {
             return respuesta.status(200).json({
                 codigosRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
             });
         }
 
         // Verificamos la existencia del registro.
-        if(await existeRegistro(Empleados, idEmpleado)) {
+        if(await existeRegistro(Empleados, idEmpleadoVinculado)) {
             // Si existe el registro, retornamos un mensaje de OK.
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.OK
