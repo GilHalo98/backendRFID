@@ -41,9 +41,6 @@ class EventosSockets {
     // Evento de acceso garantizado.
     GARANTIZAR_ACCESO_BLOQUEAR = 'garantizar_acceso_bloquear';
 
-    // Evento de acceso negado.
-    NEGAR_ACCESO_DESBLOQUEAR = 'negar_acceso_desbloquear';
-
     // Evento de envio de lista de clientes.
     LISTA_CLIENTES = 'lista_clientes';
 

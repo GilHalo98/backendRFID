@@ -95,12 +95,12 @@ exports.peticionAccesoDesbloquear = async (io, socket, payload, DISPOSITIVOS, CL
                     !consulta.resolucion ? consulta.resolucion : parseInt(consulta.resolucion)
                 );
 
-                console.log('peticion de acceso con bloqueo de puerta: ' + resolucion.toString());
+                console.log('peticion de acceso con desbloqueo de puerta: ' + resolucion.toString());
         
                 if(resolucion) {
                     socket.broadcast.to(
                         cliente.id
-                    ).emit(EVENTOS.NEGAR_ACCESO_DESBLOQUEAR, null);
+                    ).emit(EVENTOS.DESBLOQUEAR_ABRIR_PUERTA, null);
 
                 } else {
                     socket.broadcast.to(
