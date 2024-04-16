@@ -841,10 +841,15 @@ exports.registrarReporteInicioActividad = async(
         // Instanciamos la fecha del registro.
         const fecha = new Date();
 
+        // Recuperamos los datos del reporte.
+        const resolucion = (!cuerpo.resolucion ? cuerpo.resolucion : parseInt(
+            cuerpo.resolucion
+        ));
+
         // Recuperamos los datos del registro.
-        const descripcionReporte = "Actividad iniciada";
+        const descripcionReporte = resolucion? "Actividad iniciada": "Credenciales invalidas para inicio de actividad";
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
-        const idTipoReporteVinculado = 12;
+        const idTipoReporteVinculado = resolucion? 12 : 14; // 14
 
         /*Esto se sacara del payload*/
         const idDispositivo = payload.idDispositivo;
@@ -986,6 +991,38 @@ exports.registrarReporteFinaliacionActividad = async(
             idEmpleadoVinculado: idEmpleadoVinculado,
             idDispositivoVinculado: idDispositivo
         });
+
+        // Retornamos un mensaje de ok.
+        return respuesta.status(200).json({
+            codigoRespuesta: CODIGOS.OK
+        });
+
+    } catch(excepcion) {
+        // Mostramos la excepción en la consola.
+        console.log(excepcion);
+
+        // Retornamso el codigo del error de la api.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR
+        });
+    }
+};
+
+// Verifica el estatus del API.
+exports.verificarAPI = async(
+    request,
+    respuesta
+) => {
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el paload sea valido.
+        if(!payload) {
+            return respuesta.status(200).json({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
 
         // Retornamos un mensaje de ok.
         return respuesta.status(200).json({

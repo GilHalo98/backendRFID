@@ -92,6 +92,13 @@ module.exports = (app) => {
         IoT.registrarReporteFinaliacionActividad
     );
 
+    // Validamos el registro de un empleado en la DB.
+    router.get(
+        '/verificar/api',
+        upload.any(),
+        IoT.verificarAPI
+    );
+
     // Ruta general de usaurios.
     app.use(process.env.API_URL + 'IoT', router);
 };
