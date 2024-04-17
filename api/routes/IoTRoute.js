@@ -70,14 +70,6 @@ module.exports = (app) => {
         IoT.registrarReporteDescanso
     );
 
-    // Registra un reporte de credenciales invalidas para el inicio de
-    // la actividad.
-    router.post(
-        '/registrar/reporte/actividad/credencialesInvalidas',
-        upload.any(),
-        IoT.registrarReporteCredencialesInvalidasParaActividad
-    );
-
     // Registra un reporte de inicio de actividad.
     router.post(
         '/registrar/reporte/actividad/iniciada',
