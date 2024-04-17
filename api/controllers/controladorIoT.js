@@ -1013,6 +1013,12 @@ exports.verificarAPI = async(
     request,
     respuesta
 ) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+
+
     try {
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
