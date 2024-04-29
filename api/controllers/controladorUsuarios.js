@@ -66,14 +66,14 @@ exports.consultaUsuario = async(request, respuesta) => {
             };
         }
 
-        if(consulta.idEmpleadoVinculado) {
-            if(! await existeRegistro(Empleados, consulta.idEmpleadoVinculado)) {
+        if(consulta.idRegistroEmpleadoVinculado) {
+            if(! await existeRegistro(Empleados, consulta.idRegistroEmpleadoVinculado)) {
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
                 });
             }
 
-            datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+            datos.idRegistroEmpleadoVinculado = consulta.idRegistroEmpleadoVinculado;
         }
 
         // Consultamos el total de los registros.
@@ -222,7 +222,7 @@ exports.modificarUsuario = async(request, respuesta) => {
         const nombreUsuario = cuerpo.nombreUsuario;
         const password = cuerpo.password;
         const oldPassword = cuerpo.oldPassword;
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        const idRegistroEmpleadoVinculado = cuerpo.idRegistroEmpleadoVinculado;
 
         // Verificamos que exista un id del registro a modificar.
         if(!id) {
@@ -277,16 +277,16 @@ exports.modificarUsuario = async(request, respuesta) => {
                 })
             }
         }
-        if(idEmpleadoVinculado) {
+        if(idRegistroEmpleadoVinculado) {
             // Buscamos el registro vinculado.
-            if(! await existeRegistro(Empleados, consulta.idEmpleadoVinculado)) {
+            if(! await existeRegistro(Empleados, consulta.idRegistroEmpleadoVinculado)) {
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
                 });
             }
 
             // Si existe el registro, se realiza el cambio.
-            registro.idEmpleadoVinculado = idEmpleadoVinculado;
+            registro.idRegistroEmpleadoVinculado = idRegistroEmpleadoVinculado;
         }
 
         // Actualizamos la fehca de modificacion del registro.
