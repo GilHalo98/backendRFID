@@ -112,6 +112,7 @@ exports.registrarUsuario = async(request, respuesta) => {
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
+    const consulta = request.query;
 
     try {
         // Desencriptamos el payload del token.
