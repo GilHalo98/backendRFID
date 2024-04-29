@@ -148,7 +148,7 @@ exports.registrarUsuario = async(request, respuesta) => {
         }
 
         // Buscamos que el registro vinculado exista.
-        if(! await existeRegistro(Empleados, consulta.idEmpleadoVinculado)) {
+        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
