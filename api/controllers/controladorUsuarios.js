@@ -112,7 +112,6 @@ exports.registrarUsuario = async(request, respuesta) => {
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
-    const consulta = request.query;
 
     try {
         // Desencriptamos el payload del token.
@@ -131,14 +130,14 @@ exports.registrarUsuario = async(request, respuesta) => {
         // Recuperamos la informacion del registro.
         const nombreUsuario = cuerpo.nombreUsuario;
         const password = cuerpo.password;
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        const idRegistroEmpleadoVinculado = cuerpo.idRegistroEmpleadoVinculado;
 
         // Validamos que exista la informacion necesaria para
         // realizar el registro del usuario.
         if(
             !nombreUsuario
             || !password
-            || !idEmpleadoVinculado
+            || !idRegistroEmpleadoVinculado
         ) {
             // Si no estan completos mandamos
             // un mensaje de datos incompletos.
@@ -148,7 +147,7 @@ exports.registrarUsuario = async(request, respuesta) => {
         }
 
         // Buscamos que el registro vinculado exista.
-        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
+        if(! await existeRegistro(Empleados, idRegistroEmpleadoVinculado)) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
@@ -174,7 +173,7 @@ exports.registrarUsuario = async(request, respuesta) => {
             nombreUsuario: nombreUsuario,
             password: password,
             fechaRegistroUsuario: fecha,
-            idEmpleadoVinculado: idEmpleadoVinculado
+            idRegistroEmpleadoVinculado: idRegistroEmpleadoVinculado
         };
 
         // Guardamos el registro en la DB.
