@@ -146,7 +146,7 @@ exports.registrarReporte = async(request, respuesta) => {
         }
 
         // Si no existe.
-        if(! await existeRegistro(TiposReportes, consulta.idTipoReporteVinculado)) {
+        if(! await existeRegistro(TiposReportes, idTipoReporteVinculado)) {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -232,7 +232,7 @@ exports.modificarReporte = async(request, respuesta) => {
         }
         if(idTipoReporteVinculado) {
             // Si no existe.
-            if(! await existeRegistro(TiposReportes, consulta.idTipoReporteVinculado)) {
+            if(! await existeRegistro(TiposReportes, idTipoReporteVinculado)) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
