@@ -119,16 +119,10 @@ exports.registrarRecurso = async(request, respuesta) => {
 
         // Recuperamos la informacion del registro.
         const archivo = request.file;
-        const nombre = archivo.filename; 
-        const tipo = archivo.mimetype;
 
         // Validamos que exista la informacion necesaria para
         // realizar el registro del empleado.
-        if(
-            !nombre
-            || !tipo
-            || !archivo
-        ) {
+        if(!archivo) {
             // Si no estan completos mandamos
             // un mensaje de datos incompletos.
             return respuesta.status(200).send({
