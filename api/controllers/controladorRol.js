@@ -271,7 +271,7 @@ exports.modificarRol = async(request, respuesta) => {
         }
         if(idPermisoVinculado) {
             // Si no existe.
-            if(! await existeRegistro(Permisos, consulta.idPermisoVinculado)) {
+            if(! await existeRegistro(Permisos, idPermisoVinculado)) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE

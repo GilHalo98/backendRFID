@@ -73,7 +73,7 @@ exports.registrarDispositivo = async(request, respuesta) => {
         }
 
         // Si no existe.
-        if(! await existeRegistro(TiposDispositivos, consulta.idTipoDispositivoVinculado)) {
+        if(! await existeRegistro(TiposDispositivos, idTipoDispositivoVinculado)) {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE

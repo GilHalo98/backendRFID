@@ -162,14 +162,14 @@ exports.registrarReporteDispositivo = async(request, respuesta) => {
         }
 
         // Si no existe.
-        if(! await existeRegistro(Reportes, consulta.idReporteVinculado)) {
+        if(! await existeRegistro(Reportes, idReporteVinculado)) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
         // Si no existe.
-        if(! await existeRegistro(Dispositivos, consulta.idDispositivoVinculado)) {
+        if(! await existeRegistro(Dispositivos, idDispositivoVinculado)) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
@@ -250,7 +250,7 @@ exports.modificarReporteDispositivo = async(request, respuesta) => {
 
         // Cambiamos los datos del registro.
         if(idDispositivoVinculado) {
-            if(! await existeRegistro(Reportes, consulta.idDispositivoVinculado)) {
+            if(! await existeRegistro(Reportes, idDispositivoVinculado)) {
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
                 });
@@ -258,7 +258,7 @@ exports.modificarReporteDispositivo = async(request, respuesta) => {
             registro.idDispositivoVinculado = idDispositivoVinculado;
         }
         if(idReporteVinculado) {
-            if(! await existeRegistro(Dispositivos, consulta.idReporteVinculado)) {
+            if(! await existeRegistro(Dispositivos, idReporteVinculado)) {
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
                 });

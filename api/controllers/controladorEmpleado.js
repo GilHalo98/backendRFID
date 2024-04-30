@@ -196,7 +196,7 @@ exports.registrarEmpleado = async(request, respuesta) => {
         }
 
         // Verificamos que los registros vinculados existan.
-        if(! await existeRegistro(Roles, consulta.idRolVinculado)) {
+        if(! await existeRegistro(Roles, idRolVinculado)) {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -358,7 +358,7 @@ exports.modificarEmpleado = async(request, respuesta) => {
         }
         if(idRolVinculado) {
             // Verificamos que los registros vinculados existan.
-            if(! await existeRegistro(Roles, consulta.idRolVinculado)) {
+            if(! await existeRegistro(Roles, idRolVinculado)) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
