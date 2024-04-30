@@ -133,7 +133,7 @@ exports.registrarRecurso = async(request, respuesta) => {
         // Buscamos que no exista otro registro con los mismos datos.
         const coincidencia = await Recursos.findOne({
             where: {
-                nombre: nombre
+                nombre: archivo.filename
             }
         });
 
