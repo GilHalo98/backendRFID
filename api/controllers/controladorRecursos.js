@@ -221,8 +221,8 @@ exports.modificarRecurso = async(request, respuesta) => {
         // Cambiamos los datos del registro.
         if(archivo) {
             registro.tipo = archivo.mimetype;
-            registro.tipo = archivo.filename;
-            registro.tipo = fs.readFileSync(archivo.path);
+            registro.nombre = archivo.filename;
+            registro.data = fs.readFileSync(archivo.path);
             registro.fechaModificacionEmpleado = fecha;
         }
 
