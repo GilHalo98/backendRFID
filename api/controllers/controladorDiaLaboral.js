@@ -18,11 +18,11 @@ const { getToken, getTokenPayload } = require("../utils/jwtConfig");
 const { toSQLDate } = require("../utils/utils");
 
 // Modelos que usara el controlador.
-const Roles = db.rol
-const Permisos = db.permiso;
+const DiasLaborales = db.diaLaboral;
+const Horarios = db.horario;
 
 // Consulta los registros en la base de datos.
-exports.consultaRol = async(request, respuesta) => {
+exports.consultaDiaLaboral = async(request, respuesta) => {
     // GET Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
@@ -58,25 +58,9 @@ exports.consultaRol = async(request, respuesta) => {
             datos.id = consulta.id;
         }
 
-        if(consulta.rolTrabajador) {
-            datos.rolTrabajador = {
-                [Op.substring]: consulta.rolTrabajador
-            };
-        }
-
-        if(consulta.descripcionRol) {
-            datos.descripcionRol = {
-                [Op.substring]: consulta.descripcionRol
-            };
-        }
-
-        if(consulta.bitRol) {
-            datos.bitRol = consulta.bitRol;
-        }
-
-        if(consulta.idPermisoVinculado) {
+        if(consulta.idHorarioVinculado) {
             // Si no existe.
-            if(! await existeRegistro(Permisos, consulta.idPermisoVinculado)) {
+            if(! await existeRegistro(Horarios, consulta.idHorarioVinculado)) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -84,16 +68,16 @@ exports.consultaRol = async(request, respuesta) => {
             }
 
             // Si existe, se agrega el dato a la busqueda.
-            datos.idPermisoVinculado = consulta.idPermisoVinculado;
+            datos.idHorarioVinculado = consulta.idHorarioVinculado;
         }
 
         // Consultamos el total de los registros.
-        const totalRegistros = await Roles.count({
+        const totalRegistros = await DiasLaborales.count({
             where: datos,
         });
 
         // Consultamos todos los registros.
-        const registros = await Roles.findAll({
+        const registros = await DiasLaborales.findAll({
             offset: offset,
             limit: limit,
             where: datos
@@ -118,7 +102,7 @@ exports.consultaRol = async(request, respuesta) => {
 };
 
 // Guarda un registro en la base de datos.
-exports.registrarRol = async(request, respuesta) => {
+exports.registrarDiaLaboral = async(request, respuesta) => {
     // POST Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
@@ -139,18 +123,24 @@ exports.registrarRol = async(request, respuesta) => {
         const fecha = new Date();
 
         // Recuperamos la informacion del registro.
-        const rolTrabajador = cuerpo.rolTrabajador;
-        const descripcionRol = cuerpo.descripcionRol;
-        const bitRol = cuerpo.bitRol;
-        const idPermisoVinculado = cuerpo.idPermisoVinculado;
+        const dia = cuerpo.dia;
+        const esDescanso = cuerpo.esDescanso;
+        const horaEntrada = cuerpo.horaEntrada;
+        const horaSalidaDescanso = cuerpo.horaSalidaDescanso;
+        const horaEntradaDescanso = cuerpo.horaEntradaDescanso;
+        const horaSalida = cuerpo.horaSalida;
+        const idHorarioVinculado = cuerpo.idHorarioVinculado;
 
         // Validamos que exista la informacion necesaria para
         // realizar el registro del permiso.
         if(
-            !rolTrabajador
-            || !descripcionRol
-            || !idPermisoVinculado
-            || !bitRol
+            !dia
+            || !esDescanso
+            || !horaEntrada
+            || !horaSalidaDescanso
+            || !horaEntradaDescanso
+            || !horaSalida
+            || !idHorarioVinculado
         ) {
             // Si no estan completos mandamos
             // un mensaje de datos incompletos.
@@ -160,39 +150,27 @@ exports.registrarRol = async(request, respuesta) => {
         }
 
         // Si no existe.
-        if(! await existeRegistro(Permisos, idPermisoVinculado)) {
+        if(! await existeRegistro(Horarios, idHorarioVinculado)) {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Buscamos que no exista otro registro con los mismos datos.
-        const coincidencia = await Roles.count({
-            where: {
-                rolTrabajador: rolTrabajador
-            }
-        });
-
-        // Si existe un registro con los mismos datos terminamos
-        // la operacion.
-        if(coincidencia) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
-            });
-        }
-
         // Creamos el registro.
         const nuevoRegistro = {
-            rolTrabajador: rolTrabajador,
-            descripcionRol: descripcionRol,
-            fechaRegistroRol: fecha,
-            bitRol: bitRol,
-            idPermisoVinculado: idPermisoVinculado
+            dia: dia,
+            esDescanso: esDescanso,
+            horaEntrada: horaEntrada,
+            horaSalidaDescanso: horaSalidaDescanso,
+            horaEntradaDescanso: horaEntradaDescanso,
+            horaSalida: horaSalida,
+            fechaRegistroDia: fecha,
+            idHorarioVinculado: idHorarioVinculado,
         };
 
         // Guardamos el registro en la DB.
-        await Roles.create(nuevoRegistro);
+        await DiasLaborales.create(nuevoRegistro);
 
         // Retornamos una respuesta de exito.
         return respuesta.status(200).send({
@@ -211,7 +189,7 @@ exports.registrarRol = async(request, respuesta) => {
 };
 
 // Modifica un registro de la base de datos.
-exports.modificarRol = async(request, respuesta) => {
+exports.modificarDiaLaboral = async(request, respuesta) => {
     // PUT Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
@@ -234,10 +212,13 @@ exports.modificarRol = async(request, respuesta) => {
 
         // Recuperamos la informacion del registro.
         const id = consulta.id;
-        const rolTrabajador = cuerpo.rolTrabajador;
-        const descripcionRol = cuerpo.descripcionRol;
-        const bitRol = cuerpo.bitRol;
-        const idPermisoVinculado = cuerpo.idPermisoVinculado;
+        const dia = cuerpo.dia;
+        const esDescanso = cuerpo.esDescanso;
+        const horaEntrada = cuerpo.horaEntrada;
+        const horaSalidaDescanso = cuerpo.horaSalidaDescanso;
+        const horaEntradaDescanso = cuerpo.horaEntradaDescanso;
+        const horaSalida = cuerpo.horaSalida;
+        const idHorarioVinculado = cuerpo.idHorarioVinculado;
 
         // Verificamos que exista un id del registro a modificar.
         if(!id) {
@@ -248,30 +229,39 @@ exports.modificarRol = async(request, respuesta) => {
         }
 
         // Buscamos el registro.
-        const registro = await Roles.findByPk(id);
+        const registro = await DiasLaborales.findByPk(id);
 
         // Verificamos que exista el registro.
         if(!registro) {
             // Si no se encontro el registro, se envia un
             // codio de registro inexistente.
             return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.ROL_NO_ENCONTRADO,
+                codigoRespuesta: CODIGOS.DIA_LABORAL_NO_ENCONTRADO,
             });
         }
 
         // Cambiamos los datos del registro.
-        if(rolTrabajador) {
-            registro.rolTrabajador = rolTrabajador;
+        if(dia) {
+            registro.dia = dia;
         }
-        if(descripcionRol) {
-            registro.descripcionRol = descripcionRol;
+        if(esDescanso) {
+            registro.esDescanso = esDescanso;
         }
-        if(bitRol) {
-            registro.bitRol = bitRol;
+        if(horaEntrada) {
+            registro.horaEntrada = horaEntrada;
         }
-        if(idPermisoVinculado) {
+        if(horaSalidaDescanso) {
+            registro.horaSalidaDescanso = horaSalidaDescanso;
+        }
+        if(horaEntradaDescanso) {
+            registro.horaEntradaDescanso = horaEntradaDescanso;
+        }
+        if(horaSalida) {
+            registro.horaSalida = horaSalida;
+        }
+        if(idHorarioVinculado) {
             // Si no existe.
-            if(! await existeRegistro(Permisos, idPermisoVinculado)) {
+            if(! await existeRegistro(Horarios, idHorarioVinculado)) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -279,11 +269,11 @@ exports.modificarRol = async(request, respuesta) => {
             }
 
             // Si existe el registro, actualizamos el dato del registro.
-            registro.idPermisoVinculado = idPermisoVinculado;
+            registro.idHorarioVinculado = idHorarioVinculado;
         }
 
         // Actualizamos la fehca de modificacion del registro.
-        registro.fechaModificacionRol = fecha;
+        registro.fechaModificacionDia = fecha;
 
         // Guardamos los cambios.
         await registro.save();
@@ -305,7 +295,7 @@ exports.modificarRol = async(request, respuesta) => {
 };
 
 // Elimina un registro de la base de datos dado un id.
-exports.eliminarRol = async(request, respuesta) => {
+exports.eliminarDiaLaboral = async(request, respuesta) => {
     // DELETE Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
@@ -335,13 +325,13 @@ exports.eliminarRol = async(request, respuesta) => {
         }
 
         // Busca el registro dado el id.
-        const registro = await Roles.findByPk(id);
+        const registro = await DiasLaborales.findByPk(id);
 
         // Si no existe el registro con el id.
         if(!registro) {
             // Retorna un error.
             return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.ROL_NO_ENCONTRADO,
+                codigoRespuesta: CODIGOS.DIA_LABORAL_NO_ENCONTRADO,
             });
         }
 
