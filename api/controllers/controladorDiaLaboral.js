@@ -58,6 +58,10 @@ exports.consultaDiaLaboral = async(request, respuesta) => {
             datos.id = consulta.id;
         }
 
+        if(consulta.dia) {
+            datos.dia = consulta.dia;
+        }
+
         if(consulta.idHorarioVinculado) {
             // Si no existe.
             if(! await existeRegistro(Horarios, consulta.idHorarioVinculado)) {
