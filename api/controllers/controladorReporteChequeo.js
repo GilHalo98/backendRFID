@@ -74,7 +74,10 @@ exports.consultaReporteChequeo = async(request, respuesta) => {
 
         if(consulta.idEmpleadoVinculado) {
             // Si no existe el registro.
-            if(! await existeRegistro(Empleados, consulta.idEmpleadoVinculado)) {
+            if(! await existeRegistro(
+                Empleados,
+                consulta.idEmpleadoVinculado
+            )) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -94,15 +97,7 @@ exports.consultaReporteChequeo = async(request, respuesta) => {
         const registros = await ReportesChequeos.findAll({
             offset: offset,
             limit: limit,
-            where: datos,
-            include: [{
-                model: Reportes,
-                include: [{
-                    model: TiposReportes
-                }]
-            }, {
-                model: Empleados
-            }]
+            where: datos
         });
 
         // Retornamos los registros encontrados.

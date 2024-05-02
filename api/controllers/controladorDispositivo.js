@@ -184,12 +184,7 @@ exports.consultarDispositivo = async(request, respuesta) => {
         const registros = await DispositivosIoT.findAll({
             offset: offset,
             limit: limit,
-            where: datos,
-            include: [{
-                model: Zonas,
-            }, {
-                model: TiposDispositivos,
-            }]
+            where: datos
         });
 
         // Retornamos los registros encontrados.

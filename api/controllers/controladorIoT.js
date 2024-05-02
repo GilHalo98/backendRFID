@@ -24,14 +24,13 @@ const reporte = require("../models/reporte");
 
 // Modelos que usara el controlador.
 const ReportesDispositivos = db.reporteDispositivo;
-const DispositivosIoT = db.dispositivoIoT;
+const ReportesActividades = db.reporteActividad;
 const ReportesChequeos = db.reporteChequeo;
+const DispositivosIoT = db.dispositivoIoT;
 const ReportesAccesos = db.reporteAcceso;
-const ReportesActividades = db.reporteActividad
-const TiposReportes = db.tipoReporte;
 const DiasLaborales = db.diaLaboral;
-const Horarios = db.horario;
 const Empleados = db.empleado;
+const Horarios = db.horario;
 const Reportes = db.reporte;
 
 // Registra un reporte.

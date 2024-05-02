@@ -74,7 +74,10 @@ exports.consultaReporteDispositivo = async(request, respuesta) => {
 
         if(consulta.idDispositivoVinculado) {
             // Si no existe.
-            if(! await existeRegistro(Dispositivos, consulta.idDispositivoVinculado)) {
+            if(! await existeRegistro(
+                Dispositivos,
+                consulta.idDispositivoVinculado
+            )) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -94,15 +97,7 @@ exports.consultaReporteDispositivo = async(request, respuesta) => {
         const registros = await ReportesDispositivos.findAll({
             offset: offset,
             limit: limit,
-            where: datos,
-            include: [{
-                model: Reportes,
-                include: [{
-                    model: TiposReportes
-                }]
-            }, {
-                model: Dispositivos
-            }]
+            where: datos
         });
 
         // Retornamos los registros encontrados.

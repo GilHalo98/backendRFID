@@ -67,7 +67,10 @@ exports.consultaUsuario = async(request, respuesta) => {
         }
 
         if(consulta.idRegistroEmpleadoVinculado) {
-            if(! await existeRegistro(Empleados, consulta.idRegistroEmpleadoVinculado)) {
+            if(! await existeRegistro(
+                Empleados,
+                consulta.idRegistroEmpleadoVinculado
+            )) {
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
                 });

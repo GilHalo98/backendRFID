@@ -107,17 +107,7 @@ exports.consultaReporteAcceso = async(request, respuesta) => {
         const registros = await ReportesAccesos.findAll({
             offset: offset,
             limit: limit,
-            where: datos,
-            include: [{
-                model: Reportes,
-                include: [{
-                    model: TiposReportes
-                }]
-            }, {
-                model: Empleados
-            }, {
-                model: Zonas
-            }]
+            where: datos
         });
 
         // Retornamos los registros encontrados.

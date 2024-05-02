@@ -83,12 +83,7 @@ exports.consultaHorario = async(request, respuesta) => {
         const registros = await Horarios.findAll({
             offset: offset,
             limit: limit,
-            where: datos,
-            include: [{
-                model: DiasLaborales
-            }, {
-                model: Empleados
-            }]
+            where: datos
         });
 
         // Retornamos los registros encontrados.

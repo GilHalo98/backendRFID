@@ -75,7 +75,10 @@ exports.consultaReporteActividad = async(request, respuesta) => {
 
         if(consulta.idEmpleadoVinculado) {
             // Si no existe el registro.
-            if(! await existeRegistro(Empleados, consulta.idEmpleadoVinculado)) {
+            if(! await existeRegistro(
+                Empleados,
+                consulta.idEmpleadoVinculado
+            )) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -88,7 +91,10 @@ exports.consultaReporteActividad = async(request, respuesta) => {
 
         if(consulta.idDispositivoVinculado) {
             // Si no existe el registro.
-            if(! await existeRegistro(Dispositvos, consulta.idDispositivoVinculado)) {
+            if(! await existeRegistro(
+                Dispositvos,
+                consulta.idDispositivoVinculado
+            )) {
                 // Retornamos un mensaje de error.
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -107,17 +113,7 @@ exports.consultaReporteActividad = async(request, respuesta) => {
         const registros = await ReportesActividades.findAll({
             offset: offset,
             limit: limit,
-            where: datos,
-            include: [{
-                model: Reportes,
-                include: [{
-                    model: TiposReportes
-                }]
-            }, {
-                model: Empleados
-            }, {
-                model: Dispositivos
-            }]
+            where: datos
         });
 
         // Retornamos los registros encontrados.

@@ -112,13 +112,7 @@ exports.consultaEmpleado = async(request, respuesta) => {
         const registros = await Empleados.findAll({
             offset: offset,
             limit: limit,
-            where: datos,
-            include: [{
-                model: Roles,
-                include: [{
-                    model: Permisos
-                }]
-            }]
+            where: datos
         });
 
         // Retornamos los registros encontrados.
