@@ -31,6 +31,7 @@ require("./routes/reporteDispositivoRoute")(app)
 require("./routes/tipoDispositivoRoute")(app);
 require("./routes/tipoReporteRoute")(app);
 require("./routes/dispositivoRoute")(app);
+require("./routes/diaLaboralRoute")(app);
 require("./routes/dashboardRoute")(app);
 require("./routes/empleadoRoute")(app);
 require("./routes/horarioRoute")(app);
