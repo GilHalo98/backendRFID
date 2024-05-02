@@ -27,8 +27,11 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors({origin: "*"}));
 
 // Aqui se agregan las rutas generales.
-require("./routes/reporteDispositivoRoute")(app)
+require("./routes/reporteDispositivoRoute")(app);
+require("./routes/reporteActividadRoute")(app);
 require("./routes/tipoDispositivoRoute")(app);
+require("./routes/reporteChequeoRoute")(app);
+require("./routes/reporteAccesosRoute")(app);
 require("./routes/tipoReporteRoute")(app);
 require("./routes/dispositivoRoute")(app);
 require("./routes/diaLaboralRoute")(app);
@@ -42,6 +45,7 @@ require("./routes/recursoRoute")(app);
 require("./routes/rolRoute")(app);
 require("./routes/IoTRoute")(app);
 require("./routes/zonaRoute")(app);
+
 
 // Instancia un objeto servidor.
 const server = http.createServer(app);
