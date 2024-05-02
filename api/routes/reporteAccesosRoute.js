@@ -27,5 +27,5 @@ module.exports = (app) => {
     router.delete('/eliminar',  upload.any(), controlador.eliminarReporteAcceso);
 
     // Ruta general de reportes.
-    app.use(process.env.API_URL + 'reporteAccesos', router);
+    app.use(process.env.API_URL + 'reporteAcceso', router);
 };
