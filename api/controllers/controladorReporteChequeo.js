@@ -18,7 +18,6 @@ const { existeRegistro } = require("../utils/registros");
 
 // Modelos que usara el controlador.
 const ReportesChequeos = db.reporteChequeo;
-const TiposReportes = db.tipoReporte;
 const Empleados = db.empleado;
 const Reportes = db.reporte;
 
@@ -174,7 +173,7 @@ exports.registrarReporteChequeo = async(request, respuesta) => {
         const nuevoRegistro = {
             idReporteVinculado: idReporteVinculado,
             idEmpleadoVinculado: idEmpleadoVinculado,
-            fechaRegistroReporteAcceso: fecha
+            fechaRegistroReporteChequeo: fecha
         };
 
         // Guardamos el registro en la DB.
@@ -265,7 +264,7 @@ exports.modificarReporteChequeo = async(request, respuesta) => {
         }
 
         // Actualizamos la fehca de modificacion del registro.
-        registro.fechaModificacionReporteAcceso = fecha;
+        registro.fechaModificacionReporteChequeo = fecha;
 
         // Guardamos los cambios.
         await registro.save();

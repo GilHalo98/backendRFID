@@ -20,7 +20,6 @@ const { existeRegistro } = require("../utils/registros");
 const ReportesDispositivos = db.reporteDispositivo;
 const Dispositivos = db.dispositivoIoT;
 const Reportes = db.reporte;
-const TiposReportes = db.tipoReporte;
 
 // Consulta los registros en la base de datos.
 exports.consultaReporteDispositivo = async(request, respuesta) => {

@@ -18,7 +18,6 @@ const { existeRegistro } = require("../utils/registros");
 
 // Modelos que usara el controlador.
 const ReportesAccesos = db.reporteAcceso;
-const TiposReportes = db.tipoReporte;
 const Empleados = db.empleado;
 const Reportes = db.reporte;
 const Zonas = db.zona;
