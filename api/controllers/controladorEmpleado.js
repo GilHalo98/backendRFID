@@ -162,10 +162,6 @@ exports.registrarEmpleado = async(request, respuesta) => {
         const fechaNacimiento = cuerpo.fechaNacimiento;
         const idRolVinculado = cuerpo.idRolVinculado;
 
-        // Informacion del regitro del usuario a partir del registro
-        const generarRegistroUsuario = cuerpo.generarRegistroUsuario;
-        let idRegistroEmpleado = undefined;
-
         // Informacion del registro de la imagen del registro.
         const archivoImagen = request.file;
         let idImagenVinculada = 1;
@@ -179,8 +175,6 @@ exports.registrarEmpleado = async(request, respuesta) => {
             || !numeroTelefonico
             || !fechaNacimiento
             || !idRolVinculado
-            || !archivoImagen
-            || !generarRegistroUsuario
         ) {
             // Si no estan completos mandamos
             // un mensaje de datos incompletos.
@@ -215,19 +209,6 @@ exports.registrarEmpleado = async(request, respuesta) => {
             });
         }
 
-        // Creamos el registro de la imagen del registro.
-        const nuevaImagen = {
-            tipo: archivoImagen.mimetype,
-            nombre: archivoImagen.filename,
-            data: fs.readFileSync(archivoImagen.path),
-            fechaRegistroRecurso: fecha,
-        };
-
-        // Guardamos el registro en la DB.
-        await Recursos.create(nuevaImagen).then((registro) => {
-            idImagenVinculada = registro.id;
-        });
-
         // Creamos el registro.
         const nuevoRegistro = {
             nombres: nombres,
@@ -241,30 +222,7 @@ exports.registrarEmpleado = async(request, respuesta) => {
         };
         
         // Guardamos el registro en la DB.
-        await Empleados.create(nuevoRegistro).then((registro) => {
-            // Guardamos el id del registro del registro.
-            idRegistroEmpleado = registro.id;
-        });
-
-        // Si el registro del empelado tambien generara uno de
-        // usuario.
-        if(generarRegistroUsuario) {
-            // Se concatena su nombre completo.
-            const nombreCompleto = nombres
-                + ' ' + apellidoPaterno
-                + ' ' + apellidoMaterno;
-
-            // Se generan los datos del registro.
-            const nuevoUsuario = {
-                nombreUsuario: generarNombreUsuario(nombreCompleto),
-                password: generarPassword(registro.fechaRegistroEmpleado),
-                fechaRegistroUsuario: fecha,
-                idRegistroEmpleadoVinculado: idRegistroEmpleado
-            };
-
-            // Se registra el nuevo usuario.
-            await Usuarios.create(nuevoUsuario);
-        }
+        await Empleados.create(nuevoRegistro);
 
         // Retornamos una respuesta de exito.
         return respuesta.status(200).send({
