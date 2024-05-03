@@ -18,7 +18,7 @@ const { existeRegistro } = require("../utils/registros");
 
 // Modelos que usara el controlador.
 const ReportesAccesos = db.reporteAcceso;
-const TiposReportes = db.tipoReporte;
+const DispositivosIoT = db.dispositivoIoT;
 const Empleados = db.empleado;
 const Reportes = db.reporte;
 const Zonas = db.zona;
@@ -152,13 +152,13 @@ exports.registrarReporteAcceso = async(request, respuesta) => {
         // Recuperamos la informacion del registro.
         const idReporteVinculado = cuerpo.idReporteVinculado;
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
-        const idZonaVinculada = cuerpo.idZonaVinculada;
+        const idDispositivoVinculado = cuerpo.idDispositivoVinculado;
 
         // Validamos que exista la informacion necesaria para
         // realizar el registro del empleado.
         if(
             ! idReporteVinculado
-            || ! idZonaVinculada
+            || ! idDispositivoVinculado
             || ! idEmpleadoVinculado
         ) {
             // Si no estan completos mandamos
@@ -183,7 +183,7 @@ exports.registrarReporteAcceso = async(request, respuesta) => {
         }
 
         // Si no existe el registro vinculado.
-        if(! await existeRegistro(Zonas, idZonaVinculada)) {
+        if(! await existeRegistro(DispositivosIoT, idDispositivoVinculado)) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
@@ -192,7 +192,7 @@ exports.registrarReporteAcceso = async(request, respuesta) => {
         // Creamos el registro.
         const nuevoRegistro = {
             idReporteVinculado: idReporteVinculado,
-            idZonaVinculada: idZonaVinculada,
+            idDispositivoVinculado: idDispositivoVinculado,
             idEmpleadoVinculado: idEmpleadoVinculado,
             fechaRegistroReporteAcceso: fecha
         };
