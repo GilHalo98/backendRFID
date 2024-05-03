@@ -200,7 +200,7 @@ exports.registrarReporteActividad = async(request, respuesta) => {
             idReporteVinculado: idReporteVinculado,
             idDispositivoVinculado: idDispositivoVinculado,
             idEmpleadoVinculado: idEmpleadoVinculado,
-            fechaRegistroReporteAcceso: fecha
+            fechaRegistroReporteActividad: fecha
         };
 
         // Guardamos el registro en la DB.
@@ -291,7 +291,7 @@ exports.modificarReporteActividad = async(request, respuesta) => {
             registro.idEmpleadoVinculado = idEmpleadoVinculado;
         }
         if(idDispositivoVinculado) {
-            if(! await existeRegistro(Dispositivos, idDispositivoVinculado)) {
+            if(! await existeRegistro(DispositivosIoT, idDispositivoVinculado)) {
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
                 });
