@@ -28,16 +28,27 @@ function toSQLDate(fecha) {
     return fechaFormateada;
 };
 
-function toSQLTime(fecha) {
-    const fechaAux = new Date(fecha);
+function toSQLTime(tiempo) {
+    // Desempaquetamos el tiempo en HH:MM
+    const horasMinutos = tiempo.split(":");
+
+    // Instanciamos un objeto fecha.
+    const fechaAux = new Date();
+
+    // Ponemos la hora, minuto, segundo a 00.
+    fechaAux.setHours(horasMinutos[0], horasMinutos[1], 0, 0);
 
     // Solucion temporal, hay que ver si esto depende de la db, su
     // configuracion o que pedo.
     // POR LO QUE VEO ES PEDO DIRECTO DE MYSQL QUE NO SOPORTA TIMEZONES.
     const timeZone = fechaAux.getTimezoneOffset();
 
-    const offsetHoras = Math.floor(timeZone / 60);
-    const offsetMinutos = Math.floor(timeZone / (60*60));
+    const offsetHoras = Math.floor(
+        timeZone / 60
+    );
+    const offsetMinutos = Math.floor(
+        timeZone / (60*60)
+    );
 
     fechaAux.setHours(
         fechaAux.getHours() - offsetHoras,

@@ -164,7 +164,7 @@ exports.registrarDiaLaboral = async(request, respuesta) => {
         // Creamos el registro.
         const nuevoRegistro = {
             dia: dia,
-            esDescanso: esDescanso,
+            esDescanso: (esDescanso == 'true'),
             horaEntrada: horaEntrada,
             horaSalidaDescanso: horaSalidaDescanso,
             horaEntradaDescanso: horaEntradaDescanso,
@@ -249,7 +249,7 @@ exports.modificarDiaLaboral = async(request, respuesta) => {
             registro.dia = dia;
         }
         if(esDescanso) {
-            registro.esDescanso = esDescanso;
+            registro.esDescanso = (esDescanso == 'true');
         }
         if(horaEntrada) {
             registro.horaEntrada = horaEntrada;

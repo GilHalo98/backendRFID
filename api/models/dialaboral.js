@@ -30,37 +30,37 @@ module.exports = (sequelize, DataTypes) => {
 
         horaEntrada: {
             type: DataTypes.TIME,
-            set(fecha) {
+            set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaEntrada', toSQLTime(fecha));
+                this.setDataValue('horaEntrada', toSQLTime(tiempo));
             }
         },
 
         horaEntradaDescanso: {
             type: DataTypes.TIME,
-            set(fecha) {
+            set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaEntradaDescanso', toSQLTime(fecha));
+                this.setDataValue('horaEntradaDescanso', toSQLTime(tiempo));
             }
         },
 
         horaSalidaDescanso: {
             type: DataTypes.TIME,
-            set(fecha) {
+            set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaSalidaDescanso', toSQLTime(fecha));
+                this.setDataValue('horaSalidaDescanso', toSQLTime(tiempo));
             }
         },
 
         horaSalida: {
             type: DataTypes.TIME,
-            set(fecha) {
+            set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaSalida', toSQLTime(fecha));
+                this.setDataValue('horaSalida', toSQLTime(tiempo));
             }
         },
 

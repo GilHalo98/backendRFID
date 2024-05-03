@@ -130,57 +130,18 @@ exports.registrarHorario = async(request, respuesta) => {
         const tolerancia = cuerpo.tolerancia;
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
-        const horario = cuerpo.horario;
-
         // Validamos que exista la informacion necesaria para
         // realizar el registro del permiso.
         if(
             !descripcionHorario
             || !tolerancia
             || !idEmpleadoVinculado
-            || !horario
         ) {
             // Si no estan completos mandamos
             // un mensaje de datos incompletos.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
             });
-        }
-
-        // Validamos que la lista de descansos tenga una longitud de 7.
-        if(horario.length != 7) {
-            // Si no es asi, retornamos un mensaje de datos incompletos
-            // para el registro.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
-
-        // Por cada registro de dia laboral, verificamos que este completo.
-        for(let index = 0; index < horario.length; index++) {
-            const elemento = horario[index];
-
-            const dia = elemento.dia;
-            const esDescanso = elemento.esDescanso;
-            const horaEntrada = elemento.horaEntrada;
-            const horaSalidaDescanso = elemento.horaSalidaDescanso;
-            const horaEntradaDescanso = elemento.horaEntradaDescanso;
-            const horaSalida = elemento.horaSalida;
-
-            if(
-                !dia
-                || !esDescanso
-                || !horaEntrada
-                || !horaSalidaDescanso
-                || !horaEntradaDescanso
-                || !horaSalida
-            ) {
-                // Si no es asi, retornamos un mensaje de datos incompletos
-                // para el registro.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-                });
-            }
         }
 
         // Buscamos por registros con el id del registro vinculado.
@@ -201,45 +162,13 @@ exports.registrarHorario = async(request, respuesta) => {
         // Creamos el registro.
         const nuevoRegistro = {
             descripcionHorario: descripcionHorario,
-            tolerancia: toDateTime(tolerancia),
+            tolerancia: toSQLTime(tolerancia),
             idEmpleadoVinculado: idEmpleadoVinculado,
             fechaRegistroHorario: fecha
         };
 
-        // ID del horario a vincular.
-        let idHorario;
-
         // Guardamos el registro en la DB.
-        await Horarios.create(nuevoRegistro).then((registro) => {
-            // Guardamos el id del registro guardado.
-            idHorario = registro.id;
-        });
-
-        for(let index = 0; index < horario.length; index++) {
-            const elemento = horario[index];
-
-            const dia = elemento.dia;
-            const esDescanso = elemento.esDescanso;
-            const horaEntrada = elemento.horaEntrada;
-            const horaSalidaDescanso = elemento.horaSalidaDescanso;
-            const horaEntradaDescanso = elemento.horaEntradaDescanso;
-            const horaSalida = elemento.horaSalida;
-
-            // Creamos el registro.
-            const nuevoSubRegistro = {
-                dia: dia,
-                esDescanso: esDescanso,
-                horaEntrada: toDateTime(horaEntrada),
-                horaSalidaDescanso: toDateTime(horaSalidaDescanso),
-                horaEntradaDescanso: toDateTime(horaEntradaDescanso),
-                horaSalida: toDateTime(horaSalida),
-                fechaRegistroDia: fecha,
-                idHorarioVinculada: idHorario
-            };
-
-            // Realizamos el registro del dia.
-            await DiasLaborales.create(nuevoSubRegistro);
-        }
+        await Horarios.create(nuevoRegistro);
 
         // Retornamos una respuesta de exito.
         return respuesta.status(200).send({
@@ -286,7 +215,7 @@ exports.modificarHorario = async(request, respuesta) => {
         const tolerancia = cuerpo.tolerancia;
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
-        const horario = cuerpo.horario;
+        console.log(cuerpo);
 
         // Verificamos que exista un id del registro a modificar.
         if(!id) {
@@ -313,7 +242,7 @@ exports.modificarHorario = async(request, respuesta) => {
             registro.descripcionHorario = descripcionHorario;
         }
         if(tolerancia) {
-            registro.tolerancia = toDateTime(tolerancia);
+            registro.tolerancia = toSQLTime(tolerancia);
         }
 
         if(idEmpleadoVinculado) {
@@ -333,61 +262,6 @@ exports.modificarHorario = async(request, respuesta) => {
 
         // Guardamos los cambios.
         await registro.save();
-
-        // Por cada registro de dia laboral.
-        for(let index = 0; index < horario.length; index++) {
-            const elemento = horario[index];
-
-            // Recuperamos los datos del registro.
-            const dia = elemento.dia;
-            const esDescanso = elemento.esDescanso;
-            const horaEntrada = elemento.horaEntrada;
-            const horaSalidaDescanso = elemento.horaSalidaDescanso;
-            const horaEntradaDescanso = elemento.horaEntradaDescanso;
-            const horaSalida = elemento.horaSalida;
-
-            // Buscamos el registro del dia laboral.
-            const subRegistro = await DiasLaborales.findOne({
-                where: {
-                    idSemanaLaboralVinculada: id,
-                    dia: dia
-                }
-            });
-
-            // Verificamos que exista el registro.
-            if(!subRegistro) {
-                // Si no se encontro el registro, se envia un
-                // codio de registro inexistente.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE,
-                });
-            }
-
-
-            // Cambiamos los datos del registro.
-            if(esDescanso) {
-                subRegistro.esDescanso = esDescanso;
-            }
-            if(horaEntrada) {
-                subRegistro.horaEntrada = toDateTime(horaEntrada);
-            }
-            if(horaSalidaDescanso) {
-                subRegistro.horaSalidaDescanso = toDateTime(
-                    horaSalidaDescanso
-                );
-            }
-            if(horaEntradaDescanso) {
-                subRegistro.horaEntradaDescanso = toDateTime(
-                    horaEntradaDescanso
-                );
-            }
-            if(horaSalida) {
-                subRegistro.horaSalida = toDateTime(horaSalida);
-            }
-
-            // Guardamos los cambios del registro.
-            await subRegistro.save();
-        }
 
         // Retornamos un mensaje de operacion ok.
         return respuesta.status(200).send({
