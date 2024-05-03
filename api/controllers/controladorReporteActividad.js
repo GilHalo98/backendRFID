@@ -18,7 +18,7 @@ const { existeRegistro } = require("../utils/registros");
 
 // Modelos que usara el controlador.
 const ReportesActividades = db.reporteActividad;
-const Dispositvos = db.dispostivosIoT;
+const DispositivosIoT = db.dispositivoIoT;
 const TiposReportes = db.tipoReporte;
 const Empleados = db.empleado;
 const Reportes = db.reporte;
@@ -92,7 +92,7 @@ exports.consultaReporteActividad = async(request, respuesta) => {
         if(consulta.idDispositivoVinculado) {
             // Si no existe el registro.
             if(! await existeRegistro(
-                Dispositvos,
+                DispositivosIoT,
                 consulta.idDispositivoVinculado
             )) {
                 // Retornamos un mensaje de error.
@@ -189,7 +189,7 @@ exports.registrarReporteActividad = async(request, respuesta) => {
         }
 
         // Si no existe el registro vinculado.
-        if(! await existeRegistro(Dispositvos, idDispositivoVinculado)) {
+        if(! await existeRegistro(DispositivosIoT, idDispositivoVinculado)) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
