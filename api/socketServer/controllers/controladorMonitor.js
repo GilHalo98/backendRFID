@@ -92,9 +92,10 @@ exports.listarDispositivos = async (io, socket, payload, DISPOSITIVOS) => {
             lista.push({
                 id: registro.id,
                 status: status,
-                idZona: registro.idZonaVinculada,
                 zona: registro.zona.nombreZona,
+                idZona: registro.idZonaVinculada,
                 idTipoDispositivo: registro.idTipoDispositivoVinculado,
+                descripcionDispositivo: registro.descripcionDispositivo,
                 tipoDispositivo: registro.tipoDispositivo.nombreTipoDispositivo
             });
         });
