@@ -36,6 +36,11 @@ module.exports = (sequelize, DataTypes) => {
             )
 
             empleado.hasMany(
+                models.reporteActividad,
+                {foreignKey: 'idEmpleadoVinculado', onDelete: 'cascade'}
+            )
+
+            empleado.hasMany(
                 models.reporteChequeo,
                 {foreignKey: 'idEmpleadoVinculado', onDelete: 'cascade'}
             )

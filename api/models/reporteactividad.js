@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
                 models.reporte,
                 {foreignKey: 'idReporteVinculado', onDelete: 'cascade'}
             )
+
+            reporteActividad.belongsTo(
+                models.empleado,
+                {foreignKey: 'idEmpleadoVinculado', onDelete: 'cascade'}
+            )
         }
         
     }
