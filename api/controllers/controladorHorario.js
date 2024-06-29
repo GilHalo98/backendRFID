@@ -215,8 +215,6 @@ exports.modificarHorario = async(request, respuesta) => {
         const tolerancia = cuerpo.tolerancia;
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
-        console.log(cuerpo);
-
         // Verificamos que exista un id del registro a modificar.
         if(!id) {
             // Si no, retornamos un mensaje de error.
@@ -298,6 +296,9 @@ exports.eliminarHorario = async(request, respuesta) => {
             });
         }
 
+        // Instanciamos la fecha de la modificacion del registro.
+        const fecha = new Date();
+
         // Recuperamos los parametros del request.
         const id = consulta.id;
 
@@ -329,6 +330,163 @@ exports.eliminarHorario = async(request, respuesta) => {
             codigoRespuesta: CODIGOS.OK,
             registroEliminado: registro
         })
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        console.log(excepcion);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Consulta un horario y sus dias laborales dado un empleado.
+exports.consultaHorarioCompleto = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Recuperamos los parametros de busqueda.
+        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+
+        // Verificamos que los datos para la busqueda esten completos.
+        if(!idEmpleadoVinculado) {
+            // Si no estan completos mandamos
+            // un mensaje de datos incompletos.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
+            });
+        }
+
+        // Verificamos que los registros vinculados existan.
+        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Consultamos el registro del horario.
+        const registro = await Horarios.findOne({
+            where: {
+                idEmpleadoVinculado: idEmpleadoVinculado
+            },
+            include: [{
+                model: DiasLaborales
+            }]
+        });
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            registro: registro
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        console.log(excepcion);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Modifica un horario y sus dias laborales dado un empleado.
+exports.modificarHorarioCompleto = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Recuperamos los parametros de busqueda.
+        const id = cuerpo.id;
+        const tolerancia = cuerpo.tolerancia;
+        const diasLaborales = cuerpo.diasLaborales;
+
+        // Verificamos que los datos para la modificacion esten completos.
+        if(!id) {
+            // Si no, retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
+            });
+        }
+
+        // Consultamos el horario.
+        const registro = await Horario.findByPk(id);
+
+        if(!registro) {
+            // Si no se encontro el registro, se envia un
+            // codio de registro inexistente.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.HORARIO_NO_ENCONTRADO,
+            });
+        }
+
+        // Cambiamos los datos del registro.
+        registro.tolerancia = tolerancial;
+        registro.fechaModificacionHorario = fecha;
+
+        // Guardamos los cambios.
+        await registro.save();
+
+        // Pasamos a los cambios de los dias laborales.
+        await diasLaborales.forEach(async (diaLaboral) => {
+            // Buscamos el registro vinculado del dia laboral en la db.
+            const registroVinculado = await DiasLaborales.findOne({
+                where: {
+                    idHorarioVinculado: id,
+                    dia: diaLaboral.dia
+                }
+            });
+
+            // Si existe el registro, se modificaran los datos de este.
+            if(registroVinculado) {
+                // Cambiamos los datos del registro.
+                registroVinculado.esDescanso = diaLaboral.esDescanso;
+                registroVinculado.horaEntrada = diaLaboral.horaEntrada;
+                registroVinculado.horaSalidaDescanso = diaLaboral.horaSalidaDescanso;
+                registroVinculado.HoraEntradaDescanso = diaLaboral.HoraEntradaDescanso;
+                registroVinculado.horaSalida = diaLaboral.horaSalida;
+                registroVinculado.fechaModificaciondia = fecha;
+
+                // Guardamos los cambios.
+                await registroVinculado.save();
+            }
+        });
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK
+        });
 
     } catch(excepcion) {
         // Mostramos el error en la consola

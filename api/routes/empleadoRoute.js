@@ -29,6 +29,9 @@ module.exports = (app) => {
     // Elimina un registro de la DB.
     router.delete('/eliminar', uploadForm.any(), controlador.eliminarEmpleado);
 
+    // Registra un empleado completo, empleado, usuario, horario y dias laborales.
+    router.post('/registrar', upload.single("file"), controlador.registrarEmpleadoCompleto);
+
     // Ruta general de empleados.
     app.use(process.env.API_URL + 'empleado', router);
 };

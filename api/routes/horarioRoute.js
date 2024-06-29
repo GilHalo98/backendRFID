@@ -29,6 +29,9 @@ module.exports = (app) => {
     // Elimina un registro de la DB.
     router.delete('/eliminar', uploadForm.any(), controlador.eliminarHorario);
 
+    // Consulta un horario y sus dias laborales dado un empleado.
+    router.get('/consultar/horarioCompledo', uploadForm.any(), controlador.consultaHorarioCompleto);
+
     // Ruta general de empleados.
     app.use(process.env.API_URL + 'horario', router);
 };
