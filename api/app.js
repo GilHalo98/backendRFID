@@ -37,6 +37,7 @@ require("./routes/dispositivoRoute")(app);
 require("./routes/diaLaboralRoute")(app);
 require("./routes/dashboardRoute")(app);
 require("./routes/empleadoRoute")(app);
+require("./routes/reportesRoute")(app);
 require("./routes/horarioRoute")(app);
 require("./routes/permisoRoute")(app);
 require("./routes/reporteRoute")(app);
