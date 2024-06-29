@@ -98,6 +98,34 @@ function rangoHoy() {
     ];
 };
 
+function rangoSemana() {
+    // Instanciamos dos fechas.
+    const fechaA = new Date();
+    const fechaB = new Date();
+
+    // Les quitamos el offset del timezone.
+    const timeZone = fechaA.getTimezoneOffset();
+
+    const offsetHoras = Math.floor(timeZone / 60);
+    const offsetMinutos = Math.floor(timeZone / (60 * 60));
+
+    // Calculamos el dia en el que inicia la semana.
+    fechaA.setDate(fechaA.getDate() - fechaA.getDay());
+
+    // La primera va a tener hora de 00:00:00
+    fechaA.setHours(-offsetHoras, -offsetMinutos, 0);
+
+    // Calculamos el dia en el que termina la semana.
+    fechaB.setDate(fechaB.getDate() + (6 - fechaB.getDay()));
+
+    // La segunda tendra hora de 23:59:59
+    fechaB.setHours(23-offsetHoras, 59-offsetMinutos, 59);
+
+    return [
+        toSQLDate(fechaA), toSQLDate(fechaB)
+    ];
+};
+
 function empleadoInicioDescansoATiempo(
     horaInicioDescanso,
     toleranciaInicioDescanso,
@@ -185,5 +213,6 @@ module.exports = {
     empleadoSalioTarde,
     rangoHoy,
     empleadoInicioDescansoATiempo,
-    empleadoTerminoDescansoATiempo
+    empleadoTerminoDescansoATiempo,
+    rangoSemana
 };
