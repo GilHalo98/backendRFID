@@ -32,10 +32,13 @@ module.exports = (sequelize, DataTypes) => {
         descripcionHorario: DataTypes.STRING,
         tolerancia: {
             type: DataTypes.TIME,
-            set(fecha) {
+            set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('tolerancia', toSQLTime(fecha));
+                this.setDataValue(
+                    'tolerancia',
+                    !tiempo? null : toSQLTime(tiempo)
+                );
             },
         },
 

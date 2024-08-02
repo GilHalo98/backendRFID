@@ -33,7 +33,10 @@ module.exports = (sequelize, DataTypes) => {
             set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaEntrada', toSQLTime(tiempo));
+                this.setDataValue(
+                    'horaEntrada',
+                    !tiempo? null : toSQLTime(tiempo)
+                );
             }
         },
 
@@ -42,7 +45,10 @@ module.exports = (sequelize, DataTypes) => {
             set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaEntradaDescanso', toSQLTime(tiempo));
+                this.setDataValue(
+                    'horaEntradaDescanso',
+                    !tiempo? null : toSQLTime(tiempo)
+                );
             }
         },
 
@@ -51,7 +57,10 @@ module.exports = (sequelize, DataTypes) => {
             set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaSalidaDescanso', toSQLTime(tiempo));
+                this.setDataValue(
+                    'horaSalidaDescanso',
+                    !tiempo? null : toSQLTime(tiempo)
+                );
             }
         },
 
@@ -60,7 +69,10 @@ module.exports = (sequelize, DataTypes) => {
             set(tiempo) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('horaSalida', toSQLTime(tiempo));
+                this.setDataValue(
+                    'horaSalida',
+                    !tiempo? null : toSQLTime(tiempo)
+                );
             }
         },
 
