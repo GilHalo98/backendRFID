@@ -1,10 +1,14 @@
 // Librerias de terceros
+const fs = require("fs");
 const bodyParser = require("body-parser");
 const express = require("express");
 const cors = require("cors");
 const http = require('http');
 const { Server } = require("socket.io");
 var multer = require('multer');
+
+// Incluimos las funciones propias
+const { mostrarLog } = require("./utils/logs");
 
 // Para poder procesar form-data.
 var upload = multer();
@@ -15,6 +19,10 @@ require("dotenv").config();
 // Variables del entorno.
 const PORT = process.env.PORT;
 const HOST = process.env.HOST;
+
+// Directorio de logs del servidor.
+const LOG_DIR = process.env.LOG_DIR;
+const RECURSOS_DIR = process.env.RECURSOS_DIR;
 
 // Instancia una app.
 let app = express();
@@ -67,8 +75,32 @@ server.listen(PORT, HOST, (error) => {
     console.clear();
 
     if(error){
-        return console.log(`---| Cannot listen on Port: ${PORT}`);
+        return mostrarLog(`Cannot listen on Port: ${PORT}`);
     }
 
-    console.log(`---| Server is listening on: http://${HOST}:${PORT}/`);
+    mostrarLog(`Server is listening on: http://${HOST}:${PORT}/`);
+
+    /* Creamos los directorios a usar por el api. */
+
+    // Si el directorio de los logs del servidor no existe.
+    if(!fs.existsSync(LOG_DIR)) {
+        // Creamos el directorio.
+        fs.mkdirSync(LOG_DIR);
+
+        mostrarLog('Directorio de logs creado exitosamente...');
+
+    } else {
+        mostrarLog('Directorio de logs cargado exitosamente...');
+    }
+
+    // Si el directorio de los recursos del servidor no existe.
+    if(!fs.existsSync(RECURSOS_DIR)) {
+        // Creamos el directorio.
+        fs.mkdirSync(RECURSOS_DIR);
+
+        mostrarLog('Directorio de recursos creado exitosamente...');
+
+    } else {
+        mostrarLog('Directorio de recursos cargado exitosamente...');
+    }
 });
