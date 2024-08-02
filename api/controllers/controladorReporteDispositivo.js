@@ -21,6 +21,9 @@ const ReportesDispositivos = db.reporteDispositivo;
 const Dispositivos = db.dispositivoIoT;
 const Reportes = db.reporte;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Consulta los registros en la base de datos.
 exports.consultaReporteDispositivo = async(request, respuesta) => {
     // GET Request.
@@ -108,7 +111,7 @@ exports.consultaReporteDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -186,7 +189,7 @@ exports.registrarReporteDispositivo = async(request, respuesta) => {
         
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -273,7 +276,7 @@ exports.modificarReporteDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -335,7 +338,7 @@ exports.eliminarReporteDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({

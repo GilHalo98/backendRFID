@@ -23,6 +23,9 @@ const TiposReportes = db.tipoReporte;
 const Empleados = db.empleado;
 const Reportes = db.reporte;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Consulta los registros en la base de datos.
 exports.consultaReporteActividad = async(request, respuesta) => {
     // GET Request.
@@ -125,7 +128,7 @@ exports.consultaReporteActividad = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -213,7 +216,7 @@ exports.registrarReporteActividad = async(request, respuesta) => {
         
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -313,7 +316,7 @@ exports.modificarReporteActividad = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -375,7 +378,7 @@ exports.eliminarReporteActividad = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({

@@ -16,6 +16,9 @@ const { getToken, getTokenPayload } = require("../utils/jwtConfig");
 // Modelos que usara el controlador.
 const TiposDispositivos = db.tipoDispositivo;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Consulta los registros en la base de datos.
 exports.consultaTipoDispositivo = async(request, respuesta) => {
     // GET Request.
@@ -80,7 +83,7 @@ exports.consultaTipoDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -159,7 +162,7 @@ exports.registrarTipoDispositivo = async(request, respuesta) => {
         
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -236,7 +239,7 @@ exports.modificarTipoDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -298,7 +301,7 @@ exports.eliminarTipoDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({

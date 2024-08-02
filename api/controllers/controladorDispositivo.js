@@ -21,6 +21,9 @@ const TiposDispositivos = db.tipoDispositivo;
 const DispositivosIoT = db.dispositivoIoT;
 const Zonas = db.zona;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Registra un dipositivo.
 exports.registrarDispositivo = async(request, respuesta) => {
     // POST Request.
@@ -98,7 +101,7 @@ exports.registrarDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -195,7 +198,7 @@ exports.consultarDispositivo = async(request, respuesta) => {
         });
 
     } catch(excepcion){
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         return respuesta.status(500).send({
             codigoRespuesta: CODIGOS.API_ERROR
@@ -256,7 +259,7 @@ exports.eliminarDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -359,7 +362,7 @@ exports.modificarDispositivo = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -413,7 +416,7 @@ exports.generarTokenAcceso = async(request, respuesta) => {
         });
 
     } catch(excepcion){
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         return respuesta.status(500).send({
             codigoRespuesta: CODIGOS.API_ERROR

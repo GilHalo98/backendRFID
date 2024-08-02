@@ -16,6 +16,7 @@ const { Op } = require("sequelize");
 // Funciones extra.
 const { rangoHoy, rangoSemana } = require("../utils/tiempo");
 const { existeRegistro } = require("../utils/registros");
+const { mostrarLog } = require("../utils/logs");
 
 // Modelos que usara el controlador.
 const ReportesActividades = db.reporteActividad;
@@ -127,23 +128,14 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
 
         // Generamos un reporte por cada dia laboral.
         diasLaborales.forEach((diaLaboral) => {
-            const descansa = diaLaboral.esDescanso;
-
             // Listamos los dias de descanso.
-            if(descansa) {
-                datosPorDia[diaLaboral.dia] = {
-                    descanso: diaLaboral.esDescanso,
-                };
-
-            } else {
-                datosPorDia[diaLaboral.dia] = {
-                    falto: true,
-                    descanso: diaLaboral.esDescanso,
-                    llegoTarde: true,
-                    salioTarde: false,
-                    tiempoTrabajo: 0
-                };
-            }
+            datosPorDia[diaLaboral.dia] = {
+                falto: true,
+                descanso: diaLaboral.esDescanso,
+                llegoTarde: true,
+                salioTarde: false,
+                tiempoTrabajo: 0
+            };
         });
 
         // Tiempo total de trabajo en milisegundos.
@@ -198,6 +190,11 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                             ].salioTarde = true;
                         }
 
+                        // Guardamos la fecha del registro.
+                        datosPorDia[
+                            registro.fechaRegistroReporteChequeo.getDay()
+                        ].fecha = registro.fechaRegistroReporteChequeo;
+
                         // Aumentamos el tiempo total en la semana
                         // de trabajo.
                         tiempoTrabajoTotal += tiempoTrabajo;
@@ -234,7 +231,7 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -263,7 +260,7 @@ exports.historialActividadMaquina = async(request, respuesta) => {
         }
 
         // Recuperamos los datos de la consulta.
-        const idDispositivoVinculado = cuerpo.idDispositivoVinculado;
+        const idDispositivoVinculado = consulta.idDispositivoVinculado;
 
         // Verificamos que los datos de la consulta esten completos.
         if(!idDispositivoVinculado) {
@@ -309,7 +306,7 @@ exports.historialActividadMaquina = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({

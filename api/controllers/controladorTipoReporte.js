@@ -16,6 +16,9 @@ const { getTokenPayload } = require("../utils/jwtConfig");
 // Modelos que usara el controlador.
 const TiposReportes = db.tipoReporte;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Consulta los registros en la base de datos.
 exports.consultaTipoReporte = async(request, respuesta) => {
     // GET Request.
@@ -80,7 +83,7 @@ exports.consultaTipoReporte = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -159,7 +162,7 @@ exports.registrarTipoReporte = async(request, respuesta) => {
         
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -236,7 +239,7 @@ exports.modificarTipoReporte = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -298,7 +301,7 @@ exports.eliminarTipoReporte = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({

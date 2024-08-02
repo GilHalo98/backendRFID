@@ -20,14 +20,19 @@ const fs = require("fs");
 const { getTokenPayload } = require("../utils/jwtConfig");
 
 // Para la generacion de username y password.
-const { generarNombreUsuario, generarPassword }  = require("../utils/utils");
+const { toSQLTime }  = require("../utils/utils");
 
 // Modelos que usara el controlador.
+const DiasLaborales = db.diaLaboral;
 const Empleados = db.empleado;
+const Horarios = db.horario;
 const Permisos = db.permiso;
 const Recursos = db.recurso;
 const Usuarios = db.usuario;
 const Roles = db.rol;
+
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
 
 // Consulta los registros en la base de datos.
 exports.consultaEmpleado = async(request, respuesta) => {
@@ -124,7 +129,7 @@ exports.consultaEmpleado = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -219,7 +224,7 @@ exports.registrarEmpleado = async(request, respuesta) => {
             idRolVinculado: idRolVinculado,
             idImagenVinculada: idImagenVinculada
         };
-        
+
         // Guardamos el registro en la DB.
         await Empleados.create(nuevoRegistro);
 
@@ -227,10 +232,10 @@ exports.registrarEmpleado = async(request, respuesta) => {
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK
         });
-        
+
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -345,7 +350,7 @@ exports.modificarEmpleado = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -407,11 +412,126 @@ exports.eliminarEmpleado = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
             codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Consulta los registros en la base de datos del empleado, completo.
+exports.consultaEmpleadoCompleto = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Verificamos si se selecciono un offset.
+        const offset = (
+            !consulta.offset ? consulta.offset : parseInt(consulta.offset)
+        );
+
+        // Verificamos si se selecciono un maximo de elementos por pagina.
+        const limit = (
+            !consulta.limit ? consulta.limit : parseInt(consulta.limit)
+        );
+
+        // Construimos la consulta hacia la db.
+        const datos = Object();
+
+        // Agregamos los parametros de la consulta.
+        if(consulta.id) {
+            datos.id = consulta.id;
+        }
+
+        if(consulta.numeroTelefonico) {
+            datos.numeroTelefonico = {
+                [Op.substring]: consulta.numeroTelefonico
+            };
+        }
+
+        if(consulta.nombres) {
+            datos.nombres = {
+                [Op.substring]: consulta.nombres
+            };
+        }
+
+        if(consulta.apellidoPaterno) {
+            datos.apellidoPaterno = {
+                [Op.substring]: consulta.apellidoPaterno
+            };
+        }
+
+        if(consulta.apellidoMaterno) {
+            datos.apellidoMaterno = {
+                [Op.substring]: consulta.apellidoMaterno
+            };
+        }
+
+        if(consulta.idRolVinculado) {
+            // Si no existe.
+            if(! await existeRegistro(Roles, consulta.idRolVinculado)) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                });
+            }
+
+            // Si existe, se agrega el dato a la busqueda.
+            datos.idRolVinculado = consulta.idRolVinculado;
+        }
+
+        // Consultamos el total de los registros.
+        const totalRegistros = await Empleados.count({
+            where: datos,
+        });
+
+        // Consultamos todos los registros.
+        const registros = await Empleados.findAll({
+            offset: offset,
+            limit: limit,
+            where: datos,
+            include: [{
+                model: Usuarios,
+                attributes: {
+                    exclude: ['password']
+                }
+            }, {
+                model: Horarios,
+                include: [{
+                    model: DiasLaborales
+                }]
+            }]
+        });
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            totalRegistros: totalRegistros,
+            registros: registros
+        });
+        
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR
         });
     }
 };
@@ -434,25 +554,32 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
             });
         }
 
+        // Lista de dias.
+        const listaDias = [
+            { nombreDia: 'Lunes', id: 0 },
+            { nombreDia: 'Martes', id: 1 },
+            { nombreDia: 'Miercoles', id: 2 },
+            { nombreDia: 'Jueves', id: 3 },
+            { nombreDia: 'Viernes', id: 4 },
+            { nombreDia: 'Sabado', id: 5 },
+            { nombreDia: 'Domingo', id: 6 }
+        ];
+
         // Instanciamos la fecha del registro.
         const fecha = new Date();
-        
+
         // ID de imagen por default de empleado.
         let idImagenVinculada = 1;
 
         // Recuperamos la informacion por registro.
         const archivoImagen = request.file;
-        const informacionEmpleado = cuerpo.informacionEmpleado;
-        const informacionUsuario = cuerpo.informacionUsuario;
-        const informacionHorario = cuerpo.informacionHorario;
-        const informacionDiasLaborales = cuerpo.informacionDiasLaborales;
 
         // ID del registro del empelado.
         let idEmpelado = undefined;
 
         // ID del registro del horario.
         let idHorario = undefined;
-        
+
         // Variables de coincidencias y nuevo registro.
         let coincidencia = undefined;
         let nuevoRegistro = undefined;
@@ -501,12 +628,12 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
         // La siguiente parte es para el registro del empleado.
 
         // Recuperamos la informacion del registro.
-        const nombres = informacionEmpleado.nombres;
-        const apellidoPaterno = informacionEmpleado.apellidoPaterno;
-        const apellidoMaterno = informacionEmpleado.apellidoMaterno;
-        const numeroTelefonico = informacionEmpleado.numeroTelefonico;
-        const fechaNacimiento = informacionEmpleado.fechaNacimiento;
-        const idRolVinculado = informacionEmpleado.idRolVinculado;
+        const nombres = cuerpo.nombres;
+        const apellidoPaterno = cuerpo.apellidoPaterno;
+        const apellidoMaterno = cuerpo.apellidoMaterno;
+        const numeroTelefonico = cuerpo.numeroTelefonico;
+        const fechaNacimiento = cuerpo.fechaNacimiento;
+        const idRolVinculado = cuerpo.idRolVinculado;
 
         // Validamos que exista la informacion necesaria para
         // realizar el registro del registro.
@@ -562,7 +689,7 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
             idRolVinculado: idRolVinculado,
             idImagenVinculada: idImagenVinculada
         };
-        
+
         // Guardamos el registro en la DB.
         await Empleados.create(nuevoRegistro).then((registro) => {
             idEmpelado = registro.id;
@@ -573,8 +700,8 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
         // al sistema.
 
         // Recuperamos la informacion del registro.
-        const nombreUsuario = informacionUsuario.nombreUsuario;
-        const password = informacionUsuario.password;
+        const nombreUsuario = cuerpo.nombreUsuario;
+        const password = cuerpo.password;
         const idRegistroEmpleadoVinculado = idEmpelado;
 
         // Validamos que exista la informacion necesaria para
@@ -627,8 +754,8 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
         // La proxima parte es la del registro del horario.
 
         // Recuperamos la informacion del registro.
-        const descripcionHorario = informacionHorario.descripcionHorario;
-        const tolerancia = informacionHorario.tolerancia;
+        const descripcionHorario = cuerpo.descripcionHorario;
+        const tolerancia = cuerpo.tolerancia;
         const idEmpleadoVinculado = idEmpelado;
 
         // Validamos que exista la informacion necesaria para
@@ -673,56 +800,62 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
             idHorario = registro.id;
         });
 
-        // Por ultimo la parte de los dias laborales, en este
-        // caso se registra de uno por uno.
-        await informacionDiasLaborales.forEach(async (informacionDiaLaboral) => {
-            // Recuperamos la informacion del registro.
-            const dia = informacionDiaLaboral.dia;
-            const esDescanso = informacionDiaLaboral.esDescanso;
-            const horaEntrada = informacionDiaLaboral.horaEntrada;
-            const horaSalidaDescanso = informacionDiaLaboral.horaSalidaDescanso;
-            const horaEntradaDescanso = informacionDiaLaboral.horaEntradaDescanso;
-            const horaSalida = informacionDiaLaboral.horaSalida;
+        // Verificamos si el registro vinculado existe en la db.
+        if(! await existeRegistro(Horarios, idHorario)) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Mapeamos los datos de la lista de los dias laborales.
+        const nuevosRegistros = listaDias.map((diaSemana) => {
+            // Datos del registro del dia laboral.
+            const dia = diaSemana.id;
+            const esDescanso = cuerpo[
+                'esDescanso' + diaSemana.nombreDia
+            ];
+            const horaEntrada = cuerpo[
+                'horaEntrada' + diaSemana.nombreDia
+            ];
+            const horaSalidaDescanso = cuerpo[
+                'horaSalidaDescanso' + diaSemana.nombreDia
+            ];
+            const horaEntradaDescanso = cuerpo[
+                'horaEntradaDescanso' + diaSemana.nombreDia
+            ];
+            const horaSalida = cuerpo[
+                'horaSalida' + diaSemana.nombreDia
+            ];
             const idHorarioVinculado = idHorario;
 
             // Validamos que exista la informacion necesaria para
             // realizar el registro del permiso.
-            if(
-                !dia
-                || !esDescanso
-                || !horaEntrada
-                || !horaSalidaDescanso
-                || !horaEntradaDescanso
-                || !horaSalida
-                || !idHorarioVinculado
-            ) {
-                // Si no estan completos mandamos
-                // un mensaje de datos incompletos.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-                })
+            if(!(!esDescanso || !idHorarioVinculado)) {
+                // Si existe la informacion, entonces se agrega a
+                // la lista de datos validos.
+                return {
+                    dia: dia,
+                    esDescanso: esDescanso,
+                    horaEntrada: toSQLTime(horaEntrada),
+                    horaSalidaDescanso: toSQLTime(horaSalidaDescanso),
+                    horaEntradaDescanso: toSQLTime(horaEntradaDescanso),
+                    horaSalida: toSQLTime(horaSalida),
+                    fechaRegistroDia: fecha,
+                    idHorarioVinculado: idHorarioVinculado
+                };
             }
+        });
 
-            // Si no existe.
-            if(! await existeRegistro(Horarios, idHorarioVinculado)) {
-                // Retornamos un mensaje de error.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-                });
-            }
+        // Si los registros del horario laboral son diferente de 7,
+        // se retorna un error de datos de registro incompletos.
+        if(nuevosRegistros.length != 7) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
+            });
+        }
 
-            // Creamos el registro.
-            const nuevoRegistro = {
-                dia: dia,
-                esDescanso: (esDescanso == 'true'),
-                horaEntrada: horaEntrada,
-                horaSalidaDescanso: horaSalidaDescanso,
-                horaEntradaDescanso: horaEntradaDescanso,
-                horaSalida: horaSalida,
-                fechaRegistroDia: fecha,
-                idHorarioVinculado: idHorarioVinculado,
-            };
-
+        // Guardamos los nuevos registros.
+        await nuevosRegistros.forEach(async (nuevoRegistro) => {
             // Guardamos el registro en la DB.
             await DiasLaborales.create(nuevoRegistro);
         });
@@ -731,14 +864,331 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK
         });
-        
+
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
             codigoRespuesta: CODIGOS.API_ERROR
+        });
+    }
+};
+
+// Modifica un registro en la base de datos del empleado, completo.
+exports.modificarEmpleadoCompleto = async(request, respuesta) => {
+    // PUT Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Lista de dias.
+        const listaDias = [
+            'Lunes',
+            'Martes',
+            'Miercoles',
+            'Jueves',
+            'Viernes',
+            'Sabado',
+            'Domingo'
+        ];
+
+        // Instanciamos la fecha de la modificacion del registro.
+        const fecha = new Date();
+
+        // Desempaquetamos los datos del registro.
+        const archivoImagen = request.file;
+
+        const idEmpleado = consulta.id;
+        const nombres = cuerpo.nombres;
+        const apellidoPaterno = cuerpo.apellidoPaterno;
+        const apellidoMaterno = cuerpo.apellidoMaterno;
+        const numeroTelefonico = cuerpo.numeroTelefonico;
+        const fechaNacimiento = cuerpo.fechaNacimiento;
+        const idRolVinculado = cuerpo.idRolVinculado;
+
+        const nombreUsuario = cuerpo.nombreUsuario;
+        const password = cuerpo.password;
+
+        const descripcionHorario = cuerpo.descripcionHorario;
+        const tolerancia = cuerpo.tolerancia;
+
+        // Verificamos que exista un id del registro a modificar.
+        if(!idEmpleado) {
+            // Si no, retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
+            });
+        }
+
+        // Buscamos el registro.
+        const registro = await Empleados.findByPk(idEmpleado);
+
+        // Verificamos que exista el registro.
+        if(!registro) {
+            // Si no se encontro el registro, se envia un
+            // codio de registro inexistente.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO,
+            });
+        }
+
+        // Consultamos el registro del recurso.
+        const registroVinculadoRecurso = await Recursos.findByPk(
+            registro.idImagenVinculada
+        );
+
+        // Verificamos que exista un recurso para modificar.
+        if(archivoImagen) {
+            // Buscamos por un registro con el mismo nombre de archivo.
+            const registroExistenteRecurso = await Recursos.findOne({
+                where: {
+                    nombre: archivoImagen.filename
+                }
+            });
+
+            // Si existe un registro con los mismos datos terminamos
+            // la operacion.
+            if(registroExistenteRecurso) {
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
+                });
+            }
+
+            // Guardamos todos los cambios.
+            registroVinculadoRecurso.tipo = archivoImagen.mimetype;
+            registroVinculadoRecurso.nombre = archivoImagen.filename;
+            registroVinculadoRecurso.data = fs.readFileSync(
+                archivoImagen.path
+            );
+            registroVinculadoRecurso.fechaModificacionRecurso = fecha;
+        }
+
+        // Buscamos el registor vinculado.
+        const registroVinculadoUsuario = await Usuarios.findOne({
+            where: {
+                idRegistroEmpleadoVinculado: idEmpleado
+            }
+        });
+
+        // Verificamos que exista el registro.
+        if(!registroVinculadoUsuario) {
+            // Si no se encontro el registro, se envia un
+            // codio de registro inexistente.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.USUARIO_NO_ENCONTRADO,
+            });
+        }
+
+        // Buscamos el registro vinculado.
+        const registroVinculadoHorario = await Horarios.findOne({
+            where: {
+                idEmpleadoVinculado: idEmpleado
+            }
+        });
+
+        // Verificamos que exista el registro.
+        if(!registroVinculadoHorario) {
+            // Si no se encontro el registro, se envia un
+            // codio de registro inexistente.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.HORARIO_NO_ENCONTRADO,
+            });
+        }
+
+        // Lista de registros de dias laborales.
+        const registrosVinculadosDiasLaborales = await DiasLaborales.findAll({
+            where: {
+                idHorarioVinculado: registroVinculadoHorario.id
+            }
+        });
+
+        // Verificamos que existan los registros.
+        if(registrosVinculadosDiasLaborales.length != 7) {
+            // Si no se encontro el registro, se envia un
+            // codio de registro inexistente.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DIA_LABORAL_NO_ENCONTRADO,
+            });
+        }
+
+        // Lo primero es cambiar el registro del empleado.
+        if(nombres) {
+            registro.nombres = nombres;
+        }
+
+        if(apellidoPaterno) {
+            registro.apellidoPaterno = apellidoPaterno;
+        }
+
+        if(apellidoMaterno) {
+            registro.apellidoMaterno = apellidoMaterno;
+        }
+
+        if(numeroTelefonico) {
+            registro.numeroTelefonico = numeroTelefonico;
+        }
+
+        if(fechaNacimiento) {
+            registro.fechaNacimiento = fechaNacimiento;
+        }
+
+        if(idRolVinculado) {
+            // Verificamos que el registro vinculado exista.
+            if(await existeRegistro(Roles, idRolVinculado)) {
+                // Si existe, cambiamos registro vinculado.
+                registro.idRolVinculado = idRolVinculado;
+            }
+        }
+
+        registro.fechaModificacionEmpleado = fecha;
+
+        // Ahora cambiamos los datos del registro de usuario.
+        if(nombreUsuario) {
+            // Verificamos que no exista un registro con el mismo nombre
+            // de ususario.
+            const registroExistente = await Usuarios.findOne({
+                where: {
+                    idRegistroEmpleadoVinculado: {
+                        [Op.ne]: idEmpleado
+                    },
+                    nombreUsuario: nombreUsuario
+                }
+            });
+
+            // Si no existe el registro.
+            if(!registroExistente) {
+                // Realizamos el cambio de nombre de usuario.
+                registroVinculadoUsuario.nombreUsuario = nombreUsuario;
+
+            } else {
+                // Si ya existe, entonces retornamos un error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
+                });
+            }
+        }
+
+        if(password) {
+            registroVinculadoUsuario.password = password;
+        }
+
+        registroVinculadoUsuario.fechaModificacionUsuario = fecha;
+
+        // Realizamos el cambio de datos del registro del horario.
+        if(tolerancia) {
+            registroVinculadoHorario.tolerancia = toSQLTime(tolerancia);
+        }
+
+        if(descripcionHorario) {
+            registroVinculadoHorario.descripcionHorario = descripcionHorario;
+        }
+
+        registroVinculadoUsuario.fechaModificacionHorario = fecha;
+
+        // Por ultimo realizamos los cambios en los registros de
+        // dias laborales.
+        const cambios = await registrosVinculadosDiasLaborales.map(
+            async (registroDiaLaboral) => {
+                // Desempaquetamos los datos.
+                const esDescanso = parseInt(cuerpo[
+                    'esDescanso' + listaDias[registroDiaLaboral.dia]
+                ]);
+                const horaEntrada = cuerpo[
+                    'horaEntrada' + listaDias[registroDiaLaboral.dia]
+                ];
+                const horaSalidaDescanso = cuerpo[
+                    'horaSalidaDescanso' + listaDias[registroDiaLaboral.dia]
+                ];
+                const horaEntradaDescanso = cuerpo[
+                    'horaEntradaDescanso' + listaDias[registroDiaLaboral.dia]
+                ];
+                const horaSalida = cuerpo[
+                    'horaSalida' + listaDias[registroDiaLaboral.dia]
+                ];
+
+                // Realizamos los cambios.
+                if(esDescanso) {
+                    registroDiaLaboral.esDescanso = esDescanso;
+
+                    registroDiaLaboral.horaEntrada = null;
+                    registroDiaLaboral.horaSalidaDescanso = null;
+                    registroDiaLaboral.horaEntradaDescanso = null;
+                    registroDiaLaboral.horaSalida = null;
+
+                // Si no esta marcado como dia de descanso.
+                } else {
+                    // Guardamos los cambios realizados en el registro.
+                    if(horaEntrada) {
+                        registroDiaLaboral.horaEntrada = toSQLTime(horaEntrada);
+                    }
+
+                    if(horaSalidaDescanso) {
+                        registroDiaLaboral.horaSalidaDescanso = toSQLTime(horaSalidaDescanso);
+                    }
+
+                    if(horaEntradaDescanso) {
+                        registroDiaLaboral.horaEntradaDescanso = toSQLTime(horaEntradaDescanso);
+                    }
+
+                    if(horaSalida) {
+                        registroDiaLaboral.horaSalida = toSQLTime(horaSalida);
+                    }
+                }
+
+                registroDiaLaboral.fechaModificacionDiaLaboral = fecha;
+
+                // Retornamos una promesa de guardar los cambios
+                // en la base de datos.
+                return registroDiaLaboral.save();
+            }
+        );
+
+        // Por ultimo guardamos los cambios en la base de datos.
+
+        // Guardamos los cambios del registro de empleado.
+        await registro.save();
+
+        // Guardamos los cambios en el registro de usuario.
+        await registroVinculadoUsuario.save();
+
+        // Guardamos los cambios en el registro de horario.
+        await registroVinculadoHorario.save();
+
+        // Por cada registro de dia laboral.
+        await cambios.forEach(async(cambio) => {
+            // Esperamos a que se realizen los cambios.
+            await cambio;
+        });
+
+        // Por ultimo guardamos los cambios en el registro de recurso.
+        await registroVinculadoRecurso.save();
+
+        // Retornamos un mensaje de operacion ok.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
         });
     }
 };

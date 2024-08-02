@@ -33,6 +33,9 @@ const Empleados = db.empleado;
 const Horarios = db.horario;
 const Reportes = db.reporte;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Registra un reporte.
 exports.registrarReporteAcceso = async(request, respuesta) => {
     // POST Request.
@@ -140,7 +143,7 @@ exports.registrarReporteAcceso = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -214,7 +217,7 @@ exports.registrarReporteErrorAutentificacion = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -267,7 +270,7 @@ exports.validarRegistroEmpleado = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepcion en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos el codigo de error con la api.
         return respuesta.status(500).json({
@@ -330,7 +333,7 @@ exports.registrarReporteEmpleadoInexistente = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -528,7 +531,7 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -713,7 +716,7 @@ exports.registrarReporteDescanso = async (request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -811,7 +814,7 @@ exports.registrarReporteInicioActividad = async(
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -904,7 +907,7 @@ exports.registrarReporteFinaliacionActividad = async(
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
@@ -942,7 +945,7 @@ exports.verificarAPI = async(
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({

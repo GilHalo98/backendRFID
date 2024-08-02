@@ -24,6 +24,9 @@ const DiasLaborales = db.diaLaboral;
 const Empleados = db.empleado;
 const Horarios = db.horario;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Consulta los registros en la base de datos.
 exports.consultaHorario = async(request, respuesta) => {
     // GET Request.
@@ -95,7 +98,7 @@ exports.consultaHorario = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -174,10 +177,10 @@ exports.registrarHorario = async(request, respuesta) => {
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK
         });
-        
+
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -268,7 +271,7 @@ exports.modificarHorario = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -333,7 +336,7 @@ exports.eliminarHorario = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -361,30 +364,68 @@ exports.consultaHorarioCompleto = async(request, respuesta) => {
             });
         }
 
-        // Recuperamos los parametros de busqueda.
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        // Construimos la consulta hacia la db.
+        const datos = Object();
 
-        // Verificamos que los datos para la busqueda esten completos.
-        if(!idEmpleadoVinculado) {
-            // Si no estan completos mandamos
-            // un mensaje de datos incompletos.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
-            });
+        // Agregamos los parametros de la consulta.
+        if((consulta.id)) {
+            // Si no existe.
+            if(! await existeRegistro(Empleados, consulta.id)) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                });
+            }
+
+            datos.id = consulta.id;
         }
 
-        // Verificamos que los registros vinculados existan.
-        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
-            // Retornamos un mensaje de error.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
+        if((consulta.numeroTelefonico)) {
+            datos.numeroTelefonico = {
+                [Op.substring]: consulta.numeroTelefonico
+            };
         }
+
+        if((consulta.nombres)) {
+            datos.nombres = {
+                [Op.substring]: consulta.nombres
+            };
+        }
+
+        if((consulta.apellidoPaterno)) {
+            datos.apellidoPaterno = {
+                [Op.substring]: consulta.apellidoPaterno
+            };
+        }
+
+        if((consulta.apellidoMaterno)) {
+            datos.apellidoMaterno = {
+                [Op.substring]: consulta.apellidoMaterno
+            };
+        }
+
+        if((consulta.idRolVinculado)) {
+            // Si no existe.
+            if(! await existeRegistro(Roles, consulta.idRolVinculado)) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                });
+            }
+
+            // Si existe, se agrega el dato a la busqueda.
+            datos.idRolVinculado = consulta.idRolVinculado;
+        }
+
+        // Buscamos un registro del empleado.
+        const registroVinculado = await Empleados.findOne({
+            where: datos
+        });
 
         // Consultamos el registro del horario.
         const registro = await Horarios.findOne({
             where: {
-                idEmpleadoVinculado: idEmpleadoVinculado
+                idEmpleadoVinculado: registroVinculado.id
             },
             include: [{
                 model: DiasLaborales
@@ -399,7 +440,7 @@ exports.consultaHorarioCompleto = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -427,23 +468,46 @@ exports.modificarHorarioCompleto = async(request, respuesta) => {
             });
         }
 
-        // Recuperamos los parametros de busqueda.
-        const id = cuerpo.id;
-        const tolerancia = cuerpo.tolerancia;
-        const diasLaborales = cuerpo.diasLaborales;
+        // Lista de dias.
+        const listaDias = [
+            'Lunes',
+            'Martes',
+            'Miercoles',
+            'Jueves',
+            'Viernes',
+            'Sabado',
+            'Domingo'
+        ];
 
-        // Verificamos que los datos para la modificacion esten completos.
-        if(!id) {
-            // Si no, retornamos un mensaje de error.
+        // Instanciamos la fecha del registro.
+        const fecha = new Date();
+
+        // Desempaquetamos los datos.
+        const idEmpleado = consulta.id;
+
+        const tolerancia = cuerpo.tolerancia;
+        const descripcionHorario = cuerpo.descripcionHorario;
+
+        // Primero buscamos el registro del empleado.
+        const registro = await Empleados.findByPk(consulta.id);
+
+        // Si no existe el registro.
+        if(!registro) {
+            // retorna un mensaje de rror.
             return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
             });
         }
 
-        // Consultamos el horario.
-        const registro = await Horario.findByPk(id);
+        // Buscamos el registro vinculado.
+        const registroVinculadoHorario = await Horarios.findOne({
+            where: {
+                idEmpleadoVinculado: idEmpleado
+            }
+        });
 
-        if(!registro) {
+        // Verificamos que exista el registro.
+        if(!registroVinculadoHorario) {
             // Si no se encontro el registro, se envia un
             // codio de registro inexistente.
             return respuesta.status(200).send({
@@ -451,36 +515,103 @@ exports.modificarHorarioCompleto = async(request, respuesta) => {
             });
         }
 
-        // Cambiamos los datos del registro.
-        registro.tolerancia = tolerancial;
-        registro.fechaModificacionHorario = fecha;
-
-        // Guardamos los cambios.
-        await registro.save();
-
-        // Pasamos a los cambios de los dias laborales.
-        await diasLaborales.forEach(async (diaLaboral) => {
-            // Buscamos el registro vinculado del dia laboral en la db.
-            const registroVinculado = await DiasLaborales.findOne({
-                where: {
-                    idHorarioVinculado: id,
-                    dia: diaLaboral.dia
-                }
-            });
-
-            // Si existe el registro, se modificaran los datos de este.
-            if(registroVinculado) {
-                // Cambiamos los datos del registro.
-                registroVinculado.esDescanso = diaLaboral.esDescanso;
-                registroVinculado.horaEntrada = diaLaboral.horaEntrada;
-                registroVinculado.horaSalidaDescanso = diaLaboral.horaSalidaDescanso;
-                registroVinculado.HoraEntradaDescanso = diaLaboral.HoraEntradaDescanso;
-                registroVinculado.horaSalida = diaLaboral.horaSalida;
-                registroVinculado.fechaModificaciondia = fecha;
-
-                // Guardamos los cambios.
-                await registroVinculado.save();
+        // Lista de registros de dias laborales.
+        const registrosVinculadosDiasLaborales = await DiasLaborales.findAll({
+            where: {
+                idHorarioVinculado: registroVinculadoHorario.id
             }
+        });
+
+        // Verificamos que existan los registros.
+        if(registrosVinculadosDiasLaborales.length != 7) {
+            // Si no se encontro el registro, se envia un
+            // codio de registro inexistente.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DIA_LABORAL_NO_ENCONTRADO,
+            });
+        }
+
+        // Realizamos el cambio de datos del registro del horario.
+        if(tolerancia) {
+            registroVinculadoHorario.tolerancia = tolerancia;
+        }
+
+        if(descripcionHorario) {
+            registroVinculadoHorario.descripcionHorario = descripcionHorario;
+        }
+
+        registroVinculadoHorario.fechaModificacionHorario = fecha;
+
+        // Por ultimo realizamos los cambios en los registros de
+        // dias laborales.
+        const cambios = registrosVinculadosDiasLaborales.map(
+            (registroVinculado) => {
+                // Desempaquetamos los datos.
+                const esDescanso = parseInt(cuerpo[
+                    'esDescanso' + listaDias[registroVinculado.dia]
+                ]);
+                const horaEntrada = cuerpo[
+                    'horaEntrada' + listaDias[registroVinculado.dia]
+                ];
+                const horaSalidaDescanso = cuerpo[
+                    'horaSalidaDescanso' + listaDias[registroVinculado.dia]
+                ];
+                const horaEntradaDescanso = cuerpo[
+                    'horaEntradaDescanso' + listaDias[registroVinculado.dia]
+                ];
+                const horaSalida = cuerpo[
+                    'horaSalida' + listaDias[registroVinculado.dia]
+                ];
+
+                // Si el dia esta marcado como descanso.
+                if(esDescanso) {
+                    // Guardamos el cambio en el campo.
+                    registroVinculado.esDescanso = esDescanso;
+
+                    // Limpiamos las horas de entrada,
+                    // salida, inicio de descanso y fin de descanso.
+                    registroVinculado.horaEntrada = null;
+                    registroVinculado.horaSalidaDescanso = null;
+                    registroVinculado.horaEntradaDescanso = null;
+                    registroVinculado.horaSalida = null;
+
+                // Si no esta marcado como dia de descanso.
+                } else {
+                    // Guardamos los cambios realizados en los demas campos.
+                    if(horaEntrada) {
+                        registroVinculado.horaEntrada = horaEntrada;
+                    }
+
+                    if(horaSalidaDescanso) {
+                        registroVinculado.horaSalidaDescanso = horaSalidaDescanso;
+                    }
+
+                    if(horaEntradaDescanso) {
+                        registroVinculado.horaEntradaDescanso = horaEntradaDescanso;
+                    }
+
+                    if(horaSalida) {
+                        registroVinculado.horaSalida = horaSalida;
+                    }
+                }
+
+                // Cambiamos la fecha de modificacion del registro.
+                registroVinculado.fechaModificacionDiaLaboral = fecha;
+
+                // Retornamos una promesa de guardar los cambios en la
+                // base de datos.
+                return registroVinculado.save();
+            }
+        );
+
+        // Guardamos los cambios en el registro de horario.
+        await registroVinculadoHorario.save();
+
+
+        // Esperamos a que los cambios echos en los dias
+        // laborales se produscan.
+        await cambios.forEach(async (cambio) => {
+            await cambio;
         });
 
         // Retornamos los registros encontrados.
@@ -490,7 +621,7 @@ exports.modificarHorarioCompleto = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({

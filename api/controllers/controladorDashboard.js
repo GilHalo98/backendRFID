@@ -28,6 +28,9 @@ const Reportes = db.reporte;
 const Zonas = db.zona;
 const Roles = db.rol;
 
+// Funciones extra.
+const { mostrarLog } = require("../utils/logs");
+
 // Genera un reporte de accesos al día.
 exports.accesosPorDia = async(request, respuesta) => {
     // GET Request.
@@ -102,7 +105,7 @@ exports.accesosPorDia = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
@@ -131,7 +134,7 @@ exports.actividadDeMaquina = async(request, respuesta) => {
         }
 
         // Recuperamos los datos de la busqueda.
-        const idDispositivoVinculado = cuerpo.idDispositivoVinculado;
+        const idDispositivoVinculado = consulta.idDispositivoVinculado;
 
         // Verificamos que existan datos suficientes para realizar la consulta.
         if(!idDispositivoVinculado) {
@@ -162,6 +165,7 @@ exports.actividadDeMaquina = async(request, respuesta) => {
         // Consultamos el total de los registros.
         const totalRegistros = await ReportesActividades.count({
             where: {
+                idDispositivoVinculado: idDispositivoVinculado,
                 fechaRegistroReporteActividad: { 
                     [Op.between]: rangoHoy(),
                 }
@@ -175,10 +179,10 @@ exports.actividadDeMaquina = async(request, respuesta) => {
             offset: offset,
             limit: limit,
             where: {
+                idDispositivoVinculado: idDispositivoVinculado,
                 fechaRegistroReporteActividad: { 
                     [Op.between]: rangoHoy(),
-                },
-                idDispositivoVinculado: idDispositivoVinculado
+                }
             },
             include: [{
                 model: Empleados
@@ -209,7 +213,7 @@ exports.actividadDeMaquina = async(request, respuesta) => {
         // Nos movemos desde el ultimo elemento de la
         // lista, hasta el primero
         let index = registros.length - 1;
-        while (index > 1) {
+        while (index >= 1) {
             // Recuperamos el elemento en n y n - 1;
             const registro = registros[index];
             const registroSiguiente = registros[index - 1];
@@ -257,7 +261,7 @@ exports.actividadDeMaquina = async(request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamos un codigo de error.
         return respuesta.status(500).send({
