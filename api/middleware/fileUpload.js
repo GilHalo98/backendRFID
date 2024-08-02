@@ -4,8 +4,8 @@ const multer = require("multer");
 // Importa el ambiente en el que se trabaja.
 require("dotenv").config();
 
-// Variables de entorno.
-const DIR = process.env.BASE_DIR;
+// Directorio de logs del servidor.
+const RECURSOS_DIR = process.env.RECURSOS_DIR;
 
 const imageFilter = (request, archivo, callback) => {
     if(archivo.mimetype.startsWith('image')) {
@@ -21,7 +21,7 @@ const imageFilter = (request, archivo, callback) => {
 
 var storage = multer.diskStorage({
     destination: (request, archivo, callback) => {
-        callback(null, DIR + 'recursos/uploads/');
+        callback(null, RECURSOS_DIR + 'uploads/');
     },
     filename: (request, archivo, callback) => {
         callback(null, `${Date.now()}-AC-${archivo.originalname}`);

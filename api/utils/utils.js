@@ -1,9 +1,9 @@
-// En la conversion de las fechas y el tiempo no se toma en cuenta el GMT.
-// HINT esta en
-// const prueba = new Date()
-// console.log(prueba.toString());
-
 function toSQLDate(fecha) {
+    // Si el tiempo es un dato indefinidio, retornamos nulo.
+    if(typeof(fecha) == 'undefined') {
+        return null;
+    }
+
     const fechaAux = new Date(fecha);
 
     // Solucion temporal, hay que ver si esto depende de la db, su
@@ -29,6 +29,11 @@ function toSQLDate(fecha) {
 };
 
 function toSQLTime(tiempo) {
+    // Si el tiempo es un dato indefinidio, retornamos nulo.
+    if(typeof(tiempo) == 'undefined') {
+        return null;
+    }
+
     // Desempaquetamos el tiempo en HH:MM
     const horasMinutos = tiempo.split(":");
 
@@ -60,6 +65,11 @@ function toSQLTime(tiempo) {
 }
 
 function toDateTime(tiempo) {
+    // Si el tiempo es un dato indefinidio, retornamos nulo.
+    if(typeof(tiempo) == 'undefined') {
+        return null;
+    }
+
     const tiempoFracciones = tiempo.split(":");
     const fecha = new Date();
     fecha.setHours(
@@ -72,6 +82,11 @@ function toDateTime(tiempo) {
 }
 
 function calcularEdad(fechaNacimiento) {
+    // Si el tiempo es un dato indefinidio, retornamos nulo.
+    if(typeof(tiempo) == 'undefined') {
+        return null;
+    }
+
     // Calcula la edad en base a la fecha generada aleatoriamente.
     const fecha = new Date();
 

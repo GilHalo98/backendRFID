@@ -6,20 +6,27 @@ const ESTATUS_DISPOSITIVOS = new Estatus.estatusDispositivos();
 const Eventos = require("../../utils/EventosSocket");
 const EVENTOS = new Eventos.EventosSockets();
 
+// Funcion de logs del servidor.
+const {
+    mostrarLog
+} = require('../../utils/logs');
+
 // Administramos la cionexion de un cliente.
 exports.reportarEstatus = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => {
     const consulta = !payload ? {} : payload;
 
     try {
-        console.log('nuevo status');
-
         const nuevoStatus = consulta.status;
 
         const id = CLIENTES[socket.id];
 
-        DISPOSITIVOS[id].status = nuevoStatus;
+        mostrarLog(
+            'reportando nuevo estatus de dispositivo '
+            + id + ': ' + DISPOSITIVOS[id].status
+            + ' -> ' + nuevoStatus
+        );
 
-        console.log(DISPOSITIVOS);
+        DISPOSITIVOS[id].status = nuevoStatus;
 
         // Reportamos un cambio de estatus de dispositivos
         // a los monitores.
@@ -27,7 +34,9 @@ exports.reportarEstatus = async (io, socket, payload, DISPOSITIVOS, CLIENTES) =>
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al reportar estatus: ${excepcion}`
+        );
     }
 };
 
@@ -52,7 +61,7 @@ exports.peticionAccesoBloquear = async (io, socket, payload, DISPOSITIVOS, CLIEN
                     !consulta.resolucion ? consulta.resolucion : parseInt(consulta.resolucion)
                 );
 
-                console.log('peticion de acceso con bloqueo de puerta: ' + resolucion.toString());
+                mostrarLog('peticion de acceso con bloqueo de puerta: ' + resolucion.toString());
         
                 if(resolucion) {
                     socket.broadcast.to(
@@ -70,7 +79,9 @@ exports.peticionAccesoBloquear = async (io, socket, payload, DISPOSITIVOS, CLIEN
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al realizar peticion de accesos y bloqueo: ${excepcion}`
+        );
     }
 };
 
@@ -95,7 +106,7 @@ exports.peticionAccesoDesbloquear = async (io, socket, payload, DISPOSITIVOS, CL
                     !consulta.resolucion ? consulta.resolucion : parseInt(consulta.resolucion)
                 );
 
-                console.log('peticion de acceso con desbloqueo de puerta: ' + resolucion.toString());
+                mostrarLog('peticion de acceso con desbloqueo de puerta: ' + resolucion.toString());
         
                 if(resolucion) {
                     socket.broadcast.to(
@@ -113,7 +124,9 @@ exports.peticionAccesoDesbloquear = async (io, socket, payload, DISPOSITIVOS, CL
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al realizar peticion de desbloqueo y acceso: ${excepcion}`
+        );
     }
 };
 
@@ -141,7 +154,7 @@ exports.peticionAcceso = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => 
                         !consulta.resolucion ? consulta.resolucion : parseInt(consulta.resolucion)
                     );
 
-                    console.log('peticion de acceso: ' + resolucion.toString());
+                    mostrarLog('peticion de acceso: ' + resolucion.toString());
             
                     if(resolucion) {
                         socket.broadcast.to(
@@ -160,6 +173,8 @@ exports.peticionAcceso = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => 
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al realizar peticion de acceso: ${excepcion}`
+        );
     }
 };

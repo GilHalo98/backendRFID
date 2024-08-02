@@ -12,6 +12,10 @@ const EVENTOS = new Eventos.EventosSockets();
 // Para la creacion y lectura de tokens.
 const { getTokenPayload } = require("../../utils/jwtConfig");
 
+const {
+    mostrarLog
+} = require('../../utils/logs');
+
 // Modelos a usar de la db.
 const DispositivosIoT = db.dispositivoIoT;
 const Usuarios = db.usuario;
@@ -19,16 +23,16 @@ const Usuarios = db.usuario;
 // Administramos la cionexion de un cliente.
 exports.conexion = async (io, socket, DISPOSITIVOS, CLIENTES) => {
     // Recivimos conexion de un nuevo dispositivo.
-    console.log('Cliente conectado: ' + socket.id);
+    mostrarLog('Cliente conectado: ' + socket.id);
 
     // Desempaquetamos la autorizacion.
     const token = socket.handshake.headers.authorization;
 
     try {
         if(token) {
-            const payload = await getTokenPayload(token);
+            const payload = await getTokenPayload(token, guardarEnArchivo=false);
 
-            console.log(payload);
+            mostrarLog(payload, guardarEnArchivo=false);
 
             if(payload.idUsuario) {
                 const usuario = await Usuarios.findByPk(payload.idUsuario);
@@ -75,10 +79,8 @@ exports.conexion = async (io, socket, DISPOSITIVOS, CLIENTES) => {
                     // Lo conectamos a la sala.
                     socket.join(dispositivo.idZonaVinculada);
 
-                    console.log('-------------------------------');
-                    console.log(DISPOSITIVOS);
-                    console.log(CLIENTES);
-                    console.log('-------------------------------');
+                    mostrarLog(DISPOSITIVOS, guardarEnArchivo=false);
+                    mostrarLog(CLIENTES, guardarEnArchivo=false);
 
                     return;
             
@@ -88,7 +90,9 @@ exports.conexion = async (io, socket, DISPOSITIVOS, CLIENTES) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al realizar conexion de cliente: ${excepcion}`
+        );
     }
 };
 
@@ -97,7 +101,7 @@ exports.desconexion = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => {
     const consulta = !payload ? {} : payload;
 
     try {
-        console.log('Cliente desconectado: ' + socket.id);
+        mostrarLog('Cliente desconectado: ' + socket.id);
 
         // Reportamos a los monitores la desconecion del cliente.
         io.to('monitores').emit(EVENTOS.CLIENTE_TERMINADO);
@@ -107,6 +111,8 @@ exports.desconexion = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al realizar desconexion de cliente.: ${excepcion}`
+        );
     }
 };

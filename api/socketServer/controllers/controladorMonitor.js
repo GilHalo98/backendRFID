@@ -8,6 +8,11 @@ const { existeRegistro } = require("../../utils/registros");
 const Estatus = require("../../utils/statusDispositivos");
 const ESTATUS_DISPOSITIVOS = new Estatus.estatusDispositivos();
 
+// Funcion de logs del servidor.
+const {
+    mostrarLog
+} = require('../../utils/logs');
+
 // Eventos del server socket.
 const Eventos = require("../../utils/EventosSocket");
 const EVENTOS = new Eventos.EventosSockets();
@@ -22,7 +27,7 @@ exports.listarDispositivos = async (io, socket, payload, DISPOSITIVOS) => {
     const consulta = !payload ? {} : payload;
 
     try {
-        console.log('listando dispositivos');
+        mostrarLog('listando dispositivos');
 
         // Lista de dispositivos.
         const lista = [];
@@ -62,7 +67,10 @@ exports.listarDispositivos = async (io, socket, payload, DISPOSITIVOS) => {
 
         if(consulta.idTipoDispositivoVinculado) {
             // Si no existe.
-            if(! await existeRegistro(TiposDispositivos, consulta.idTipoDispositivoVinculado)) {
+            if(! await existeRegistro(
+                TiposDispositivos,
+                consulta.idTipoDispositivoVinculado
+            )) {
                 // Retornamos un mensaje de error.
             }
 
@@ -104,7 +112,9 @@ exports.listarDispositivos = async (io, socket, payload, DISPOSITIVOS) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al listar dispositivos: ${excepcion}`
+        );
     }
 };
 
@@ -117,7 +127,7 @@ exports.forzarEvento = async (io, socket, payload, CLIENTES) => {
         const idDispositivo = consulta.idDispositivo;
         const argumentos = consulta.argumentos;
 
-        if(!accion ||!idDispositivo) {
+        if(!accion || !idDispositivo) {
             // Retornamos un mensaje de
             // parametros necesarios incompletos.
         }
@@ -136,12 +146,12 @@ exports.forzarEvento = async (io, socket, payload, CLIENTES) => {
             // conectado o invalido.
         }
 
-        console.log(
+        mostrarLog(
             socket.id
             + ' a forzado la accion '
             + accion
             + ' sobre el dispositivo '
-            + uidObjetivo
+            + idDispositivo
         );
 
         // Emitimos el evento de accion forzada
@@ -152,6 +162,28 @@ exports.forzarEvento = async (io, socket, payload, CLIENTES) => {
 
     } catch(excepcion) {
         // Mostramos el error en la consola
-        console.log(excepcion);
+        mostrarLog(
+            `Error al forzar evento en dispositivo: ${excepcion}`
+        );
+    }
+};
+
+// Consulta el estatus de un dispositivo.
+exports.consultarEstatus = async (io, socket, payload, DISPOSITIVOS) => {
+    const consulta = !payload ? {} : payload;
+
+    try {
+        mostrarLog('Reportado status de dispositivo');
+
+        io.to(socket.id).emit(
+            EVENTOS.ESTATUS_DISPOSITIVO,
+            DISPOSITIVOS[consulta].status
+        );
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(
+            `Error al consultar estatus de dispositivo: ${excepcion}`
+        );
     }
 };

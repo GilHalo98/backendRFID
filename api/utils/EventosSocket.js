@@ -8,6 +8,12 @@ class EventosSockets {
     // Evento de reporte de status.
     REPORTAR_STATUS = 'reportar_status';
 
+    // Evento de peticion de estatus de dispositivo,
+    PETICION_ESTATUS = 'peticion_estatus';
+
+    // Retorna el estatus del dispositivo.
+    ESTATUS_DISPOSITIVO = 'estatus_dispositivo';
+
     // Evento de peticion de acceso a una zona.
     PETICION_ACCESO = 'peticion_acceso';
 
@@ -67,6 +73,12 @@ class EventosSockets {
     
     // Envia la accion de desactivar a un controlador de maquinas.
     ACTIVAR = 'activar';
+
+    // Bloquea el dispositivo para impedir el uso de este.
+    BLOQUEAR = 'bloquear';
+
+    // Desbloquea el dispositivo para permitir el uso de este.
+    DESBLOQUEAR = 'desbloquear';
 };
 
 module.exports = {

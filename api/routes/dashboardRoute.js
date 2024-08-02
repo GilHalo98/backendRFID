@@ -15,10 +15,18 @@ module.exports = (app) => {
     const controlador = require('../controllers/controladorDashboard.js');
 
     // Genera un reporte de los accesos del día.
-    router.get('/accesos/porDia', upload.any(), controlador.accesosPorDia);
+    router.get(
+        '/accesos/porDia',
+        upload.any(),
+        controlador.accesosPorDia
+    );
 
     // Genera un reporte de las activdades de la maquina.
-    router.get('/actividadMaquina', upload.any(), controlador.actividadDeMaquina);
+    router.get(
+        '/actividadMaquina',
+        upload.any(),
+        controlador.actividadDeMaquina
+    );
 
     // Ruta general de reportes.
     app.use(process.env.API_URL + 'dashboard', router);

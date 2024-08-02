@@ -1,9 +1,16 @@
+// Libreria para el manejo de tokens.
 const jwt = require('jsonwebtoken');
 
 // Para encriptar la api key.
 const bcrypjs = require("bcryptjs");
 
+// API key para los dispositivos.
 const API_KEY = process.env.API_KEY;
+
+//  Funcion para mostrar los logs.
+const {
+    mostrarLog
+} = require('../utils/logs');
 
 const getToken = (payload, config) => {
     // Realizamos una key para el encriptado.
@@ -34,7 +41,7 @@ const getTokenPayload = async (token) => {
         // Si ocurrio un error al desencriptar el payload.
         if(error) {
             // Lo mostramos en la consola.
-            console.log(`Error al decodificar datos en el token: ${error}`);
+            mostrarLog(`Error al decodificar datos en el token: ${error}`);
         } else {
             // Sino, asinamos el payload.
             payload = decoded;
@@ -55,14 +62,14 @@ const getTokenPayload = async (token) => {
 
             } else {
                 // No hay match, la api key es invalida.
-                console.log('Error, api key no valida');
+                mostrarLog('Error, api key no valida');
                 return null;
             }
 
 
         } else {
             // Si no existe, retorna nulo.
-            console.log('Error, api key no proporcionada');
+            mostrarLog('Error, api key no proporcionada');
             return null;    
         }
     }

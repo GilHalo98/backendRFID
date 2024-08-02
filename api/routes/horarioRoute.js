@@ -30,7 +30,18 @@ module.exports = (app) => {
     router.delete('/eliminar', uploadForm.any(), controlador.eliminarHorario);
 
     // Consulta un horario y sus dias laborales dado un empleado.
-    router.get('/consultar/horarioCompledo', uploadForm.any(), controlador.consultaHorarioCompleto);
+    router.get(
+        '/consultar/completo',
+        uploadForm.any(),
+        controlador.consultaHorarioCompleto
+    );
+
+    // Modifica un horario de un empleado completo.
+    router.put(
+        '/modificar/completo',
+        uploadForm.any(),
+        controlador.modificarHorarioCompleto
+    );
 
     // Ruta general de empleados.
     app.use(process.env.API_URL + 'horario', router);

@@ -208,11 +208,32 @@ function empleadoTerminoDescansoATiempo(
     return terminoATiempo;
 };
 
+function tiempoActual() {
+    /*
+    * Calcula la fecha actual tomando en cuenta el offset.
+    */
+
+    const fechaActual = new Date();
+
+    const timeZone = fechaActual.getTimezoneOffset() * 2;
+
+    const offsetHoras = Math.floor(timeZone / 60);
+    const offsetMinutos = Math.floor(timeZone / (60*60));
+
+    fechaActual.setHours(
+        fechaActual.getHours() - offsetHoras,
+        fechaActual.getMinutes() - offsetMinutos
+    );
+
+    return fechaActual;
+}
+
 module.exports = {
     empleadoLlegoATiempo,
     empleadoSalioTarde,
     rangoHoy,
     empleadoInicioDescansoATiempo,
     empleadoTerminoDescansoATiempo,
-    rangoSemana
+    rangoSemana,
+    tiempoActual
 };
