@@ -31,6 +31,7 @@ const Reportes = db.reporte;
 
 // Genera un reporte de horas trabajadas en el periodo de tiempo dado.
 exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
+    /*TODO: ARREGLA ESTE PEDO QLERO*/
     // GET Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
@@ -144,15 +145,22 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
         // Nos movemos desde el ultimo elemento de la
         // lista, hasta el primero
         let index = registros.length - 1;
-        while (index > 1) {
+        while (index >= 1) {
             // Recuperamos el elemento en n y n - 1;
             const registro = registros[index];
             const registroSiguiente = registros[index - 1];
 
+            console.log(registro.id, 
+            registroSiguiente.id)
+
             // Si los reportes estan echos por el mismo empleado y el
             // reporte en n es de tipo inicio de actividad, mientras
             // que el de n - 1 es de finalizacion de activdad.
-            if(registro.fechaRegistroReporteChequeo.getDay() == registroSiguiente.fechaRegistroReporteChequeo.getDay()) {
+            const diaRegistro = registro.fechaRegistroReporteChequeo.getDay();
+            const diaRegistroSiguiente = registroSiguiente.fechaRegistroReporteChequeo.getDay();
+            if(diaRegistro == diaRegistroSiguiente) {
+                const esEntrada = '';
+                const esEntradaRetraso = '';
                 if(registro.reporte.idTipoReporteVinculado == 8 || registro.reporte.idTipoReporteVinculado == 9) {
                     if(registroSiguiente.reporte.idTipoReporteVinculado == 10 || registroSiguiente.reporte.idTipoReporteVinculado == 11) {
                         // Eso quiere decir que es un periodo de actividad,
@@ -205,19 +213,19 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                     } else {
                         // Si no es asi, eso quiere decir eque el periodo esta
                         // mal formado, saltamos el reporte actual al siguiente.
-                        index -= 1;
+                        index -= 2;
                     }
 
                 } else {
                     // Si no es asi, eso quiere decir eque el periodo esta
                     // mal formado, saltamos el reporte actual al siguiente.
-                    index -= 1;
+                    index -= 2;
                 }
 
             } else {
                 // Si no es asi, eso quiere decir eque el periodo esta
                 // mal formado, saltamos el reporte actual al siguiente.
-                index -= 1;
+                index -= 2;
             }
 
         }

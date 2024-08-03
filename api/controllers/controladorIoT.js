@@ -478,6 +478,12 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
             // Si se encuentra el reporte de salida, envia un mensaje de
             // error.
             if(reporteSalida) {
+                mostrarLog(
+                    'Empleado '
+                    + idEmpleadoVinculado.toString()
+                    + ' checo despues de la salida'
+                );
+
                 return respuesta.status(200).json({
                     codigoRespuesta: CODIGOS.OPERACION_INVALIDA
                 });
@@ -523,6 +529,12 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
             idReporteVinculado: idReporteVinculado,
             idEmpleadoVinculado: idEmpleadoVinculado
         });
+
+        mostrarLog(
+            descripcionReporte
+            + " "
+            + idEmpleadoVinculado.toString()
+        );
 
         // Retornamos un mensaje de ok.
         return respuesta.status(200).json({
