@@ -23,6 +23,9 @@ const bcrypjs = require("bcryptjs");
 // Para la creacion y lectura de tokens.
 const { getToken, getTokenPayload } = require("../utils/jwtConfig");
 
+// Para el control de logs.
+const { mostrarLog } = require('../utils/logs');
+
 // Consulta los registros en la base de datos.
 exports.consultaUsuario = async(request, respuesta) => {
     // GET Request.
