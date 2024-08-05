@@ -14,9 +14,21 @@ const CODIGOS = new respuestas.CodigoApp();
 const { Op } = require("sequelize");
 
 // Funciones extra.
-const { rangoHoy, rangoSemana } = require("../utils/tiempo");
-const { existeRegistro } = require("../utils/registros");
-const { mostrarLog } = require("../utils/logs");
+const {
+    rangoDia,
+    rangoHoy,
+    rangoSemana,
+    msToTime,
+} = require("../utils/tiempo");
+
+const {
+    existeRegistro
+} = require("../utils/registros");
+
+const {
+    mostrarLog
+} = require("../utils/logs");
+const reporte = require("../models/reporte");
 
 // Modelos que usara el controlador.
 const ReportesActividades = db.reporteActividad;
@@ -93,141 +105,155 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
         });
 
         // Si no existen los dias laborales para el horario.
-        if(!diasLaborales) {
+        if(diasLaborales.length < 7) {
             // Retorna una alerta de registro vinculado no existe.
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Consultamos los registros de chequeos pertenecientes al
-        // empleado dado generados en el tiempo dado.
-        const registros = await ReportesChequeos.findAll({
-            where: {
-                idEmpleadoVinculado: idEmpleadoVinculado,
-                fechaRegistroReporteChequeo: {
-                    [Op.between]: rangoSemana(),
-                }
-            },
-            include: [{
-                required: true,
-                model: Reportes,
-                where: {
-                    idTipoReporteVinculado: {
-                        [Op.or]: [8, 9, 10, 11]
-                    }
-                },
-                include: [{
-                    model: TiposReportes
-                }]
-            }],
-            order: [['fechaRegistroReporteChequeo', 'DESC']],
-        });
-
-        // Lista de dias con llegadas tardes, faltas, etc.
-        const datosPorDia = {};
-
-        // Generamos un reporte por cada dia laboral.
-        diasLaborales.forEach((diaLaboral) => {
-            // Listamos los dias de descanso.
-            datosPorDia[diaLaboral.dia] = {
-                falto: true,
-                descanso: diaLaboral.esDescanso,
-                llegoTarde: true,
-                salioTarde: false,
-                tiempoTrabajo: 0
-            };
-        });
-
         // Tiempo total de trabajo en milisegundos.
         let tiempoTrabajoTotal = 0;
 
-        // Nos movemos desde el ultimo elemento de la
-        // lista, hasta el primero
-        let index = registros.length - 1;
-        while (index >= 1) {
-            // Recuperamos el elemento en n y n - 1;
-            const registro = registros[index];
-            const registroSiguiente = registros[index - 1];
+        // Lista de horas trabajadas por dia.
+        const datosPorDia = {};
 
-            console.log(registro.id, 
-            registroSiguiente.id)
-
-            // Si los reportes estan echos por el mismo empleado y el
-            // reporte en n es de tipo inicio de actividad, mientras
-            // que el de n - 1 es de finalizacion de activdad.
-            const diaRegistro = registro.fechaRegistroReporteChequeo.getDay();
-            const diaRegistroSiguiente = registroSiguiente.fechaRegistroReporteChequeo.getDay();
-            if(diaRegistro == diaRegistroSiguiente) {
-                const esEntrada = '';
-                const esEntradaRetraso = '';
-                if(registro.reporte.idTipoReporteVinculado == 8 || registro.reporte.idTipoReporteVinculado == 9) {
-                    if(registroSiguiente.reporte.idTipoReporteVinculado == 10 || registroSiguiente.reporte.idTipoReporteVinculado == 11) {
-                        // Eso quiere decir que es un periodo de actividad,
-                        // calculamos el tiempo de actividad por periodo, este
-                        // tiempo esta en milisegundos.
-                        const tiempoTrabajo = registroSiguiente.fechaRegistroReporteChequeo
-                        - registro.fechaRegistroReporteChequeo;
-
-                        // Se cambia la bandera de falto.
-                        datosPorDia[
-                            registro.fechaRegistroReporteChequeo.getDay()
-                        ].tiempoTrabajo = tiempoTrabajo;
-
-                        // Se cambia la bandera de falto.
-                        datosPorDia[
-                            registro.fechaRegistroReporteChequeo.getDay()
-                        ].falto = false;
-
-                        // Se cambia la bandera de descanso.
-                        datosPorDia[
-                            registro.fechaRegistroReporteChequeo.getDay()
-                        ].descanso = false;
-
-                        // Se cambia la bandera de llego tarde.
-                        if(registro.reporte.idTipoReporteVinculado == 9) {
-                            datosPorDia[
-                                registro.fechaRegistroReporteChequeo.getDay()
-                            ].llegoTarde = false;
-                        }
-
-                        // Se cambia la bandera de salio tarde.
-                        if(registroSiguiente.reporte.idTipoReporteVinculado == 11) {
-                            datosPorDia[
-                                registro.fechaRegistroReporteChequeo.getDay()
-                            ].salioTarde = true;
-                        }
-
-                        // Guardamos la fecha del registro.
-                        datosPorDia[
-                            registro.fechaRegistroReporteChequeo.getDay()
-                        ].fecha = registro.fechaRegistroReporteChequeo;
-
-                        // Aumentamos el tiempo total en la semana
-                        // de trabajo.
-                        tiempoTrabajoTotal += tiempoTrabajo;
-
-                        // Nos movemos al siguiente periodo.
-                        index -= 2;
-
-                    } else {
-                        // Si no es asi, eso quiere decir eque el periodo esta
-                        // mal formado, saltamos el reporte actual al siguiente.
-                        index -= 2;
+        for (let index = 0; index < diasLaborales.length; index++) {
+            // Instancia del dia laboral.
+            const diaLaboral = diasLaborales[index];
+            
+            // Consultamos los reportes de chequeos.
+            const reporteEntrada = await ReportesChequeos.findOne({
+                where: {
+                    idEmpleadoVinculado: idEmpleadoVinculado,
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDia(diaLaboral.dia),
                     }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [8, 9]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
 
-                } else {
-                    // Si no es asi, eso quiere decir eque el periodo esta
-                    // mal formado, saltamos el reporte actual al siguiente.
-                    index -= 2;
-                }
+            const reporteInicioDescanso = await ReportesChequeos.findOne({
+                where: {
+                    idEmpleadoVinculado: idEmpleadoVinculado,
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDia(diaLaboral.dia),
+                    }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: 15
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
+
+            const reporteFinDescanso = await ReportesChequeos.findOne({
+                where: {
+                    idEmpleadoVinculado: idEmpleadoVinculado,
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDia(diaLaboral.dia),
+                    }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: 16
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
+
+            const reporteSalida = await ReportesChequeos.findOne({
+                where: {
+                    idEmpleadoVinculado: idEmpleadoVinculado,
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDia(diaLaboral.dia),
+                    }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [10, 11]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
+
+            // Para realizar el calculo de las horas
+            // trabajadas y descansadas.
+            let tiempoTrabajo = 0;
+            let tiempoDescanso = 0;
+
+            // Identificamos si falto.
+            let falto = false;
+
+
+            // Identificamos si llego tarde.
+            let llegoTarde = false;
+
+            // Identificamos si salio tarde.
+            let salioTarde = false;
+
+            // Si existen el reporte de entrada y salida.
+            if(!(!reporteSalida || !reporteEntrada)) {
+                // Calculamos el tiempo de trabajo en milisegundos.
+                tiempoTrabajo = reporteSalida.fechaRegistroReporteChequeo
+                    - reporteEntrada.fechaRegistroReporteChequeo;
+
+                llegoTarde = reporteEntrada.idTipoReporteVinculado == 9 ?
+                    true : false;
+
+                salioTarde = reporteSalida.idTipoReporteVinculado == 11 ?
+                    true : false;
 
             } else {
-                // Si no es asi, eso quiere decir eque el periodo esta
-                // mal formado, saltamos el reporte actual al siguiente.
-                index -= 2;
+                // Marcamos que el empleado falto.
+                falto = diaLaboral.esDescanso? true : false;
             }
 
+            // Si existen el reporte de inicio y fin de descanso.
+            if(!(!reporteInicioDescanso || !reporteFinDescanso)) {
+                // Calculamos el tiempo de descanso en milisegundos.
+                tiempoDescanso = reporteFinDescanso.fechaRegistroReporteChequeo
+                    - reporteInicioDescanso.fechaRegistroReporteChequeo;
+            }
+
+            // Guardamos la informacion en el diccionario.
+            datosPorDia[diaLaboral.dia] = {
+                tiempoTrabajo: tiempoTrabajo - tiempoDescanso,
+                tiempoDescanso: tiempoDescanso,
+                llegoTarde: llegoTarde,
+                salioTarde: salioTarde,
+                esDescanso: diaLaboral.esDescanso,
+                falto: falto
+            };
+
+            // Acumulamos el tiempo de trabajo total
+            tiempoTrabajoTotal += tiempoTrabajo - tiempoDescanso;
         }
 
         // Retornamos los registros encontrados.
