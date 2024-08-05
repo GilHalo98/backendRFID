@@ -412,7 +412,14 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
             });
         }
 
-        // Buscamos por un registro de entrada en la DB.
+        // Instanciamos los datos a guardar en el registro y el registro
+        // de chequeo vinculado.
+        let descripcionReporte = undefined;
+        let idReporteVinculado = undefined;
+        let idTipoReporteVinculado = undefined;
+
+        // Buscamos un registro de un reporte de entrada o de entrada
+        // con retraso en la base de datos.
         const reporteEntrada = await Reportes.findOne({
             where: {
                 idTipoReporteVinculado: {
@@ -431,15 +438,8 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
             }]
         });
 
-        // Instanciamos los datos a guardar en el registro y el registro
-        // de chequeo vinculado.
-        let descripcionReporte = undefined;
-        let idReporteVinculado = undefined;
-        let idTipoReporteVinculado = undefined;
-
+        // Si no existe el reporte de entrada registramos uno.
         if(!reporteEntrada) {
-            // Se registra el reporte de entrada.
-
             // Verificamos si el chequeo de entrada del empleado fue con
             // retraso.
             if(empleadoLlegoATiempo(
@@ -455,13 +455,12 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
                 idTipoReporteVinculado = 9;
             }
 
+        // Si existe un reporte de entrada, buscamos por un
+        // registro de inicio de descanso en la base de datos.
         } else {
-            // Buscamos por un registro de salida en la DB.
-            const reporteSalida = await Reportes.findOne({
+            const reporteInicioDescanso = await Reportes.findOne({
                 where: {
-                    idTipoReporteVinculado: {
-                        [Op.or]: [10, 11]
-                    },
+                    idTipoReporteVinculado: 15,
                     fechaRegistroReporte: {
                         [Op.between]: rangoHoy(),
                     }
@@ -475,234 +474,98 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
                 }]
             });
 
-            // Si se encuentra el reporte de salida, envia un mensaje de
-            // error.
-            if(reporteSalida) {
-                mostrarLog(
-                    'Empleado '
-                    + idEmpleadoVinculado.toString()
-                    + ' checo despues de la salida'
-                );
+            // Si no existe un reporte de inicio de descanso
+            // registramos uno.
+            if(!reporteInicioDescanso) {
+                descripcionReporte = "Inicio de descanso de empleado";
+                idTipoReporteVinculado = 15;
+            }
 
-                return respuesta.status(200).json({
-                    codigoRespuesta: CODIGOS.OPERACION_INVALIDA
+            // Si , existe un reporte de inicio de descanso, buscamos
+            // por un regsitro de fin de descanso.
+            else {
+                const reporteFinDescanso = await Reportes.findOne({
+                    where: {
+                        idTipoReporteVinculado: 16,
+                        fechaRegistroReporte: {
+                            [Op.between]: rangoHoy(),
+                        }
+                    },
+                    include: [{
+                        model: ReportesChequeos,
+                        where: {
+                            idEmpleadoVinculado: idEmpleadoVinculado
+                        }
+
+                    }]
                 });
-            }
 
-            // Se registra el reporte de salida.
-            if(empleadoSalioTarde(
-                diaLaboral.horaSalida,
-                horario.tolerancia,
-                fecha
-            )) {
-                descripcionReporte = "Chequeo de salida tarde de empleado";
-                idTipoReporteVinculado = 11;
+                // Si no existe un reporte de inicio de descanso
+                // registramos uno.
+                if(!reporteFinDescanso) {
+                    descripcionReporte = "Fin de descanso de empleado";
+                    idTipoReporteVinculado = 16;
 
-            } else {
-                descripcionReporte = "Chequeo de salida de empleado";
-                idTipoReporteVinculado = 10;
+                // Si existe un reporte de fin de descanso, entonces
+                // buscamos por un registro de reporte de salida de
+                // empleado o salida con extras.
+                } else {
+                    const reporteSalida = await Reportes.findOne({
+                        where: {
+                            idTipoReporteVinculado: {
+                                [Op.or]: [10, 11]
+                            },
+                            fechaRegistroReporte: {
+                                [Op.between]: rangoHoy(),
+                            }
+                        },
+                        include: [{
+                            model: ReportesChequeos,
+                            where: {
+                                idEmpleadoVinculado: idEmpleadoVinculado
+                            }
+
+                        }]
+                    });
+
+                    // Si no existe un reporte de salida de empleado
+                    // registramos uno en la base de datos.
+                    if(!reporteSalida) {
+                        if(empleadoSalioTarde(
+                            diaLaboral.horaSalida,
+                            horario.tolerancia,
+                            fecha
+                        )) {
+                            descripcionReporte = "Chequeo de salida tarde de empleado";
+                            idTipoReporteVinculado = 11;
+            
+                        } else {
+                            descripcionReporte = "Chequeo de salida de empleado";
+                            idTipoReporteVinculado = 10;
+                        }
+                    // Si ya se encuentran todos los reportes
+                    // registrados por el dia, retornamos un mensaje
+                    // de operacion invalida.
+                    } else {
+                        mostrarLog(
+                            'Empleado '
+                            + idEmpleadoVinculado.toString()
+                            + ' checo despues de la salida'
+                        );
+        
+                        return respuesta.status(200).json({
+                            codigoRespuesta: CODIGOS.OPERACION_INVALIDA
+                        });
+                    }
+                }
             }
         }
-
-        // Verificamos que los datos del reporte esten completos.
-        if(!descripcionReporte || !idTipoReporteVinculado) {
-            // Si no estan completos mandamos
-            // un mensaje de datos incompletos.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
-
-        // Registramos el reporte.
-        await Reportes.create({
-            descripcionReporte: descripcionReporte,
-            fechaRegistroReporte: fecha,
-            idTipoReporteVinculado: idTipoReporteVinculado
-
-        }).then((registro) => {
-            idReporteVinculado = registro.id;
-        });
-
-        // Registramos el reporte de chequeo.
-        await ReportesChequeos.create({
-            fechaRegistroReporteChequeo: fecha,
-            idReporteVinculado: idReporteVinculado,
-            idEmpleadoVinculado: idEmpleadoVinculado
-        });
 
         mostrarLog(
             descripcionReporte
             + " "
             + idEmpleadoVinculado.toString()
         );
-
-        // Retornamos un mensaje de ok.
-        return respuesta.status(200).json({
-            codigoRespuesta: CODIGOS.OK
-        });
-
-    } catch(excepcion) {
-        // Mostramos la excepción en la consola.
-        mostrarLog(`Error con controlador: ${excepcion}`);
-
-        // Retornamso el codigo del error de la api.
-        return respuesta.status(500).send({
-            codigoRespuesta: CODIGOS.API_ERROR
-        });
-    }
-};
-
-// Registra un reporte de descanso del empleado.
-exports.registrarReporteDescanso = async (request, respuesta) => {
-    // POST Request.
-    const cabecera = request.headers;
-    const cuerpo = request.body;
-    const parametros = request.params;
-
-    try {
-        // Desencriptamos el payload del token.
-        const payload = await getTokenPayload(cabecera.authorization);
-
-        // Verificamos que el payload sea valido.
-        if(!payload) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
-            });
-        }
-
-        // Instanciamos la fecha del registro.
-        const fecha = new Date();
-
-        // Dia de la semana actual.
-        const dia = fecha.getDay();
-
-        // Recuperamos los datos del reporte.
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
-
-        // Verificamos que existan los datos para generar el registro.
-        if(!idEmpleadoVinculado) {
-            return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            })
-        }
-
-        // Verificamos que exista el registro del empleado.
-        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
-            return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
-
-        // Buscamos que el empleado tenga un horario.
-        const horario = await Horarios.findOne({
-            where: {
-                idEmpleadoVinculado: idEmpleadoVinculado
-            }
-        });
-
-        // Verificamos que exista el registor del horario del empleado.
-        if(!horario) {
-            return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
-
-        // Buscamos el dia de la semana actual en el horario.
-        const diaLaboral = await DiasLaborales.findOne({
-            where: {
-                dia: dia,
-                idHorarioVinculado: horario.id
-            }
-        })
-
-        // Verificamos que exista el registor del dia laboral.
-        if(!diaLaboral) {
-            return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
-
-        // Buscamos por un registro de salida a descanso en la DB.
-        const reporteInicioDescanso = await Reportes.findOne({
-            where: {
-                idTipoReporteVinculado: 15,
-                fechaRegistroReporte: {
-                    [Op.between]: rangoHoy(),
-                }
-            },
-            include: [{
-                model: ReportesChequeos,
-                where: {
-                    idEmpleadoVinculado: idEmpleadoVinculado
-                }
-
-            }]
-        });
-
-        // Instanciamos los datos a guardar en el registro y el registro
-        // de chequeo vinculado.
-        let descripcionReporte = undefined;
-        let idReporteVinculado = undefined;
-        let idTipoReporteVinculado = undefined;
-
-        if(!reporteInicioDescanso) {
-            // Se registra el reporte de inicio de descanso.
-            if(empleadoInicioDescansoATiempo(
-                diaLaboral.horaSalidaDescanso,
-                horario.tolerancia,
-                fecha
-            )) {
-                descripcionReporte = "Inicio de descanso de empleado";
-                idTipoReporteVinculado = 15;
-
-            }
-
-        } else {
-            // Buscamos por un registro de salida en la DB.
-            const reporteFinDescanso = await Reportes.findOne({
-                where: {
-                    idTipoReporteVinculado: 16,
-                    fechaRegistroReporte: {
-                        [Op.between]: rangoHoy(),
-                    }
-                },
-                include: [{
-                    model: ReportesChequeos,
-                    where: {
-                        idEmpleadoVinculado: idEmpleadoVinculado
-                    }
-
-                }]
-            });
-
-            // Si se encuentra el reporte de salida, envia un mensaje de
-            // error.
-            if(reporteFinDescanso) {
-                return respuesta.status(200).json({
-                    codigoRespuesta: CODIGOS.OPERACION_INVALIDA
-                });
-            }
-
-            // Se registra el reporte de salida.
-            if(empleadoTerminoDescansoATiempo(
-                diaLaboral.horaEntradaDescanso,
-                horario.tolerancia,
-                fecha
-            )) {
-                descripcionReporte = "Fin de descanso de empleado";
-                idTipoReporteVinculado = 16;
-
-            }
-        }
-
-        // Verificamos que los datos del reporte esten completos.
-        if(!descripcionReporte || !idTipoReporteVinculado) {
-            // Si no estan completos mandamos
-            // un mensaje de datos incompletos.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
 
         // Registramos el reporte.
         await Reportes.create({
