@@ -98,6 +98,27 @@ function rangoHoy() {
     ];
 };
 
+function rangoDia(dia) {
+    // Instanciamos dos fechas.
+    const fechaA = new Date();
+    const fechaB = new Date();
+
+    // Calculamos el dia de la semana.
+    fechaA.setDate(fechaA.getDate() + (dia - fechaA.getDay()) + 1);
+    fechaB.setDate(fechaB.getDate() + (dia - fechaB.getDay()) + 1);
+
+    // La primera va a tener hora de 00:00:00
+    fechaA.setHours(0, 0, 0);
+
+    // La segunda tendra hora de 23:59:59
+    fechaB.setHours(23, 59, 59);
+
+    // Cambiamos el formato y las retornamos.
+    return [
+        toSQLDate(fechaA), toSQLDate(fechaB)
+    ];
+};
+
 function rangoSemana() {
     // Instanciamos dos fechas.
     const fechaA = new Date();
@@ -113,13 +134,13 @@ function rangoSemana() {
     fechaA.setDate(fechaA.getDate() - fechaA.getDay());
 
     // La primera va a tener hora de 00:00:00
-    fechaA.setHours(-offsetHoras, -offsetMinutos, 0);
+    fechaA.setHours(0, 0, 0);
 
     // Calculamos el dia en el que termina la semana.
     fechaB.setDate(fechaB.getDate() + (6 - fechaB.getDay()));
 
     // La segunda tendra hora de 23:59:59
-    fechaB.setHours(23-offsetHoras, 59-offsetMinutos, 59);
+    fechaB.setHours(23, 59, 59);
 
     return [
         toSQLDate(fechaA), toSQLDate(fechaB)
@@ -226,7 +247,18 @@ function tiempoActual() {
     );
 
     return fechaActual;
-}
+};
+
+function msToTime(s) {
+    var ms = s % 1000;
+    s = (s - ms) / 1000;
+    var secs = s % 60;
+    s = (s - secs) / 60;
+    var mins = s % 60;
+    var hrs = (s - mins) / 60;
+
+    return hrs + ':' + mins + ':' + secs;
+};
 
 module.exports = {
     empleadoLlegoATiempo,
@@ -235,5 +267,7 @@ module.exports = {
     empleadoInicioDescansoATiempo,
     empleadoTerminoDescansoATiempo,
     rangoSemana,
-    tiempoActual
+    tiempoActual,
+    rangoDia,
+    msToTime
 };
