@@ -23,6 +23,7 @@ const { toSQLDate, toSQLTime, toDateTime } = require("../utils/utils");
 const DiasLaborales = db.diaLaboral;
 const Empleados = db.empleado;
 const Horarios = db.horario;
+const Roles = db.rol;
 
 // Funciones extra.
 const { mostrarLog } = require("../utils/logs");
