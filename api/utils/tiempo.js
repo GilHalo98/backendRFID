@@ -98,10 +98,10 @@ function rangoHoy() {
     ];
 };
 
-function rangoDia(dia) {
+function rangoDia(dia, semana=null) {
     // Instanciamos dos fechas.
-    const fechaA = new Date();
-    const fechaB = new Date();
+    const fechaA = semana? new Date(semana[0]) : new Date();
+    const fechaB = semana? new Date(semana[0]) : new Date();
 
     // Calculamos el dia de la semana.
     fechaA.setDate(fechaA.getDate() + (dia - fechaA.getDay()) + 1);
@@ -144,6 +144,53 @@ function rangoSemana() {
 
     return [
         toSQLDate(fechaA), toSQLDate(fechaB)
+    ];
+};
+
+function deserealizarSemana(semana) {
+    // Primero convertimos todos los literales a minusculas.
+    const datoSerializado = semana.toLowerCase();
+
+    // Si existe una semana, deserealizamos el
+    // dato, primero partimos el string, de
+    // año-semana a [año, semana].
+    const semanaReporte = datoSerializado.split('-w');
+
+    // Creamos las instancias de las fechas.
+    const fechaA = new Date();
+    const fechaB = new Date();
+
+    // Establecemos la fecha de inicio de semana.
+    fechaA.setFullYear(
+        parseInt(semanaReporte[0]),
+        0,
+        (parseInt(semanaReporte[1]) * 7) - 6
+    );
+
+    fechaA.setHours(
+        0,
+        0,
+        0,
+        0
+    );
+
+    // Establecemos la fecha de fin de semana.
+    fechaB.setFullYear(
+        parseInt(semanaReporte[0]),
+        0,
+        (parseInt(semanaReporte[1]) * 7)
+    );
+
+
+    fechaB.setHours(
+        23,
+        59,
+        59,
+        0  
+    );
+
+    return [
+        fechaA, fechaB
     ];
 };
 
@@ -261,13 +308,14 @@ function msToTime(s) {
 };
 
 module.exports = {
-    empleadoLlegoATiempo,
-    empleadoSalioTarde,
-    rangoHoy,
     empleadoInicioDescansoATiempo,
     empleadoTerminoDescansoATiempo,
-    rangoSemana,
+    empleadoLlegoATiempo,
+    empleadoSalioTarde,
+    deserealizarSemana,
     tiempoActual,
+    rangoSemana,
+    rangoHoy,
     rangoDia,
     msToTime
 };

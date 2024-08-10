@@ -15,9 +15,10 @@ const { Op } = require("sequelize");
 
 // Funciones extra.
 const {
+    deserealizarSemana,
+    rangoSemana,
     rangoDia,
     rangoHoy,
-    rangoSemana,
     msToTime,
 } = require("../utils/tiempo");
 
@@ -99,6 +100,10 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
             // Si existe, se agrega el dato a la busqueda.
             datos.idRolVinculado = consulta.idRolVinculado;
         }
+
+        // Inicializamos el rango de la semana a generar el reporte.
+        const semanaReporte = consulta.semanaReporte?
+            deserealizarSemana(consulta.semanaReporte) : null;
 
         // Consultamos el total de los registros.
         const totalRegistros = await Empleados.count({
@@ -200,12 +205,17 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                 // Registro de dia laboral.
                 const diaLaboral = diasLaborales[j];
 
+                const rangoDiaReporte = rangoDia(
+                    diaLaboral.dia,
+                    semanaReporte
+                );
+
                 // Consultamos los reportes de chequeos.
                 const reporteEntrada = await ReportesChequeos.findOne({
                     where: {
                         idEmpleadoVinculado: registro.id,
                         fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDia(diaLaboral.dia),
+                            [Op.between]: rangoDiaReporte,
                         }
                     },
                     include: [{
@@ -226,7 +236,7 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                     where: {
                         idEmpleadoVinculado: registro.id,
                         fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDia(diaLaboral.dia),
+                            [Op.between]: rangoDiaReporte,
                         }
                     },
                     include: [{
@@ -245,7 +255,7 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                     where: {
                         idEmpleadoVinculado: registro.id,
                         fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDia(diaLaboral.dia),
+                            [Op.between]: rangoDiaReporte,
                         }
                     },
                     include: [{
@@ -264,7 +274,7 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                     where: {
                         idEmpleadoVinculado: registro.id,
                         fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDia(diaLaboral.dia),
+                            [Op.between]: rangoDiaReporte,
                         }
                     },
                     include: [{

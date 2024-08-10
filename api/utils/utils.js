@@ -1,4 +1,4 @@
-function toSQLDate(fecha) {
+function toSQLDate(fecha, timeOffset=true) {
     // Si el tiempo es un dato indefinidio, retornamos nulo.
     if(typeof(fecha) == 'undefined') {
         return null;
@@ -6,18 +6,17 @@ function toSQLDate(fecha) {
 
     const fechaAux = new Date(fecha);
 
-    // Solucion temporal, hay que ver si esto depende de la db, su
-    // configuracion o que pedo.
-    // POR LO QUE VEO ES PEDO DIRECTO DE MYSQL QUE NO SOPORTA TIMEZONES.
-    const timeZone = fechaAux.getTimezoneOffset() * 2;
+    if(timeOffset) {
+        const timeZone = fechaAux.getTimezoneOffset() * 2;
 
-    const offsetHoras = Math.floor(timeZone / 60);
-    const offsetMinutos = Math.floor(timeZone / (60*60));
-
-    fechaAux.setHours(
-        fechaAux.getHours() - offsetHoras,
-        fechaAux.getMinutes() - offsetMinutos
-    );
+        const offsetHoras = Math.floor(timeZone / 60);
+        const offsetMinutos = Math.floor(timeZone / (60*60));
+    
+        fechaAux.setHours(
+            fechaAux.getHours() - offsetHoras,
+            fechaAux.getMinutes() - offsetMinutos
+        );
+    }
 
     const fechaFormateada = fechaAux.toISOString().slice(
         0,
