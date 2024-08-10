@@ -46,7 +46,6 @@ const Roles = db.rol;
 
 // Genera un reporte de horas trabajadas en el periodo de tiempo dado.
 exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
-    /*TODO: ARREGLA ESTE PEDO QLERO*/
     // GET Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
@@ -141,7 +140,7 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
         });
 
         // Lista de datos por empleado.
-        const datosPorEmpleado = {};
+        const datosPorEmpleado = [];
 
         // Por cada registro en los registros.
         for (let i = 0; i < registros.length; i++) {
@@ -152,15 +151,26 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
             let tiempoTrabajoTotal = 0;
 
             // Lista de horas trabajadas por dia.
-            const datosPorDia = {};
+            const datosPorDia = [];
 
             // Registro de horario del empleado.
             const horario = registro.horario;
 
             // Si el registro del empelado no tiene horario.
             if(!horario) {
+                // Guardamos los datos a enviar
+                datosPorEmpleado.push({
+                    id: registro.id,
+                    nombres: registro.nombres,
+                    apellidoPaterno: registro.apellidoPaterno,
+                    apellidoMaterno: registro.apellidoMaterno,
+                    idImagenVinculada: registro.idImagenVinculada,
+                    idRolVinculado: registro.idRolVinculado,
+                    tiempoTrabajoTotal: tiempoTrabajoTotal,
+                    horasTrabajadas: null
+                });
+
                 // Se retorna un nulo.
-                datosPorEmpleado[registro.id] = null;
                 continue;
             }
 
@@ -169,8 +179,19 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
 
             // Si el registro del empelado no tiene dias laborales.
             if(!diasLaborales) {
+                // Guardamos los datos a enviar
+                datosPorEmpleado.push({
+                    id: registro.id,
+                    nombres: registro.nombres,
+                    apellidoPaterno: registro.apellidoPaterno,
+                    apellidoMaterno: registro.apellidoMaterno,
+                    idImagenVinculada: registro.idImagenVinculada,
+                    idRolVinculado: registro.idRolVinculado,
+                    tiempoTrabajoTotal: tiempoTrabajoTotal,
+                    horasTrabajadas: null
+                });
+
                 // Se retorna un nulo.
-                datosPorEmpleado[registro.id] = null;
                 continue;
             }
 
@@ -280,15 +301,15 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                     tiempoTrabajo = reporteSalida.fechaRegistroReporteChequeo
                         - reporteEntrada.fechaRegistroReporteChequeo;
 
-                    llegoTarde = reporteEntrada.idTipoReporteVinculado == 9 ?
+                    llegoTarde = reporteEntrada.reporte.idTipoReporteVinculado == 9 ?
                         true : false;
 
-                    salioTarde = reporteSalida.idTipoReporteVinculado == 11 ?
+                    salioTarde = reporteSalida.reporte.idTipoReporteVinculado == 11 ?
                         true : false;
 
                 } else {
                     // Marcamos que el empleado falto.
-                    falto = diaLaboral.esDescanso? true : false;
+                    falto = diaLaboral.esDescanso? false : true;
                 }
 
                 // Si existen el reporte de inicio y fin de descanso.
@@ -298,22 +319,39 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                         - reporteInicioDescanso.fechaRegistroReporteChequeo;
                 }
 
+                // Construimos los datos a detalle del reporte.
+                const datosDetalle = {
+                    entrada: !reporteEntrada?
+                        null: reporteEntrada.fechaRegistroReporteChequeo,
+
+                    inicioDescanso: !reporteInicioDescanso?
+                        null: reporteInicioDescanso.fechaRegistroReporteChequeo,
+
+                    finDescanso: !reporteFinDescanso?
+                        null: reporteFinDescanso.fechaRegistroReporteChequeo,
+
+                    salida: !reporteSalida?
+                        null: reporteSalida.fechaRegistroReporteChequeo ,
+                };
+
                 // Guardamos la informacion en el diccionario.
-                datosPorDia[diaLaboral.dia] = {
+                datosPorDia.push({
+                    dia: diaLaboral.dia,
+                    detalle: datosDetalle,
                     tiempoTrabajo: tiempoTrabajo - tiempoDescanso,
                     tiempoDescanso: tiempoDescanso,
                     llegoTarde: llegoTarde,
                     salioTarde: salioTarde,
                     esDescanso: diaLaboral.esDescanso,
                     falto: falto
-                };
+                });
 
                 // Acumulamos el tiempo de trabajo total
                 tiempoTrabajoTotal += tiempoTrabajo - tiempoDescanso;
             }
 
             // Guardamos los datos a enviar
-            datosPorEmpleado[registro.id] = {
+            datosPorEmpleado.push({
                 id: registro.id,
                 nombres: registro.nombres,
                 apellidoPaterno: registro.apellidoPaterno,
@@ -322,7 +360,7 @@ exports.reporteDeHorasTrabajadas = async(request, respuesta) => {
                 idRolVinculado: registro.idRolVinculado,
                 tiempoTrabajoTotal: tiempoTrabajoTotal,
                 horasTrabajadas: datosPorDia
-            }
+            });
         }
 
         // Retornamos los registros encontrados.
