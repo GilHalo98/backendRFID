@@ -35,7 +35,10 @@ module.exports = (sequelize, DataTypes) => {
             set(fecha) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('fechaRegistroReporteActividad', toSQLDate(fecha));
+                this.setDataValue(
+                    'fechaRegistroReporteActividad',
+                    toSQLDate(fecha)
+                );
             }
         },
         fechaModificacionReporteActividad: {
@@ -43,7 +46,10 @@ module.exports = (sequelize, DataTypes) => {
             set(fecha) {
                 // Formateamos el formato de la fecha del registro
                 // a corde al soportado por la DB.
-                this.setDataValue('fechaModificacionReporteActividad', toSQLDate(fecha));
+                this.setDataValue(
+                    'fechaModificacionReporteActividad',
+                    toSQLDate(fecha)
+                );
             }
         },
 

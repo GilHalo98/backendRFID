@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 module.exports = {
-    logging: false,
+    logging: true,
     username: process.env.DB_USER,
     password: process.env.DB_PASS,
     database: process.env.DB_DATABASE,

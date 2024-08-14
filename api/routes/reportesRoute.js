@@ -18,14 +18,28 @@ module.exports = (app) => {
     router.get(
         '/horasTrabajadas', 
         upload.any(),
-        controlador.reporteDeHorasTrabajadas
+        controlador.reporteHorasTrabajadas
     );
 
     // Consulta los registros de la DB.
     router.get(
         '/historial/actividad/maquina', 
         upload.any(),
-        controlador.historialActividadMaquina
+        controlador.reporteActividadMaquina
+    );
+
+    // Consulta los registros de la DB.
+    router.get(
+        '/historial/usos/maquina', 
+        upload.any(),
+        controlador.reporteUsosMaquina
+    );
+
+    // Consulta los registros de la DB.
+    router.get(
+        '/historial/operadores/maquina', 
+        upload.any(),
+        controlador.reporteOperadoresMaquina
     );
 
     // Ruta general de reportes.

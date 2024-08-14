@@ -18,7 +18,8 @@ class CodigoApp {
     HORARIO_NO_ENCONTRADO = 10;
     DIA_LABORAL_NO_ENCONTRADO = 11;
 
-    // Códigos de datos para registros/Busqueda invalidos/incompletos. (256, 512)
+    // Códigos de datos para registros/Busqueda invalidos/incompletos.
+    // (256, 512)
     DATOS_REGISTRO_INCOMPLETOS = 256;
     REGISTRO_VINCULADO_NO_EXISTE = 257;
     DATOS_BUSQUEDA_INCOMPLETOS = 258;
