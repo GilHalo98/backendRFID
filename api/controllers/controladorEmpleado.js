@@ -833,7 +833,7 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
             if(!(!esDescanso || !idHorarioVinculado)) {
                 // Si existe la informacion, entonces se agrega a
                 // la lista de datos validos.
-                return {
+                return DiasLaborales.create({
                     dia: dia,
                     esDescanso: esDescanso,
                     horaEntrada: toSQLTime(horaEntrada),
@@ -842,7 +842,7 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
                     horaSalida: toSQLTime(horaSalida),
                     fechaRegistroDia: fecha,
                     idHorarioVinculado: idHorarioVinculado
-                };
+                });
             }
         });
 
@@ -855,10 +855,7 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
         }
 
         // Guardamos los nuevos registros.
-        await nuevosRegistros.forEach(async (nuevoRegistro) => {
-            // Guardamos el registro en la DB.
-            await DiasLaborales.create(nuevoRegistro);
-        });
+        await Promise.all(nuevosRegistros);
 
         // Retornamos una respuesta de exito.
         return respuesta.status(200).send({
@@ -1168,11 +1165,8 @@ exports.modificarEmpleadoCompleto = async(request, respuesta) => {
         // Guardamos los cambios en el registro de horario.
         await registroVinculadoHorario.save();
 
-        // Por cada registro de dia laboral.
-        await cambios.forEach(async(cambio) => {
-            // Esperamos a que se realizen los cambios.
-            await cambio;
-        });
+        // Guardamos los nuevos registros.
+        await Promise.all(cambios);
 
         // Por ultimo guardamos los cambios en el registro de recurso.
         await registroVinculadoRecurso.save();
