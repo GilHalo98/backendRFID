@@ -24,11 +24,14 @@ var storage = multer.diskStorage({
         callback(null, RECURSOS_DIR + 'uploads/');
     },
     filename: (request, archivo, callback) => {
-        callback(null, `${Date.now()}-AC-${archivo.originalname}`);
+        callback(null, `${Date.now()}AC${archivo.originalname}`);
     },
 });
 
-var uploadFile = multer({ storage: storage, fileFilter: imageFilter });
+var uploadFile = multer({
+    storage: storage,
+    fileFilter: imageFilter
+});
 
 // Exportamos el middleware para la subida de archivos.
 module.exports = uploadFile;
