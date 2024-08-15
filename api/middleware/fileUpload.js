@@ -29,7 +29,7 @@ var storage = multer.diskStorage({
 });
 
 var uploadFile = multer({
-    storage: storage,
+    // storage: storage,
     fileFilter: imageFilter
 });
 
