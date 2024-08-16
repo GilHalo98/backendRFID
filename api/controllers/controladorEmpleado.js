@@ -1104,15 +1104,19 @@ exports.modificarEmpleadoCompleto = async(request, respuesta) => {
                 const esDescanso = parseInt(cuerpo[
                     'esDescanso' + listaDias[registroDiaLaboral.dia]
                 ]);
+
                 const horaEntrada = cuerpo[
                     'horaEntrada' + listaDias[registroDiaLaboral.dia]
                 ];
+
                 const horaSalidaDescanso = cuerpo[
                     'horaSalidaDescanso' + listaDias[registroDiaLaboral.dia]
                 ];
+
                 const horaEntradaDescanso = cuerpo[
                     'horaEntradaDescanso' + listaDias[registroDiaLaboral.dia]
                 ];
+
                 const horaSalida = cuerpo[
                     'horaSalida' + listaDias[registroDiaLaboral.dia]
                 ];
@@ -1128,6 +1132,9 @@ exports.modificarEmpleadoCompleto = async(request, respuesta) => {
 
                 // Si no esta marcado como dia de descanso.
                 } else {
+                    // Guardamos el cambio de si el dia es descanso.
+                    registroDiaLaboral.esDescanso = esDescanso;
+
                     // Guardamos los cambios realizados en el registro.
                     if(horaEntrada) {
                         registroDiaLaboral.horaEntrada = toSQLTime(horaEntrada);

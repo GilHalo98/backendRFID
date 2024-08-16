@@ -578,6 +578,9 @@ exports.modificarHorarioCompleto = async(request, respuesta) => {
 
                 // Si no esta marcado como dia de descanso.
                 } else {
+                    // Guardamos el cambio de si el dia es descanso.
+                    registroVinculado.esDescanso = esDescanso;
+
                     // Guardamos los cambios realizados en los demas campos.
                     if(horaEntrada) {
                         registroVinculado.horaEntrada = horaEntrada;
@@ -608,12 +611,9 @@ exports.modificarHorarioCompleto = async(request, respuesta) => {
         // Guardamos los cambios en el registro de horario.
         await registroVinculadoHorario.save();
 
-
         // Esperamos a que los cambios echos en los dias
         // laborales se produscan.
-        await cambios.forEach(async (cambio) => {
-            await cambio;
-        });
+        await Promise.all(cambios);
 
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
