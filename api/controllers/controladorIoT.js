@@ -349,9 +349,6 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
     const cuerpo = request.body;
     const parametros = request.params;
 
-    console.log(cabecera);
-    console.log(cuerpo);
-
     try {
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
@@ -594,7 +591,7 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        mostrarLog(`Error con controlador: ${excepcion}`);
+        console.log(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
