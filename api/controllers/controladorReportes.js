@@ -318,8 +318,12 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
                         true : false;
 
                 } else {
-                    // Marcamos que el empleado falto.
-                    falto = diaLaboral.esDescanso? false : true;
+                    if(!(!reporteInicioDescanso || !reporteFinDescanso)) {
+                        // Marcamos que el empleado falto.
+                        falto = diaLaboral.esDescanso? false : true;
+                    } else {
+                        falto = true;
+                    }
                 }
 
                 // Si existen el reporte de inicio y fin de descanso.
