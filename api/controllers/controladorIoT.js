@@ -397,8 +397,6 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
             });
         }
 
-        console.log(dia, horario.id);
-
         // Buscamos el dia de la semana actual en el horario.
         const diaLaboral = await DiasLaborales.findOne({
             where: {
@@ -419,6 +417,8 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
         let descripcionReporte = undefined;
         let idReporteVinculado = undefined;
         let idTipoReporteVinculado = undefined;
+
+        console.log(rangoHoy());
 
         // Buscamos un registro de un reporte de entrada o de entrada
         // con retraso en la base de datos.
