@@ -210,6 +210,8 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
                     semanaReporte
                 );
 
+                console.log(rangoDiaReporte);
+
                 // Consultamos los reportes de chequeos.
                 const reporteEntrada = await ReportesChequeos.findOne({
                     where: {

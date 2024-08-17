@@ -412,8 +412,6 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
             });
         }
 
-        console.log(diaLaboral);
-
         // Instanciamos los datos a guardar en el registro y el registro
         // de chequeo vinculado.
         let descripcionReporte = undefined;
