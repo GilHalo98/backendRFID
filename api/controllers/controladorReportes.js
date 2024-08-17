@@ -379,7 +379,6 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
                 tiempoTrabajoTotal: tiempoTrabajoTotal,
                 horasTrabajadas: datosPorDia
             });
-            console.log(datosPorDia);
         }
 
 

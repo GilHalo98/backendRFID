@@ -27,8 +27,8 @@ function generarDiasLaborales(cantidadUsuarios) {
         for(let j = 0; j < 7; j++) {
             horario.push(
                 {
-                    dia: j,
-                    esDescanso: "0",
+                    dia: j + 1,
+                    esDescanso: j + 1 < 7? "0" : "1",
                     horaEntrada: "09:00:00",
                     horaEntradaDescanso: "13:00:00",
                     horaSalidaDescanso: "14:00:00",
