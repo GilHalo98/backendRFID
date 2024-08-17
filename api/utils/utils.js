@@ -64,6 +64,8 @@ function toSQLTime(tiempo) {
 }
 
 function toDateTime(tiempo) {
+    console.log(tiempo);
+
     // Si no se pasa el tiempo, entonces se retonra nulo
     // asignamos un tiempo de tolerancia de 0.
     if(!tiempo) {
