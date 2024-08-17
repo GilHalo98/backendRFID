@@ -9,8 +9,6 @@ function empleadoLlegoATiempo(
     // Duplicamos la fecha actual.
     const horaLlegada = new Date(fecha);
 
-    console.log(toleranciaEntrada);
-
     // Pasamos la tolerancia y la hora de entrada a objetos Date.
     const tolerancia = toDateTime(toleranciaEntrada);
     const entrada = toDateTime(horaEntrada);
