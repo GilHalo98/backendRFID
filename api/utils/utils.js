@@ -64,18 +64,21 @@ function toSQLTime(tiempo) {
 }
 
 function toDateTime(tiempo) {
-    // Si no se pasa el tiempo, entonces se retonra nulo.
+    // Si no se pasa el tiempo, entonces se retonra nulo
+    // asignamos un tiempo de tolerancia de 0.
     if(!tiempo) {
-        return null;
+        tiempo = '00:00:00';
     }
 
-    // Si el tiempo es un dato indefinidio, retornamos nulo.
+    // Si el tiempo es un dato indefinidio,
+    // asignamos un tiempo de tolerancia de 0.
     if(typeof(tiempo) == 'undefined') {
-        return null;
+        tiempo = '00:00:00';
     }
 
     const tiempoFracciones = tiempo.split(":");
     const fecha = new Date();
+
     fecha.setHours(
         tiempoFracciones[0],
         tiempoFracciones[1],
