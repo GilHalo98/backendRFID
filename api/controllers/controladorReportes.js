@@ -318,11 +318,15 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
                         true : false;
 
                 } else {
+                    // Si existe el reporte de inicio y fin de descanso.
                     if(!(!reporteInicioDescanso || !reporteFinDescanso)) {
-                        // Marcamos que el empleado falto.
-                        falto = diaLaboral.esDescanso? false : true;
+                        // Marcamos que el empleado no falto.
+                        falto = false;
+
+                    // Si ninguno de estos existe, entonces es una falta
                     } else {
-                        falto = true;
+                        falto = diaLaboral.esDescanso == 1?
+                            false : true;
                     }
                 }
 
@@ -375,7 +379,9 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
                 tiempoTrabajoTotal: tiempoTrabajoTotal,
                 horasTrabajadas: datosPorDia
             });
+            console.log(datosPorDia);
         }
+
 
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
