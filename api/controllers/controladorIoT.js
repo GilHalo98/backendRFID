@@ -418,8 +418,6 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
         let idReporteVinculado = undefined;
         let idTipoReporteVinculado = undefined;
 
-        console.log(rangoHoy());
-
         // Buscamos un registro de un reporte de entrada o de entrada
         // con retraso en la base de datos.
         const reporteEntrada = await Reportes.findOne({

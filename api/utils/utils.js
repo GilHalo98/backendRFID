@@ -64,6 +64,11 @@ function toSQLTime(tiempo) {
 }
 
 function toDateTime(tiempo) {
+    // Si no se pasa el tiempo, entonces se retonra nulo.
+    if(!tiempo) {
+        return null;
+    }
+
     // Si el tiempo es un dato indefinidio, retornamos nulo.
     if(typeof(tiempo) == 'undefined') {
         return null;
