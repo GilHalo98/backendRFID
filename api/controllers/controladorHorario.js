@@ -549,19 +549,19 @@ exports.modificarHorarioCompleto = async(request, respuesta) => {
             (registroVinculado) => {
                 // Desempaquetamos los datos.
                 const esDescanso = parseInt(cuerpo[
-                    'esDescanso' + listaDias[registroVinculado.dia]
+                    'esDescanso' + listaDias[registroVinculado.dia - 1]
                 ]);
                 const horaEntrada = cuerpo[
-                    'horaEntrada' + listaDias[registroVinculado.dia]
+                    'horaEntrada' + listaDias[registroVinculado.dia - 1]
                 ];
                 const horaSalidaDescanso = cuerpo[
-                    'horaSalidaDescanso' + listaDias[registroVinculado.dia]
+                    'horaSalidaDescanso' + listaDias[registroVinculado.dia - 1]
                 ];
                 const horaEntradaDescanso = cuerpo[
-                    'horaEntradaDescanso' + listaDias[registroVinculado.dia]
+                    'horaEntradaDescanso' + listaDias[registroVinculado.dia - 1]
                 ];
                 const horaSalida = cuerpo[
-                    'horaSalida' + listaDias[registroVinculado.dia]
+                    'horaSalida' + listaDias[registroVinculado.dia - 1]
                 ];
 
                 // Si el dia esta marcado como descanso.

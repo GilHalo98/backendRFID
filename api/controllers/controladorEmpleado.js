@@ -556,13 +556,13 @@ exports.registrarEmpleadoCompleto = async(request, respuesta) => {
 
         // Lista de dias.
         const listaDias = [
-            { nombreDia: 'Lunes', id: 0 },
-            { nombreDia: 'Martes', id: 1 },
-            { nombreDia: 'Miercoles', id: 2 },
-            { nombreDia: 'Jueves', id: 3 },
-            { nombreDia: 'Viernes', id: 4 },
-            { nombreDia: 'Sabado', id: 5 },
-            { nombreDia: 'Domingo', id: 6 }
+            { nombreDia: 'Lunes', id: 1 },
+            { nombreDia: 'Martes', id: 2 },
+            { nombreDia: 'Miercoles', id: 3 },
+            { nombreDia: 'Jueves', id: 4 },
+            { nombreDia: 'Viernes', id: 5 },
+            { nombreDia: 'Sabado', id: 6 },
+            { nombreDia: 'Domingo', id: 7 }
         ];
 
         // Instanciamos la fecha del registro.
@@ -1102,23 +1102,23 @@ exports.modificarEmpleadoCompleto = async(request, respuesta) => {
             async (registroDiaLaboral) => {
                 // Desempaquetamos los datos.
                 const esDescanso = parseInt(cuerpo[
-                    'esDescanso' + listaDias[registroDiaLaboral.dia]
+                    'esDescanso' + listaDias[registroDiaLaboral.dia - 1]
                 ]);
 
                 const horaEntrada = cuerpo[
-                    'horaEntrada' + listaDias[registroDiaLaboral.dia]
+                    'horaEntrada' + listaDias[registroDiaLaboral.dia - 1]
                 ];
 
                 const horaSalidaDescanso = cuerpo[
-                    'horaSalidaDescanso' + listaDias[registroDiaLaboral.dia]
+                    'horaSalidaDescanso' + listaDias[registroDiaLaboral.dia - 1]
                 ];
 
                 const horaEntradaDescanso = cuerpo[
-                    'horaEntradaDescanso' + listaDias[registroDiaLaboral.dia]
+                    'horaEntradaDescanso' + listaDias[registroDiaLaboral.dia - 1]
                 ];
 
                 const horaSalida = cuerpo[
-                    'horaSalida' + listaDias[registroDiaLaboral.dia]
+                    'horaSalida' + listaDias[registroDiaLaboral.dia - 1]
                 ];
 
                 // Realizamos los cambios.
