@@ -206,7 +206,7 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
                 const diaLaboral = diasLaborales[j];
 
                 const rangoDiaReporte = rangoDia(
-                    diaLaboral.dia,
+                    diaLaboral.dia - 1,
                     semanaReporte
                 );
 
