@@ -349,6 +349,9 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
     const cuerpo = request.body;
     const parametros = request.params;
 
+    console.log(cabecera);
+    console.log(cuerpo);
+
     try {
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
