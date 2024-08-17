@@ -403,7 +403,7 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
                 dia: dia,
                 idHorarioVinculado: horario.id
             }
-        })
+        });
 
         // Verificamos que exista el registor del dia laboral.
         if(!diaLaboral) {
@@ -411,6 +411,8 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
+
+        console.log(diaLaboral);
 
         // Instanciamos los datos a guardar en el registro y el registro
         // de chequeo vinculado.
