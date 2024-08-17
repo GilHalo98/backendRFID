@@ -397,6 +397,8 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
             });
         }
 
+        console.log(dia, horario.id);
+
         // Buscamos el dia de la semana actual en el horario.
         const diaLaboral = await DiasLaborales.findOne({
             where: {
@@ -543,6 +545,7 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
                             descripcionReporte = "Chequeo de salida de empleado";
                             idTipoReporteVinculado = 10;
                         }
+
                     // Si ya se encuentran todos los reportes
                     // registrados por el dia, retornamos un mensaje
                     // de operacion invalida.
@@ -591,7 +594,7 @@ exports.registrarReporteChequeo = async (request, respuesta) => {
 
     } catch(excepcion) {
         // Mostramos la excepción en la consola.
-        console.log(`Error con controlador: ${excepcion}`);
+        mostrarLog(`Error con controlador: ${excepcion}`);
 
         // Retornamso el codigo del error de la api.
         return respuesta.status(500).send({
