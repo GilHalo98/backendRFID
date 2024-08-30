@@ -104,6 +104,7 @@ exports.listarDispositivos = async (io, socket, payload, DISPOSITIVOS) => {
                 idZona: registro.idZonaVinculada,
                 idTipoDispositivo: registro.idTipoDispositivoVinculado,
                 descripcionDispositivo: registro.descripcionDispositivo,
+                bitZona: registro.zona.bitZona,
                 tipoDispositivo: registro.tipoDispositivo.nombreTipoDispositivo
             });
         });
