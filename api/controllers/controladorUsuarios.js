@@ -437,7 +437,10 @@ exports.login = async(request, respuesta) => {
         return respuesta.status(200).send({
             codigo_respuesta: CODIGOS.OK,
             authorization: getToken(
-                { 'idUsuario': registro.id },
+                {
+                    'idUsuario': registro.id,
+                    'idRol': registro.idRolVinculado
+                },
                 cuerpo.alwaysOn ? {} : { expiresIn: '24h' }
             )
         });
