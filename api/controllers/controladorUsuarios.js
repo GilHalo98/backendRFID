@@ -16,6 +16,7 @@ const { existeRegistro } = require("../utils/registros");
 // Modelos que usara el controlador.
 const Empleados = db.empleado;
 const Usuarios = db.usuario;
+const Roles = db.rol;
 
 // Para encriptar la contraseña
 const bcrypjs = require("bcryptjs");
@@ -409,7 +410,11 @@ exports.login = async(request, respuesta) => {
         const registro = await Usuarios.findOne({
             where: {
                 nombreUsuario: nombreUsuario
-            }
+            },
+            include: [{
+                required: true,
+                model: Empleados
+            }]
         });
 
         // Si no existe el usuario, retorna un mensaje.
@@ -436,11 +441,9 @@ exports.login = async(request, respuesta) => {
         // Retornamso la respuesta con el token en el header.
         return respuesta.status(200).send({
             codigo_respuesta: CODIGOS.OK,
+            rol: registro.empleado.idRolVinculado,
             authorization: getToken(
-                {
-                    'idUsuario': registro.id,
-                    'idRol': registro.idRolVinculado
-                },
+                { 'idUsuario': registro.id },
                 cuerpo.alwaysOn ? {} : { expiresIn: '24h' }
             )
         });
