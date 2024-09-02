@@ -371,16 +371,15 @@ exports.modificarUsuario = async(request, respuesta) => {
             registro.nombreUsuario = nombreUsuario;
         }
         if(password) {
-            // Si es la misma, se cambia a la nueva contraseña.
-            registro.password = password;
+        // Si es la misma, se cambia a la nueva contraseña.
+        registro.password = password;
 
-            } else {
-                // Si no se pasa la contraseña anterior
-                // se manda un mensaje
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.DATOS_PARA_MODIFICACION_INCOMPLETOS
-                })
-            }
+        } else {
+            // Si no se pasa la contraseña anterior
+            // se manda un mensaje
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DATOS_PARA_MODIFICACION_INCOMPLETOS
+            })
         }
         if(idRegistroEmpleadoVinculado) {
             // Buscamos el registro vinculado.
