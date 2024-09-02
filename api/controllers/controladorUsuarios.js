@@ -371,8 +371,7 @@ exports.modificarUsuario = async(request, respuesta) => {
             registro.nombreUsuario = nombreUsuario;
         }
         if(password) {
-        // Si es la misma, se cambia a la nueva contraseña.
-        registro.password = password;
+            registro.password = password;
 
         } else {
             // Si no se pasa la contraseña anterior
