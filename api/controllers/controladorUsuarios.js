@@ -344,7 +344,6 @@ exports.modificarUsuario = async(request, respuesta) => {
         const id = consulta.id;
         const nombreUsuario = cuerpo.nombreUsuario;
         const password = cuerpo.password;
-        const idRegistroEmpleadoVinculado = cuerpo.idRegistroEmpleadoVinculado;
 
         // Verificamos que exista un id del registro a modificar.
         if(!id) {
@@ -379,17 +378,6 @@ exports.modificarUsuario = async(request, respuesta) => {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.DATOS_PARA_MODIFICACION_INCOMPLETOS
             })
-        }
-        if(idRegistroEmpleadoVinculado) {
-            // Buscamos el registro vinculado.
-            if(! await existeRegistro(Empleados, consulta.idRegistroEmpleadoVinculado)) {
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-                });
-            }
-
-            // Si existe el registro, se realiza el cambio.
-            registro.idRegistroEmpleadoVinculado = idRegistroEmpleadoVinculado;
         }
 
         // Actualizamos la fehca de modificacion del registro.
