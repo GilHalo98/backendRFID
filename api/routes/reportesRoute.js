@@ -63,6 +63,24 @@ module.exports = (app) => {
         controlador.reporteChequeos
     );
 
+    router.get(
+        '/horasTrabajadas/resumen',
+        upload.any(),
+        controlador.reporteResumen
+    );
+
+    router.get(
+        '/horasTrabajadas/intentos/accesos',
+        upload.any(),
+        controlador.reporteIntentosAccesos
+    );
+
+    router.get(
+        '/horasTrabajadas/intentos/actividad',
+        upload.any(),
+        controlador.reporteIntentosActividad
+    );
+
     // Ruta general de reportes.
     app.use(process.env.API_URL + 'reportes', router);
 };
