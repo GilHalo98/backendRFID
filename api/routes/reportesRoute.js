@@ -42,6 +42,27 @@ module.exports = (app) => {
         controlador.reporteOperadoresMaquina
     );
 
+    /**
+     * Endpoints para los reportes de horas trabajadas.
+     */
+    router.get(
+        '/horasTrabajadas/general',
+        upload.any(),
+        controlador.reporteGeneralHorasTrabajadas
+    );
+
+    router.get(
+        '/horasTrabajadas/movimientos',
+        upload.any(),
+        controlador.reporteMovimientos
+    );
+
+    router.get(
+        '/horasTrabajadas/chequeos',
+        upload.any(),
+        controlador.reporteChequeos
+    );
+
     // Ruta general de reportes.
     app.use(process.env.API_URL + 'reportes', router);
 };

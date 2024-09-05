@@ -99,6 +99,12 @@ function rangoHoy() {
 };
 
 function rangoDia(dia, semana=null) {
+    // Le quitamos una unidad al dia pasado, si el dia es 7 o domingo,
+    // se establece a -1 para empezar con el domingo de
+    // la semana pasada.
+    dia = dia == 7?
+        -1 : dia - 1;
+
     // Instanciamos dos fechas.
     const fechaA = semana? new Date(semana[0]) : new Date();
     const fechaB = semana? new Date(semana[0]) : new Date();
@@ -164,7 +170,7 @@ function deserealizarSemana(semana) {
     fechaA.setFullYear(
         parseInt(semanaReporte[0]),
         0,
-        (parseInt(semanaReporte[1]) * 7) - 6
+        (parseInt(semanaReporte[1]) * 7) - 7
     );
 
     fechaA.setHours(
@@ -178,7 +184,7 @@ function deserealizarSemana(semana) {
     fechaB.setFullYear(
         parseInt(semanaReporte[0]),
         0,
-        (parseInt(semanaReporte[1]) * 7)
+        (parseInt(semanaReporte[1]) * 7) - 2
     );
 
 

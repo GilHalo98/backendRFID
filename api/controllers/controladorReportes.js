@@ -13,7 +13,7 @@ const CODIGOS = new respuestas.CodigoApp();
 // Operadores de sequelize para consultas
 const { Op } = require("sequelize");
 
-// Funciones extra.
+// Funciones de manipulacion de tiempo.
 const {
     deserealizarSemana,
     rangoSemana,
@@ -22,16 +22,15 @@ const {
     msToTime,
 } = require("../utils/tiempo");
 
-const {
-    existeRegistro
-} = require("../utils/registros");
-
+// Funciones extra.
 const {
     mostrarLog
 } = require("../utils/logs");
 
-// Modelos de datos.
-const reporte = require("../models/reporte");
+// Rutinas
+const {
+    existeRegistro
+} = require("../utils/registros");
 
 // Modelos que usara el controlador.
 const ReportesActividades = db.reporteActividad;
@@ -381,7 +380,6 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
             });
         }
 
-
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
@@ -721,6 +719,508 @@ exports.reporteOperadoresMaquina = async(request, respuesta) => {
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: totalRegistros,
             registros: registros
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+/**
+ * Consultas para la vista de reporte a detalle de empleado.
+ */
+
+// Genera un reporte general de la semana.
+exports.reporteGeneralHorasTrabajadas = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Construimos la consulta hacia la db.
+        const datos = Object();
+
+        // Agregamos el id del registro a la consulta.
+        if(consulta.id) {
+            datos.idEmpleadoVinculado = consulta.id; 
+        }
+
+        // Instanciamos la semana del reporte.
+        const semanaReporte = deserealizarSemana(
+            consulta.semanaReporte
+        );
+
+        // Agregamos el rango de la semana a la consulta.
+        if(consulta.semanaReporte) {
+            datos.fechaRegistroReporteChequeo = {
+                [Op.between]: semanaReporte
+            };
+        }
+
+        // Buscamos el registro vinculado del empleado.
+        const registroVinculado = await Empleados.findByPk(consulta.id);
+
+        // Si el registro vinculado no existe.
+        if(!registroVinculado) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
+            });
+        }
+
+        // Buscamos el horairo vinculado del empleado.
+        const horarioVinculado = await Horarios.findOne({
+            where: {
+                idEmpleadoVinculado: datos.idEmpleadoVinculado
+            },
+            include: [{
+                model: DiasLaborales
+            }],
+        });
+
+        // Si no existe un horario vinculado al empleado, abortamos la
+        // operacion.
+        if(!horarioVinculado) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.HORARIO_NO_ENCONTRADO
+            });
+        }
+
+        // Verificamos que no existan registros de dias faltantes.
+        if(horarioVinculado.diaLaborals.length != 7) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Instanciamos los datos del reporte general.
+        const reporte = {
+            tiempoTrabajoTotal: 0,
+            tiempoDescansoTotal: 0,
+            retraso: 0,
+            faltas: 0,
+            extras: 0,
+            descansosLaborados: 0
+        };
+
+        // Por cada dia de la semana laboral.
+        for(let i = 0; i < horarioVinculado.diaLaborals.length; i++) {
+            // Instanciamos el dia laboral.
+            const diaLaboral = horarioVinculado.diaLaborals[i];
+
+            // Instanciamos la fecha del dia.
+            const rangoDiaReporte = rangoDia(
+                diaLaboral.dia,
+                semanaReporte
+            );
+
+            // Buscamos los reportes de chequeo en la base de datos.
+            const reporteEntrada = await ReportesChequeos.findOne({
+                where: {
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDiaReporte
+                    }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [8, 9]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
+
+            const reporteInicioDescanso = await ReportesChequeos.findOne({
+                where: {
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDiaReporte
+                    }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: 15
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
+
+            const reporteFinDescanso = await ReportesChequeos.findOne({
+                where: {
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDiaReporte
+                    }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: 16
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
+
+            const reporteSalida = await ReportesChequeos.findOne({
+                where: {
+                    fechaRegistroReporteChequeo: {
+                        [Op.between]: rangoDiaReporte
+                    }
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [10, 11]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }]
+            });
+
+            // Si el dia es descanso.
+            if(diaLaboral.esDescanso) {
+                // Si hay registros de entrada y salida
+                if(reporteEntrada && reporteSalida) {
+                    // entonces se toma como un descanso laborado.
+                    reporte.descansosLaborados ++;
+                }
+
+            // Si no es descanso.
+            } else {
+                // Si no hay registro de entrada y salida.
+                if(!reporteEntrada && !reporteSalida) {
+                    // Y no es un descanso.
+                    if(!diaLaboral.esDescanso) {
+                        // Se marca una falta.
+                        reporte.faltas ++;
+                    }
+
+                // Si hay registro de entrada y salida.
+                } if(reporteEntrada && reporteSalida) {
+                    // Calculamos el tiempo laboradas.
+                    reporte.tiempoTrabajoTotal += (
+                        reporteSalida.fechaRegistroReporteChequeo.getTime()
+                        - reporteEntrada.fechaRegistroReporteChequeo.getTime()
+                    );
+
+                    // Si el tipo de reporte para la entrada
+                    // es con retraso.
+                    if(reporteEntrada.reporte.idTipoReporteVinculado == 9) {
+                        // entonces se marca un retraso.
+                        reporte.retraso ++;
+                    }
+
+                    // Si el tipo de reporte para la salida
+                    // es con extras.
+                    if(reporteSalida.reporte.idTipoReporteVinculado == 11) {
+                        // entonces se marca la salida con extras.
+                        reporte.extras ++;
+                    }
+
+                    // Verificamos que existan los registros del descanso.
+                    if(reporteInicioDescanso && reporteFinDescanso) {
+                        // Calculamos el tiempo de descanso.
+                        reporte.tiempoDescansoTotal += (
+                            reporteFinDescanso.fechaRegistroReporteChequeo.getTime()
+                            - reporteInicioDescanso.fechaRegistroReporteChequeo.getTime()
+                        );
+                    }
+                }
+            }
+        }
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            reporte: reporte
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Genera un reporte de los registros de reportes para el tracket.
+exports.reporteMovimientos = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Construimos la consulta hacia la db.
+        const datos = Object();
+
+        // Instanciamos la semana del reporte.
+        const semanaReporte = deserealizarSemana(
+            consulta.semanaReporte
+        );
+
+        // Instanciamos el rango del dia del reporte.
+        const rangoDiaReporte = rangoDia(
+            consulta.dia,
+            semanaReporte
+        );
+
+        // Buscamos el registro vinculado del empleado.
+        const registroVinculado = await Empleados.findByPk(consulta.id);
+
+        // Si el registro vinculado no existe.
+        if(!registroVinculado) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
+            });
+        }
+
+        // Consultamos los registros de los reportes por empleado.
+        const reporteChequeo = await ReportesChequeos.findAll({
+            where: {
+                idEmpleadoVinculado: consulta.id,
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                model: Reportes
+            }]
+        });
+
+        const reporteAcceso = await ReportesAccesos.findAll({
+            where: {
+                idEmpleadoVinculado: consulta.id,
+                fechaRegistroReporteAcceso: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                model: Reportes
+            }]
+        });
+
+        const reporteActividades = await ReportesActividades.findAll({
+            where: {
+                idEmpleadoVinculado: consulta.id,
+                fechaRegistroReporteActividad: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                model: Reportes
+            }]
+        });
+
+        // Juntamos los reportes en una lista.
+        const reportes = [
+            ...reporteAcceso,
+            ...reporteChequeo,
+            ...reporteActividades
+        ];
+
+        // Ordenamos las fechas de los reportes de manera ascendente.
+        reportes.sort((a, b) => {
+            return(
+                a.reporte.fechaRegistroReporte.getTime()
+                - b.reporte.fechaRegistroReporte.getTime()
+            );
+        })
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            reportes: reportes.map((registro) => {
+                return registro.reporte;
+            })
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Genera un reporte de chequeo de entrada y salida, así como el inico
+// y fin del descanso.
+exports.reporteChequeos = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Construimos la consulta hacia la db.
+        const datos = Object();
+
+        // Instanciamos la semana del reporte.
+        const semanaReporte = deserealizarSemana(
+            consulta.semanaReporte
+        );
+
+        // Instanciamos el rango del dia del reporte.
+        const rangoDiaReporte = rangoDia(
+            consulta.dia,
+            semanaReporte
+        );
+
+        // Buscamos el registro vinculado del empleado.
+        const registroVinculado = await Empleados.findByPk(consulta.id);
+
+        // Si el registro vinculado no existe.
+        if(!registroVinculado) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
+            });
+        }
+
+        // Buscamos los reportes de chequeo en la base de datos.
+        const reporteEntrada = await ReportesChequeos.findOne({
+            where: {
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: {
+                        [Op.or]: [8, 9]
+                    }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        const reporteInicioDescanso = await ReportesChequeos.findOne({
+            where: {
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: 15
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        const reporteFinDescanso = await ReportesChequeos.findOne({
+            where: {
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: 16
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        const reporteSalida = await ReportesChequeos.findOne({
+            where: {
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: {
+                        [Op.or]: [10, 11]
+                    }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            reporte: {
+                salida: reporteSalida,
+                entrada: reporteEntrada,
+                finDescanso: reporteFinDescanso,
+                inicioDescanso: reporteInicioDescanso
+            }
         });
 
     } catch(excepcion) {
