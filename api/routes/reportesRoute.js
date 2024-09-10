@@ -45,40 +45,71 @@ module.exports = (app) => {
     /**
      * Endpoints para los reportes de horas trabajadas.
      */
+
+    // Genera un reporte general de las horas trabajadas del empleado.
     router.get(
-        '/horasTrabajadas/general',
+        '/horasTrabajadas/detalles/general',
         upload.any(),
         controlador.reporteGeneralHorasTrabajadas
     );
 
+    // Genera un reporte de los movimientos del empelado.
     router.get(
-        '/horasTrabajadas/movimientos',
+        '/horasTrabajadas/detalles/tracker',
         upload.any(),
-        controlador.reporteMovimientos
+        controlador.reporteTracker
     );
 
+    // Genera un reporte de los chequeos del empleado.
     router.get(
-        '/horasTrabajadas/chequeos',
+        '/horasTrabajadas/detalles/chequeos',
         upload.any(),
         controlador.reporteChequeos
     );
 
+    // Genera un reporte resumen de las horas trabajadas del empleado.
     router.get(
-        '/horasTrabajadas/resumen',
+        '/horasTrabajadas/detalles/resumen',
         upload.any(),
         controlador.reporteResumen
     );
 
+    // Gener un reporte de los intentos de acceso del empleado.
     router.get(
-        '/horasTrabajadas/intentos/accesos',
+        '/horasTrabajadas/detalles/intentos/accesos',
         upload.any(),
         controlador.reporteIntentosAccesos
     );
 
+    // Genera un reporte de los intentos de inicio de actividad
+    // del empleado.
     router.get(
-        '/horasTrabajadas/intentos/actividad',
+        '/horasTrabajadas/detalles/intentos/actividad',
         upload.any(),
         controlador.reporteIntentosActividad
+    );
+
+    // Genera un reporte de los accesos a las zonas del empleado.
+    router.get(
+        '/horasTrabajadas/detalles/accesos/zona',
+        upload.any(),
+        controlador.reporteAccesosZona
+    );
+
+    // Genera un reporte de las actividades del empleado
+    // en el dispositivo dado.
+    router.get(
+        '/horasTrabajadas/detalles/actividad/dispositivo',
+        upload.any(),
+        controlador.reporteActividadesDispositivo
+    );
+
+    // Lista de zonas y dispositivos donde el empleado
+    // dado tiene reportes.
+    router.get(
+        '/horasTrabajadas/detalles/registrosConReportes',
+        upload.any(),
+        controlador.registrosConReportes
     );
 
     // Ruta general de reportes.

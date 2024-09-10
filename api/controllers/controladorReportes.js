@@ -78,8 +78,8 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
         const datos = Object();
 
         // Agregamos los parametros de la consulta.
-        if(consulta.id) {
-           datos.id = consulta.id; 
+        if(consulta.idEmpleadoVinculado) {
+           datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado; 
         }
 
         if(consulta.nombres) {
@@ -422,8 +422,8 @@ exports.reporteActividadMaquina = async(request, respuesta) => {
         const datos = Object();
 
         // Agregamos los parametros de la consulta.
-        if(consulta.id) {
-           datos.idDispositivoVinculado = consulta.id; 
+        if(consulta.idDispositivoVinculado) {
+           datos.idDispositivoVinculado = consulta.idDispositivoVinculado; 
         }
 
         if(consulta.descripcionDispositivo) {
@@ -442,7 +442,7 @@ exports.reporteActividadMaquina = async(request, respuesta) => {
         }
 
         // Verificamos los datos del registro.
-        if(! await existeRegistro(DispositivosIoT, consulta.id))  {
+        if(! await existeRegistro(DispositivosIoT, consulta.idDispositivoVinculado))  {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -565,8 +565,8 @@ exports.reporteUsosMaquina = async(request, respuesta) => {
         const datos = Object();
 
         // Agregamos los parametros de la consulta.
-        if(consulta.id) {
-           datos.idDispositivoVinculado = consulta.id; 
+        if(consulta.idDispositivoVinculado) {
+           datos.idDispositivoVinculado = consulta.idDispositivoVinculado; 
         }
 
         if(consulta.descripcionDispositivo) {
@@ -584,7 +584,7 @@ exports.reporteUsosMaquina = async(request, respuesta) => {
             };
         }
         // Verificamos los datos del registro.
-        if(! await existeRegistro(DispositivosIoT, consulta.id))  {
+        if(! await existeRegistro(DispositivosIoT, consulta.idDispositivoVinculado))  {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -660,8 +660,8 @@ exports.reporteOperadoresMaquina = async(request, respuesta) => {
         const datos = Object();
 
         // Agregamos los parametros de la consulta.
-        if(consulta.id) {
-           datos.idDispositivoVinculado = consulta.id; 
+        if(consulta.idDispositivoVinculado) {
+           datos.idDispositivoVinculado = consulta.idDispositivoVinculado; 
         }
 
         if(consulta.descripcionDispositivo) {
@@ -679,7 +679,7 @@ exports.reporteOperadoresMaquina = async(request, respuesta) => {
             };
         }
         // Verificamos los datos del registro.
-        if(! await existeRegistro(DispositivosIoT, consulta.id))  {
+        if(! await existeRegistro(DispositivosIoT, consulta.idDispositivoVinculado))  {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
@@ -760,8 +760,8 @@ exports.reporteGeneralHorasTrabajadas = async(request, respuesta) => {
         const datos = Object();
 
         // Agregamos el id del registro a la consulta.
-        if(consulta.id) {
-            datos.idEmpleadoVinculado = consulta.id; 
+        if(consulta.idEmpleadoVinculado) {
+            datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado; 
         }
 
         // Instanciamos la semana del reporte.
@@ -777,7 +777,9 @@ exports.reporteGeneralHorasTrabajadas = async(request, respuesta) => {
         }
 
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(consulta.id);
+        const registroVinculado = await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -979,7 +981,7 @@ exports.reporteGeneralHorasTrabajadas = async(request, respuesta) => {
 };
 
 // Genera un reporte de los registros de reportes para el tracket.
-exports.reporteMovimientos = async(request, respuesta) => {
+exports.reporteTracker = async(request, respuesta) => {
     // GET Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
@@ -1012,7 +1014,9 @@ exports.reporteMovimientos = async(request, respuesta) => {
         );
 
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(consulta.id);
+        const registroVinculado = await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -1024,7 +1028,7 @@ exports.reporteMovimientos = async(request, respuesta) => {
         // Consultamos los registros de los reportes por empleado.
         const reporteChequeo = await ReportesChequeos.findAll({
             where: {
-                idEmpleadoVinculado: consulta.id,
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                 fechaRegistroReporteChequeo: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -1036,7 +1040,7 @@ exports.reporteMovimientos = async(request, respuesta) => {
 
         const reporteAcceso = await ReportesAccesos.findAll({
             where: {
-                idEmpleadoVinculado: consulta.id,
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                 fechaRegistroReporteAcceso: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -1048,7 +1052,7 @@ exports.reporteMovimientos = async(request, respuesta) => {
 
         const reporteActividades = await ReportesActividades.findAll({
             where: {
-                idEmpleadoVinculado: consulta.id,
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                 fechaRegistroReporteActividad: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -1076,7 +1080,7 @@ exports.reporteMovimientos = async(request, respuesta) => {
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
-            reportes: reportes.map((registro) => {
+            reporte: reportes.map((registro) => {
                 return registro.reporte;
             })
         });
@@ -1127,7 +1131,9 @@ exports.reporteChequeos = async(request, respuesta) => {
         );
 
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(consulta.id);
+        const registroVinculado = await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -1270,7 +1276,9 @@ exports.reporteResumen = async(request, respuesta) => {
         );
 
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(consulta.id);
+        const registroVinculado = await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -1283,7 +1291,7 @@ exports.reporteResumen = async(request, respuesta) => {
         const reporte = {
             accesos: {},
             actividades: {}
-        }
+        };
 
         // Consultamos todas las zonas.
         const registrosZonas = await Zonas.findAll();
@@ -1296,7 +1304,7 @@ exports.reporteResumen = async(request, respuesta) => {
             // Consultamos los reportes de accesos por zona.
             const conteoReportes = await ReportesAccesos.count({
                 where: {
-                    idEmpleadoVinculado: consulta.id,
+                    idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                     idZonaVinculada: registroZona.id,
                     fechaRegistroReporteAcceso: {
                         [Op.between]: rangoDiaReporte
@@ -1311,7 +1319,7 @@ exports.reporteResumen = async(request, respuesta) => {
         // Realizamos el conteo de reportres de actividad iniciadas.
         const conteoReportesInicioActividad = await ReportesActividades.count({
             where: {
-                idEmpleadoVinculado: consulta.id,
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                 fechaRegistroReporteActividad: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -1328,7 +1336,7 @@ exports.reporteResumen = async(request, respuesta) => {
         // Realizamos el conteo de reportres de actividad finalizadas.
         const conteoReportesFinActividad = await ReportesActividades.count({
             where: {
-                idEmpleadoVinculado: consulta.id,
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                 fechaRegistroReporteActividad: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -1407,7 +1415,9 @@ exports.reporteIntentosAccesos = async(request, respuesta) => {
         );
 
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(consulta.id);
+        const registroVinculado = await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -1416,10 +1426,29 @@ exports.reporteIntentosAccesos = async(request, respuesta) => {
             });
         }
 
+        // Consultamos el total de los registros.
+        const totalRegistros = await ReportesAccesos.count({
+            where: {
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
+                fechaRegistroReporteAcceso: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: 2
+                }
+            }]
+        });
+
         // Consultamos los reportes de accesos.
         const registrosReportesAccesos = await ReportesAccesos.findAll({
+            offset: offset,
+            limit: limit,
             where: {
-                idEmpleadoVinculado: consulta.id,
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                 fechaRegistroReporteAcceso: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -1436,6 +1465,7 @@ exports.reporteIntentosAccesos = async(request, respuesta) => {
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
+            totalRegistros: totalRegistros,
             reporte: registrosReportesAccesos
         });
 
@@ -1494,7 +1524,9 @@ exports.reporteIntentosActividad = async(request, respuesta) => {
         );
 
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(consulta.id);
+        const registroVinculado = await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -1503,10 +1535,29 @@ exports.reporteIntentosActividad = async(request, respuesta) => {
             });
         }
 
+        // Consultamos el total de los registros.
+        const totalRegistros = await ReportesActividades.count({
+            where: {
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
+                fechaRegistroReporteActividad: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: 14
+                }
+            }]
+        });
+
         // Consultamos los reportes de accesos.
         const registrosReportesActividades = await ReportesActividades.findAll({
+            offset: offset,
+            limit: limit,
             where: {
-                idEmpleadoVinculado: consulta.id,
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                 fechaRegistroReporteActividad: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -1523,7 +1574,381 @@ exports.reporteIntentosActividad = async(request, respuesta) => {
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
+            totalRegistros: totalRegistros,
             reporte: registrosReportesActividades
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Genera un reporte de los accesos a zona.
+exports.reporteAccesosZona = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Verificamos si se selecciono un offset.
+        const offset = (
+            !consulta.offset ? consulta.offset : parseInt(consulta.offset)
+        );
+
+        // Verificamos si se selecciono un maximo de elementos por pagina.
+        const limit = (
+            !consulta.limit ? consulta.limit : parseInt(consulta.limit)
+        );
+
+        // Construimos la consulta hacia la db.
+        const datos = Object();
+
+        // Instanciamos la semana del reporte.
+        const semanaReporte = deserealizarSemana(
+            consulta.semanaReporte
+        );
+
+        // Instanciamos el rango del dia del reporte.
+        const rangoDiaReporte = rangoDia(
+            consulta.dia,
+            semanaReporte
+        );
+
+        // Guardamos el rango del dia de la consulta de los reportes.
+        datos.fechaRegistroReporteAcceso = {
+            [Op.between]: rangoDiaReporte
+        };
+
+        if(consulta.idEmpleadoVinculado) {
+            // Si no existe el registro.
+            if(! await existeRegistro(
+                Empleados,
+                consulta.idEmpleadoVinculado
+            )) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                });
+            }
+
+            // Si existe, se agrega el dato a la busqueda.
+            datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        }
+
+        if(consulta.idZonaVinculada) {
+            // Si no existe el registro.
+            if(! await existeRegistro(
+                Zonas,
+                consulta.idZonaVinculada
+            )) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                });
+            }
+            // Si existe, se agrega el dato a la busqueda.
+            datos.idZonaVinculada = consulta.idZonaVinculada;
+        }
+
+        // Consultamos el total de los registros.
+        const totalRegistros = await ReportesAccesos.count({
+            where: datos,
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: 1
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        // Consultamos todos los registros.
+        const registros = await ReportesAccesos.findAll({
+            offset: offset,
+            limit: limit,
+            where: datos,
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: 1
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }],
+            order: [['fechaRegistroReporteAcceso', 'DESC']]
+        });
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            totalRegistros: totalRegistros,
+            registros: registros
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Genera un reporte de las actividades.
+exports.reporteActividadesDispositivo = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Verificamos si se selecciono un offset.
+        const offset = (
+            !consulta.offset ? consulta.offset : parseInt(consulta.offset)
+        );
+
+        // Verificamos si se selecciono un maximo de elementos por pagina.
+        const limit = (
+            !consulta.limit ? consulta.limit : parseInt(consulta.limit)
+        );
+
+        // Construimos la consulta hacia la db.
+        const datos = Object();
+
+        // Instanciamos la semana del reporte.
+        const semanaReporte = deserealizarSemana(
+            consulta.semanaReporte
+        );
+
+        // Instanciamos el rango del dia del reporte.
+        const rangoDiaReporte = rangoDia(
+            consulta.dia,
+            semanaReporte
+        );
+
+        // Guardamos el rango del dia de la consulta de los reportes.
+        datos.fechaRegistroReporteActividad = {
+            [Op.between]: rangoDiaReporte
+        };
+
+        if(consulta.idEmpleadoVinculado) {
+            // Si no existe el registro.
+            if(! await existeRegistro(
+                Empleados,
+                consulta.idEmpleadoVinculado
+            )) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                });
+            }
+
+            // Si existe, se agrega el dato a la busqueda.
+            datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        }
+
+        if(consulta.idDispositivoVinculado) {
+            // Si no existe el registro.
+            if(! await existeRegistro(
+                DispositivosIoT,
+                consulta.idDispositivoVinculado
+            )) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                });
+            }
+            // Si existe, se agrega el dato a la busqueda.
+            datos.idDispositivoVinculado = consulta.idDispositivoVinculado;
+        }
+
+        // Consultamos el total de los registros.
+        const totalRegistros = await ReportesActividades.count({
+            where: datos,
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: {
+                        [Op.or]: [12, 13]
+                    }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        // Consultamos todos los registros.
+        const registros = await ReportesActividades.findAll({
+            offset: offset,
+            limit: limit,
+            where: datos,
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: {
+                        [Op.or]: [12, 13]
+                    }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }],
+            order: [['fechaRegistroReporteActividad', 'DESC']]
+        });
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            totalRegistros: totalRegistros,
+            registros: registros
+        });
+
+    } catch(excepcion) {
+        // Mostramos el error en la consola
+        mostrarLog(`Error con controlador: ${excepcion}`);
+
+        // Retornamos un codigo de error.
+        return respuesta.status(500).send({
+            codigoRespuesta: CODIGOS.API_ERROR,
+        });
+    }
+};
+
+// Busca los dispositivos y las zonas donde el empleado tenga reportes.
+exports.registrosConReportes = async(request, respuesta) => {
+    // GET Request.
+    const cabecera = request.headers;
+    const cuerpo = request.body;
+    const parametros = request.params;
+    const consulta = request.query;
+
+    try {
+        // Desencriptamos el payload del token.
+        const payload = await getTokenPayload(cabecera.authorization);
+
+        // Verificamos que el payload sea valido.
+        if(!payload) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.TOKEN_INVALIDO
+            });
+        }
+
+        // Construimos la consulta hacia la db.
+        const datos = Object();
+
+        // Instanciamos la semana del reporte.
+        const semanaReporte = deserealizarSemana(
+            consulta.semanaReporte
+        );
+
+        // Instanciamos el rango del dia del reporte.
+        const rangoDiaReporte = rangoDia(
+            consulta.dia,
+            semanaReporte
+        );
+
+        // Consultamos todos los registros.
+        const registrosAccesos = await ReportesAccesos.findAll({
+            where: {
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
+                fechaRegistroReporteAcceso: {
+                    [Op.between]: rangoDiaReporte
+                },
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: 1
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }],
+            order: [['fechaRegistroReporteAcceso', 'DESC']]
+        });
+
+        const idsZonas = [];
+        registrosAccesos.forEach((registro) => {
+            if(!idsZonas.includes(registro.idZonaVinculada)) {
+                idsZonas.push(registro.idZonaVinculada);
+            }
+        });
+
+        // Consultamos todos los registros.
+        const registrosDispositivos = await ReportesActividades.findAll({
+            where: {
+                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
+                fechaRegistroReporteActividad: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: {
+                        [Op.or]: [12, 13]
+                    }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }],
+            order: [['fechaRegistroReporteActividad', 'DESC']]
+        });
+
+        const idsDispositivos = [];
+        registrosDispositivos.forEach((registro) => {
+            if(!idsDispositivos.includes(registro.idDispositivoVinculado)) {
+                idsDispositivos.push(registro.idDispositivoVinculado);
+            }
+        });
+
+        // Retornamos los registros encontrados.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.OK,
+            registrosDispositivos: idsDispositivos,
+            registrosZonas: idsZonas
         });
 
     } catch(excepcion) {
