@@ -1466,7 +1466,7 @@ exports.reporteIntentosAccesos = async(request, respuesta) => {
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: totalRegistros,
-            reporte: registrosReportesAccesos
+            registros: registrosReportesAccesos
         });
 
     } catch(excepcion) {
@@ -1575,7 +1575,7 @@ exports.reporteIntentosActividad = async(request, respuesta) => {
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: totalRegistros,
-            reporte: registrosReportesActividades
+            registros: registrosReportesActividades
         });
 
     } catch(excepcion) {
