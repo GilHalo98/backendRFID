@@ -79,7 +79,7 @@ exports.reporteHorasTrabajadas = async(request, respuesta) => {
 
         // Agregamos los parametros de la consulta.
         if(consulta.idEmpleadoVinculado) {
-           datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado; 
+           datos.id = consulta.idEmpleadoVinculado; 
         }
 
         if(consulta.nombres) {
