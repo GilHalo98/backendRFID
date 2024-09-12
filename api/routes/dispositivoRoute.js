@@ -45,11 +45,11 @@ module.exports = (app) => {
     );
 
     // Elimina el registro en la DB.
-    router.dele
-    te('/eliminar',
-    upload.any(),
-    IoT.eliminarDispositivo
-);
+    router.delete(
+        '/eliminar',
+        upload.any(),
+        IoT.eliminarDispositivo
+    );
 
     // Ruta general de usaurios.
     app.use(process.env.API_URL + 'dispositivo', router);

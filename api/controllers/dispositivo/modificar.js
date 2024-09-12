@@ -15,7 +15,7 @@ const {
 // Para la creacion y lectura de tokens.
 const {
     getTokenPayload
-} = require("..././utils/jwtConfig");
+} = require("../../utils/jwtConfig");
 
 // Funciones extra.
 const {

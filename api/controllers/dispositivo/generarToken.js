@@ -11,7 +11,7 @@ const CODIGOS = new respuestas.CodigoApp();
 const {
     getToken,
     getTokenPayload
-} = require("..././utils/jwtConfig");
+} = require("../../utils/jwtConfig");
 
 // Funciones extra.
 const {

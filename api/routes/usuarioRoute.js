@@ -13,7 +13,7 @@ module.exports = (app) => {
 
     // Controlador del endpoint.
     const controlador = require(
-        '../controllers/usuarios'
+        '../controllers/usuario'
     );
 
     // Consulta los registros de la DB.
