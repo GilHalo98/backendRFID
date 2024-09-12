@@ -27,7 +27,9 @@ module.exports = (app) => {
     var router = require('express').Router();
 
     // Controlador del endpoint.
-    const IoT = require('../controllers/controladorIoT.js');
+    const IoT = require(
+        '../controllers/IoT'
+    );
 
     // Registra un reporte de acceso.
     router.post(

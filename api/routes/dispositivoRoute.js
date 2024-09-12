@@ -12,13 +12,23 @@ module.exports = (app) => {
     var router = require('express').Router();
 
     // Controlador del endpoint.
-    const IoT = require('../controllers/controladorDispositivo.js');
+    const IoT = require(
+        '../controllers/dispositivo'
+    );
 
     // Genera un access token para el dispositivo.
-    router.get('/generar/token', upload.any(), IoT.generarTokenAcceso);
+    router.get(
+        '/generar/token',
+        upload.any(),
+        IoT.generarTokenAcceso
+    );
 
     // Consulta los registros en la DB.
-    router.get('/consultar', upload.any(), IoT.consultarDispositivo);
+    router.get(
+        '/consultar',
+        upload.any(),
+        IoT.consultarDispositivo
+    );
 
     // Registra un dispositivo en la DB.
     router.post(
@@ -28,10 +38,18 @@ module.exports = (app) => {
     );
 
     // Modifica el registro en la DB.
-    router.put('/modificar', upload.any(), IoT.modificarDispositivo);
+    router.put(
+        '/modificar',
+        upload.any(),
+        IoT.modificarDispositivo
+    );
 
     // Elimina el registro en la DB.
-    router.delete('/eliminar', upload.any(), IoT.eliminarDispositivo);
+    router.dele
+    te('/eliminar',
+    upload.any(),
+    IoT.eliminarDispositivo
+);
 
     // Ruta general de usaurios.
     app.use(process.env.API_URL + 'dispositivo', router);

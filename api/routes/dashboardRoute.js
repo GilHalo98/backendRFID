@@ -12,7 +12,9 @@ module.exports = (app) => {
     var router = require('express').Router();
 
     // Controlador del endpoint.
-    const controlador = require('../controllers/controladorDashboard.js');
+    const controlador = require(
+        '../controllers/dashboard'
+    );
 
     // Genera un reporte de los accesos del día.
     router.get(

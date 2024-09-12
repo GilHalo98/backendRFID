@@ -12,19 +12,37 @@ module.exports = (app) => {
     var router = require('express').Router();
 
     // Controlador del endpoint.
-    const controlador = require('../controllers/controladorUsuarios.js');
+    const controlador = require(
+        '../controllers/usuarios'
+    );
 
     // Consulta los registros de la DB.
-    router.get('/consultar', upload.any(), controlador.consultaUsuario);
+    router.get(
+        '/consultar',
+        upload.any(),
+        controlador.consultaUsuario
+    );
 
     // Registra un dato en la DB.
-    router.post('/registrar', upload.any(), controlador.registrarUsuario);
+    router.post(
+        '/registrar',
+        upload.any(),
+        controlador.registrarUsuario
+    );
 
     // Modifica un registro de la DB.
-    router.put('/modificar', upload.any(), controlador.modificarUsuario);
+    router.put(
+        '/modificar',
+        upload.any(),
+        controlador.modificarUsuario
+    );
 
     // Elimina un registro de la DB.
-    router.delete('/eliminar', upload.any(), controlador.eliminarUsuario);
+    router.delete(
+        '/eliminar',
+        upload.any(),
+        controlador.eliminarUsuario
+    );
 
     // Retorna un token de login al usuario.
     router.post('/login', upload.any(), controlador.login);

@@ -11,23 +11,43 @@ module.exports = (app) => {
     // Enrutador de funciones.
     var router = require('express').Router();
 
-    // Controlador del endpoint.
-    const controlador = require('../controllers/controladorHorario.js');
-
     // Middleware para subida de archivos.
-    const upload = require("../middleware/fileUpload.js");
+    const upload = require(
+        "../middleware/fileUpload.js"
+    );
+
+    // Controlador del endpoint.
+    const controlador = require(
+        '../controllers/horario'
+    );
 
     // Consulta los registros de la DB.
-    router.get('/consultar', uploadForm.any(), controlador.consultaHorario);
+    router.get(
+        '/consultar',
+        uploadForm.any(),
+        controlador.consultaHorario
+    );
 
     // Registra un dato en la DB.
-    router.post('/registrar', uploadForm.any(), controlador.registrarHorario);
+    router.post(
+        '/registrar',
+        uploadForm.any(),
+        controlador.registrarHorario
+    );
 
     // Modifica un registro de la DB.
-    router.put('/modificar', uploadForm.any(), controlador.modificarHorario);
+    router.put(
+        '/modificar',
+        uploadForm.any(),
+        controlador.modificarHorario
+    );
 
     // Elimina un registro de la DB.
-    router.delete('/eliminar', uploadForm.any(), controlador.eliminarHorario);
+    router.delete(
+        '/eliminar',
+        uploadForm.any(),
+        controlador.eliminarHorario
+    );
 
     // Consulta un horario y sus dias laborales dado un empleado.
     router.get(

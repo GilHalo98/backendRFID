@@ -12,7 +12,9 @@ module.exports = (app) => {
     var router = require('express').Router();
 
     // Controlador del endpoint.
-    const controlador = require('../controllers/controladorReportes.js');
+    const controlador = require(
+        '../controllers/reportes'
+    );
 
     // Consulta los registros de la DB.
     router.get(

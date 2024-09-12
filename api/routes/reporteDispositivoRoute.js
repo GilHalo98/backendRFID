@@ -12,19 +12,37 @@ module.exports = (app) => {
     var router = require('express').Router();
 
     // Controlador del endpoint.
-    const controlador = require('../controllers/controladorReporteDispositivo.js');
+    const controlador = require(
+        '../controllers/reporteDispositivo'
+    );
 
     // Registra un dato en la DB.
-    router.post('/registrar', upload.any(), controlador.registrarReporteDispositivo);
+    router.post(
+        '/registrar',
+        upload.any(),
+        controlador.registrarReporteDispositivo
+    );
 
     // Consulta los registros de la DB.
-    router.get('/consultar',  upload.any(), controlador.consultaReporteDispositivo);
+    router.get(
+        '/consultar', 
+        upload.any(),
+        controlador.consultaReporteDispositivo
+    );
 
     // Modifica un registro de la DB.
-    router.put('/modificar',  upload.any(), controlador.modificarReporteDispositivo);
+    router.put(
+        '/modificar', 
+        upload.any(),
+        controlador.modificarReporteDispositivo
+    );
 
     // Elimina un registro de la DB.
-    router.delete('/eliminar',  upload.any(), controlador.eliminarReporteDispositivo);
+    router.delete(
+        '/eliminar', 
+        upload.any(),
+        controlador.eliminarReporteDispositivo
+    );
 
     // Ruta general de reportes.
     app.use(process.env.API_URL + 'reporteDispositivo', router);

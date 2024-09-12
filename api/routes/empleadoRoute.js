@@ -11,11 +11,15 @@ module.exports = (app) => {
     // Enrutador de funciones.
     var router = require('express').Router();
 
-    // Controlador del endpoint.
-    const controlador = require('../controllers/controladorEmpleado.js');
-
     // Middleware para subida de archivos.
-    const upload = require("../middleware/fileUpload.js");
+    const upload = require(
+        "../middleware/fileUpload.js"
+    );
+
+    // Controlador del endpoint.
+    const controlador = require(
+        '../controllers/empleado'
+    );
 
     // Consulta los registros de la DB.
     router.get(

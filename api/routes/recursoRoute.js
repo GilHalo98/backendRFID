@@ -11,23 +11,43 @@ module.exports = (app) => {
     // Enrutador de funciones.
     var router = require('express').Router();
 
-    // Controlador del endpoint.
-    const controlador = require('../controllers/controladorRecursos.js');
-
     // Middleware para subida de archivos.
-    const upload = require("../middleware/fileUpload.js");
+    const upload = require(
+        "../middleware/fileUpload.js"
+    );
+
+    // Controlador del endpoint.
+    const controlador = require(
+        '../controllers/recursos'
+    );
 
     // Consulta los registros de la DB.
-    router.get('/consultar', uploadForm.any(), controlador.consultaRecurso);
+    router.get(
+        '/consultar',
+        uploadForm.any(),
+        controlador.consultaRecurso
+    );
 
     // Registra un dato en la DB.
-    router.post('/registrar', upload.single("file"), controlador.registrarRecurso);
+    router.post(
+        '/registrar',
+        upload.single("file"),
+        controlador.registrarRecurso
+    );
 
     // Modifica un registro de la DB.
-    router.put('/modificar', upload.single("file"), controlador.modificarRecurso);
+    router.put(
+        '/modificar',
+        upload.single("file"),
+        controlador.modificarRecurso
+    );
 
     // Elimina un registro de la DB.
-    router.delete('/eliminar', uploadForm.any(), controlador.eliminarRecurso);
+    router.delete(
+        '/eliminar',
+        uploadForm.any(),
+        controlador.eliminarRecurso
+    );
 
     // Ruta general de roles.
     app.use(process.env.API_URL + 'recurso', router);
