@@ -40,6 +40,8 @@ module.exports = async function registrarReporteAcceso(
     const parametros = request.params;
     const consulta = request.query;
 
+    console.log(cuerpo, parametros, consulta)
+
     try {
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
