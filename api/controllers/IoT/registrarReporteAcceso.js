@@ -51,8 +51,6 @@ module.exports = async function registrarReporteAcceso(
             });
         }
 
-        console.log(consulta);
-
         // Desempaquetamos datos del payload.
         const idDispositivo = payload.idDispositivo;
 
@@ -61,16 +59,16 @@ module.exports = async function registrarReporteAcceso(
 
         // Recuperamos los datos del reporte.
         const resolucion = (
-            !consulta.resolucion?
-                consulta.resolucion : parseInt(consulta.resolucion)
+            !cuerpo.resolucion?
+                cuerpo.resolucion : parseInt(cuerpo.resolucion)
         );
 
         const salida = (
-            !consulta.salida?
-                consulta.salida : parseInt(consulta.salida)
+            !cuerpo.salida?
+                cuerpo.salida : parseInt(cuerpo.salida)
         );
 
-        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
         // Verificamos que los datos para el registro del reporte esten
         // completos, sino es asi, retornamos un mensaje de error.
