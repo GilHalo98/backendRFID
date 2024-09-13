@@ -94,11 +94,13 @@ module.exports = async function registrarReporteEmpleadoInexistente(
             idReporteVinculado = registro.id;
         });
 
+        mostrarLog(idReporteVinculado.toString(), false);
+
         // Guardamos el reporte del dispositivo.
         await ReportesDispositivos.create({
             idRepoteVinculado: idReporteVinculado,
             idDispositivoVinculado: idDispositivo
-        })
+        });
 
         // Retornamos un mensaje de ok.
         return respuesta.status(200).json({
