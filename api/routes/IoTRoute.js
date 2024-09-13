@@ -1,18 +1,3 @@
-/**
- * Reportes que pueden realizar los dispositivos son:
- *
- *  reporteDeDispositivo:
- *      empleado invalido
- *      tarjeta invalida
- *      uso de dispositivo
- *
- *  reporteAcceso:
- *      acceso a zona
- *
- *  reporteChequeo:
- *      chequeo de empleado
- */
-
 module.exports = (app) => {
     // Se importan las variables del ambiente.
     require('dotenv').config();
@@ -35,6 +20,12 @@ module.exports = (app) => {
     router.post(
         '/registrar/reporte/acceso',
         IoT.registrarReporteAcceso
+    );
+
+    // Registra un reporte de salida de zona.
+    router.post(
+        '/registrar/reporte/salida/zona',
+        IoT.registrarReporteSalidaZona
     );
 
     // Registramos un reporte de erro de autentificacion de tarjeta.

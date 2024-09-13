@@ -91,6 +91,21 @@ module.exports = async function reporteIntentosActividad(
             });
         }
 
+        // Buscamos el tipo de reporte para credenciales
+        // invalidas para iniciar actividad.
+        const tipoReporteCredencialesInvalidasActividad = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'credencialesInvalidasActividad'
+            }
+        });
+
+        // Si no existe, se retorna un mensaje de errror.
+        if(!tipoReporteCredencialesInvalidasActividad) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Consultamos el total de los registros.
         const totalRegistros = await ReportesActividades.count({
             where: {
@@ -103,7 +118,7 @@ module.exports = async function reporteIntentosActividad(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 14
+                    idTipoReporteVinculado: tipoReporteCredencialesInvalidasActividad.id
                 }
             }]
         });
@@ -122,7 +137,7 @@ module.exports = async function reporteIntentosActividad(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 14
+                    idTipoReporteVinculado: tipoReporteCredencialesInvalidasActividad.id
                 }
             }]
         });

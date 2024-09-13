@@ -19,6 +19,8 @@ const {
 
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
+const TiposReportes = db.tipoReporte;
+const DispositivosIoT = db.dispositivoIoT;
 
 // Registra un reporte.
 module.exports = async function registrarReporteEmpleadoInexistente(
@@ -41,15 +43,40 @@ module.exports = async function registrarReporteEmpleadoInexistente(
             });
         }
 
+        // Desempaquetamos datos del payload.
+        const idDispositivo = payload.idDispositivo;
+
         // Instanciamos la fecha del registro.
         const fecha = new Date();
 
-        // Recuperamos los datos del reporte.
-        const descripcionReporte = "Empleado inexistente detectado";
-        const idTipoReporteVinculado = 5;
+        // Verificamos que el registro del dispositivo exista.
+        const registroVinculadoDispositivo = await DispositivosIoT.findByPk(
+            idDispositivo
+        );
 
-        /*Esto se sacara del payload*/
-        const idDispositivo = payload.idDispositivo;
+        // Si no existe, retornamos un mensaje de error.
+        if(!registroVinculadoDispositivo) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Verificamos que el tipo de reporte exista.
+        const registroVinculadoTipoReporte = await TiposReportes.findOne({
+            tagTipoReporte: 'registroInexistente'
+        });
+
+        // Si no existe, retornamos un mensaje de error.
+        if(!registroVinculadoTipoReporte) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Recuperamos los datos del reporte.
+        const descripcionReporte = `Empleado inexistente detectado en dispositivo ${
+            registroVinculadoDispositivo.nombreDispositivo
+        }`;
 
         // Instanciamos los datos del reporte del dispositivo.
         let idReporteVinculado = undefined;
@@ -58,7 +85,7 @@ module.exports = async function registrarReporteEmpleadoInexistente(
         await Reportes.create({
             descripcionReporte: descripcionReporte,
             fechaRegistroReporte: fecha,
-            idTipoReporteVinculado: idTipoReporteVinculado
+            idTipoReporteVinculado: registroVinculadoTipoReporte.id
 
         }).then((registro) => {
             idReporteVinculado = registro.id;

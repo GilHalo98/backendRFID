@@ -132,6 +132,20 @@ module.exports = async function reporteAccesosZona(
             datos.idZonaVinculada = consulta.idZonaVinculada;
         }
 
+        // Verificamos que el tipo de reporte exista.
+        const registroVinculadoTipoReporte = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'accesoGarantizado'
+            }
+        });
+
+        // si no existe, entonces retornamos un mensaje de error.
+        if(!registroVinculadoTipoReporte) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Consultamos el total de los registros.
         const totalRegistros = await ReportesAccesos.count({
             where: datos,
@@ -139,7 +153,7 @@ module.exports = async function reporteAccesosZona(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 1
+                    idTipoReporteVinculado: registroVinculadoTipoReporte.id
                 },
                 include: [{
                     model: TiposReportes
@@ -156,7 +170,7 @@ module.exports = async function reporteAccesosZona(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 1
+                    idTipoReporteVinculado: registroVinculadoTipoReporte.id
                 },
                 include: [{
                     model: TiposReportes

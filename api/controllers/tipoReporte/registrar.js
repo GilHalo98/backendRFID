@@ -47,13 +47,11 @@ module.exports = async function registrarTipoReporte(
         // Recuperamos la informacion del registro.
         const nombreTipoReporte = cuerpo.nombreTipoReporte;
         const descripcionTipoReporte = cuerpo.descripcionTipoReporte;
+        const tagTipoReporte = cuerpo.tagTipoReporte;
 
         // Validamos que exista la informacion necesaria para
         // realizar el registro del tipoReporte.
-        if(
-            !nombreTipoReporte
-            || !descripcionTipoReporte
-        ) {
+        if(!nombreTipoReporte || !descripcionTipoReporte || !tagTipoReporte) {
             // Si no estan completos mandamos
             // un mensaje de datos incompletos.
             return respuesta.status(200).send({
@@ -64,7 +62,7 @@ module.exports = async function registrarTipoReporte(
         // Buscamos que no exista otro registro con los mismos datos.
         const coincidencia = await TiposReportes.count({
             where: {
-                descripcionTipoReporte: descripcionTipoReporte
+                tagTipoReporte: tagTipoReporte
             }
         });
 
@@ -80,6 +78,7 @@ module.exports = async function registrarTipoReporte(
         const nuevoTipoReporte = {
             nombreTipoReporte: nombreTipoReporte,
             descripcionTipoReporte: descripcionTipoReporte,
+            tagTipoReporte: tagTipoReporte,
             fechaRegistroTipoReporte: fecha
         };
 

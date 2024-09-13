@@ -49,12 +49,15 @@ module.exports = async function consultaTipoReporte(
 
         // Verificamos si se selecciono un offset.
         const offset = (
-            !consulta.offset ? consulta.offset : parseInt(consulta.offset)
+            !consulta.offset?
+                consulta.offset : parseInt(consulta.offset)
         );
 
-        // Verificamos si se selecciono un maximo de elementos por pagina.
+        // Verificamos si se selecciono un maximo
+        // de elementos por pagina.
         const limit = (
-            !consulta.limit ? consulta.limit : parseInt(consulta.limit)
+            !consulta.limit?
+                consulta.limit : parseInt(consulta.limit)
         );
 
         // Construimos la consulta hacia la db.
@@ -68,6 +71,12 @@ module.exports = async function consultaTipoReporte(
         if(consulta.nombreTipoReporte) {
             datos.nombreTipoReporte = {
                 [Op.substring]: consulta.nombreTipoReporte
+            };
+        }
+
+        if(consulta.tagTipoReporte) {
+            datos.tagTipoReporte = {
+                [Op.substring]: consulta.tagTipoReporte
             };
         }
 

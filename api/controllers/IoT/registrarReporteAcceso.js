@@ -25,6 +25,7 @@ const {
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
 const Empleados = db.empleado;
+const TiposReportes = db.tipoReporte;
 const ReportesAccesos = db.reporteAcceso;
 const DispositivosIoT = db.dispositivoIoT;
 
@@ -54,7 +55,8 @@ module.exports = async function registrarReporteAcceso(
 
         // Recuperamos los datos del reporte.
         const resolucion = (
-            !cuerpo.resolucion ? cuerpo.resolucion : parseInt(cuerpo.resolucion)
+            !cuerpo.resolucion?
+                cuerpo.resolucion : parseInt(cuerpo.resolucion)
         );
 
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
@@ -67,58 +69,83 @@ module.exports = async function registrarReporteAcceso(
             });
         }
 
-        // Esto se sacara del payload
-        const idDispositivo = payload.idDispositivo;
-
-        // Si no existen el registro del empleado entoces retorna un error.
-        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
-            return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
-
         // Verificamos que el dispositivo este registrado en la DB.
-        const registroDispositivo = await DispositivosIoT.findByPk(
+        const registroVinculadoDispositivo = await DispositivosIoT.findByPk(
             idDispositivo
         );
 
         // Si no es asi, entonces retorna un mensaje de error.
-        if(!registroDispositivo) {
+        if(!registroVinculadoDispositivo) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Se inicializan los datos del registro del reporte.
-        let descripcionReporte = undefined;
-        let idTipoReporteVinculado = undefined;
-        let idReporteVinculado = undefined;
+        // Verificamos si existe el registro vinculado del empleado.
+        const registroVinculadoEmpleado = await Empleados.findByPk(
+            idEmpleadoVinculado
+        );
 
-        // Verificamos la resolucion de la peticion de acceso al area.
-        if(resolucion) {
-            // Si se le dio acceso a la zona, se genera un reporte de acceso
-            // concedido.
-            descripcionReporte = "Acceso concedido al empleado a zona";
-            idTipoReporteVinculado = 1;
-
-        } else {
-            // De lo contrario se registra el reporte de acceso negado.
-            descripcionReporte = "Acceso negado al empleado a zona";
-            idTipoReporteVinculado = 2;
-        }
-
-        // Verifiamos que existan los datos para registrar el reporte.
-        if(!descripcionReporte || !idTipoReporteVinculado) {
+        // Si no existen el registro del
+        // empleado entoces retorna un error.
+        if(!registroVinculadoEmpleado) {
             return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
+
+        // Verificamos que exista el registro vinculado de la zona.
+        const registroVinculadoZona = await Zonas.findByPk({
+            where: {
+                id: registroVinculadoDispositivo.idZonaVinculada
+            }
+        });
+
+        // Si no es asi, entonces retorna un mensaje de error.
+        if(!registroVinculadoZona) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Verificamos que le tipo de reporte vinculado exista.
+        const registroVinculadoTipoReporte = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: resolucion?
+                    'accesoGarantizado' : 'accesoNegado'
+            }
+        });
+
+        // Si no es asi, retornamos un mensaje de error.
+        if(!registroVinculadoTipoReporte) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Inicializamos los datos vinculados al reporte.
+        const descripcionReporte = `Acceso ${
+            resolucion? 'concedido' : 'negado'
+        } al empelado ${
+            registroVinculadoEmpleado.nombres
+        } ${
+            registroVinculadoEmpleado.apellidoPaterno
+        } ${
+            registroVinculadoEmpleado.apellidoMaterno
+        } a la zona ${
+            registroVinculadoZona.nombreZona
+        }`;
+
+        const idReporteVinculado = undefined;
 
         // Registramos el reporte.
         await Reportes.create({
             descripcionReporte: descripcionReporte,
             fechaRegistroReporte: fecha,
-            idTipoReporteVinculado: idTipoReporteVinculado
+            idTipoReporteVinculado: registroVinculadoTipoReporte.id
+
+        // Al terminar el guardado del nuevo registro
+        // guardamos el id del registro del reporte.
         }).then((registro) => {
             idReporteVinculado = registro.id;
         });

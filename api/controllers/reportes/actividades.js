@@ -132,6 +132,28 @@ module.exports = async function reporteActividadesDispositivo(
             datos.idDispositivoVinculado = consulta.idDispositivoVinculado;
         }
 
+        // Consultamos el tipo de repote para actividad inicada.
+        const tipoReporteActividadIniciada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadIniciada'
+            }
+        });
+
+        // Consultamos el tipo de repote para actividad finalizada.
+        const tipoReporteActividadFinalizada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadFinalizada'
+            }
+        });
+
+        // Si alguno de los tipos de reporte no existe, entonces se
+        // envia un mensaje de error.
+        if(!tipoReporteActividadIniciada || !tipoReporteActividadFinalizada) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Consultamos el total de los registros.
         const totalRegistros = await ReportesActividades.count({
             where: datos,
@@ -140,7 +162,10 @@ module.exports = async function reporteActividadesDispositivo(
                 model: Reportes,
                 where: {
                     idTipoReporteVinculado: {
-                        [Op.or]: [12, 13]
+                        [Op.or]: [
+                            tipoReporteActividadIniciada.id,
+                            tipoReporteActividadFinalizada.id
+                        ]
                     }
                 },
                 include: [{
@@ -159,7 +184,10 @@ module.exports = async function reporteActividadesDispositivo(
                 model: Reportes,
                 where: {
                     idTipoReporteVinculado: {
-                        [Op.or]: [12, 13]
+                        [Op.or]: [
+                            tipoReporteActividadIniciada.id,
+                            tipoReporteActividadFinalizada.id
+                        ]
                     }
                 },
                 include: [{

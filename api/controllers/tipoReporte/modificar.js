@@ -49,6 +49,7 @@ module.exports = async function modificarTipoReporte(
         const id = consulta.id;
         const nombreTipoReporte = cuerpo.nombreTipoReporte;
         const descripcionTipoReporte = cuerpo.descripcionTipoReporte;
+        const tagTipoReporte = cuerpo.tagTipoReporte;
 
         // Verificamos que exista un id del registro a modificar.
         if(!id) {
@@ -76,6 +77,23 @@ module.exports = async function modificarTipoReporte(
         }
         if(descripcionTipoReporte) {
             tipoReporte.descripcionTipoReporte = descripcionTipoReporte;
+        }
+        if(tagTipoReporte) {
+            // Buscamos por coincidencias en los registros
+            // con el mismo targ
+            const coincidencia = await TiposReportes.count({
+                where: {
+                    tagTipoReporte: tagTipoReporte
+                }
+            });
+
+            // Si existe una coincidencia.
+            if(coincidencia) {
+                // Retornamos un mensaje de error.
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
+                });
+            }
         }
 
         // Actualizamos la fehca de modificacion del registro.

@@ -85,6 +85,63 @@ module.exports = async function reporteChequeos(
             });
         }
 
+        // Buscamos el tipo de reporte para entrada.
+        const tipoReporteEntrada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoEntrada'
+            }
+        });
+
+        // Buscamos el tipo de reporte para entrada con retraso.
+        const tipoReporteEntradaRetraso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoEntradaRetraso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para salida.
+        const tipoReporteSalida = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoSalida'
+            }
+        });
+
+        // Buscamos el tipo de reporte para salida con horas extra.
+        const tipoReporteSalidaExtras = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoSalidaExtras'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el inicio de descanso.
+        const tipoReporteInicioDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoInicioDescanso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el fin de descanso.
+        const tipoReporteFinDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoFinDescanso'
+            }
+        });
+
+        // Si alguno de los registros no existe.
+        if(
+            !tipoReporteEntrada
+            || !tipoReporteEntradaRetraso
+            || !tipoReporteSalida
+            || !tipoReporteSalidaExtras
+            || !tipoReporteInicioDescanso
+            || !tipoReporteFinDescanso
+        ) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Consultamos el reporte de entrada.
         const reporteEntrada = await ReportesChequeos.findOne({
             where: {
@@ -97,7 +154,10 @@ module.exports = async function reporteChequeos(
                 model: Reportes,
                 where: {
                     idTipoReporteVinculado: {
-                        [Op.or]: [8, 9]
+                        [Op.or]: [
+                            tipoReporteEntrada.id,
+                            tipoReporteEntradaRetraso.id
+                        ]
                     }
                 },
                 include: [{
@@ -117,7 +177,7 @@ module.exports = async function reporteChequeos(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 15
+                    idTipoReporteVinculado: tipoReporteInicioDescanso.id
                 },
                 include: [{
                     model: TiposReportes
@@ -136,7 +196,7 @@ module.exports = async function reporteChequeos(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 16
+                    idTipoReporteVinculado: tipoReporteFinDescanso.id
                 },
                 include: [{
                     model: TiposReportes
@@ -156,7 +216,10 @@ module.exports = async function reporteChequeos(
                 model: Reportes,
                 where: {
                     idTipoReporteVinculado: {
-                        [Op.or]: [10, 11]
+                        [Op.or]: [
+                            tipoReporteSalida.id,
+                            tipoReporteSalidaExtras.id
+                        ]
                     }
                 },
                 include: [{

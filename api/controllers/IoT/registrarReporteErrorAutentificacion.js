@@ -19,6 +19,7 @@ const {
 
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
+const TiposReportes = db.tipoReporte;
 const DispositivosIoT = db.dispositivoIoT;
 const ReportesDispositivos = db.reporteDispositivo;
 
@@ -46,10 +47,6 @@ module.exports = async function registrarReporteErrorAutentificacion(
         // Instanciamos la fecha del registro.
         const fecha = new Date();
 
-        // Recuperamos los datos del reporte.
-        const descripcionReporte = "Error al autentificar tarjeta";
-        const idTipoReporteVinculado = 3;
-
         /*Esto se sacara del payload*/
         const idDispositivo = payload.idDispositivo;
 
@@ -63,6 +60,25 @@ module.exports = async function registrarReporteErrorAutentificacion(
             });
         }
 
+        // Buscamos el registro del tipo de reporte.
+        const registroVinculadoTipoReporte = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'tarjetaInvalida'
+            }
+        });
+
+        // Si no existe el registro, entonces retorna un mensaje de rror.
+        if(!registroVinculadoTipoReporte) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Recuperamos los datos del reporte.
+        const descripcionReporte = `Error al autentificar tarjeta en dispositivo ${
+            registroVinculadoDispositivo.nombreDispositivo
+        }`;
+
         // Instanciamos los datos del reporte de error de autentificacion.
         let idReporteVinculado = undefined;
 
@@ -70,7 +86,7 @@ module.exports = async function registrarReporteErrorAutentificacion(
         await Reportes.create({
             descripcionReporte: descripcionReporte,
             fechaRegistroReporte: fecha,
-            idTipoReporteVinculado: idTipoReporteVinculado
+            idTipoReporteVinculado: registroVinculadoTipoReporte.id
 
         }).then((registro) => {
             idReporteVinculado = registro.id;

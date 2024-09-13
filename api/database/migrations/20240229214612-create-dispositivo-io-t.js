@@ -14,6 +14,10 @@ module.exports = {
                 type: Sequelize.STRING
             },
 
+            nombreDispositivo: {
+                type: Sequelize.STRING
+            },
+
             fechaRegistroIoT: {
                 type: Sequelize.DATE
             },

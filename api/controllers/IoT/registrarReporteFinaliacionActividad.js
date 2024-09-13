@@ -25,6 +25,7 @@ const {
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
 const Empleados = db.empleado;
+const TiposReportes = db.tipoReporte;
 const DispositivosIoT = db.dispositivoIoT;
 const ReportesActividades = db.reporteActividad;
 
@@ -49,16 +50,31 @@ module.exports = async function registrarReporteFinaliacionActividad(
             });
         }
 
+        // Desempaquetamos los datos del cuerpo.
+        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+
         // Instanciamos la fecha del registro.
         const fecha = new Date();
 
-        // Recuperamos los datos del registro.
-        const descripcionReporte = "Actividad finalizada";
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
-        const idTipoReporteVinculado = 13;
-
-        /*Esto se sacara del payload*/
+        // Desempaquetamos los datos del payload.
         const idDispositivo = payload.idDispositivo;
+
+        // Verificamos que el registro del dispositivo exista.
+        const registroVinculadoDispositivo = await DispositivosIoT.findByPk(
+            idDispositivo
+        );
+
+        // Si el registro no existe, retornamos un error.
+        if(!registroVinculadoDispositivo) {
+            return respuesta.status(200).json({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Verificamos que exista el registro del empleado.
+        const registroVinculadoEmpleado = await Empleados.findByPk(
+            idEmpleadoVinculado
+        );
 
         // Verificamos que existan los datos para generar el registro.
         if(!idEmpleadoVinculado) {
@@ -67,31 +83,36 @@ module.exports = async function registrarReporteFinaliacionActividad(
             })
         }
 
-        // Verificamos que exista el registro del empleado.
-        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
-            return respuesta.status(200).json({
+        // Vericiamos que exista el tipo de reporte.
+        const registroTipoReporteVinculado = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadFinalizada'
+            }
+        });
+
+        // Si no existe, retornamos un mensaje de error.
+        if(!registroTipoReporteVinculado) {
+            return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Verificamos que el registro del dispositivo exista.
-        const dispositivo = await DispositivosIoT.findByPk(idDispositivo);
-
-        // Si el registro no existe, retornamos un error.
-        if(!dispositivo) {
-            return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
-
-        // Instanciamos los datos del reporte de la actividad.
-        let idReporteVinculado = undefined;
+        // Recuperamos los datos del registro.
+        const descripcionReporte = `Actividad finalizada por ${
+            registroVinculadoEmpleado.nombres
+        } ${
+            registroVinculadoEmpleado.apellidoPaterno
+        } $ {
+            registroVinculadoEmpleado.apellidoMaterno
+        } en maquina ${
+            registroVinculadoDispositivo.nombreDispositivo
+        }`;
 
         // Registramos el reporte.
         await Reportes.create({
             descripcionReporte: descripcionReporte,
             fechaRegistroReporte: fecha,
-            idTipoReporteVinculado: idTipoReporteVinculado
+            idTipoReporteVinculado: registroTipoReporteVinculado.id
 
         }).then((registro) => {
             idReporteVinculado = registro.id;

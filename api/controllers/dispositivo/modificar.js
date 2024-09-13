@@ -55,6 +55,7 @@ module.exports = async function modificarDispositivo(
         // Recuperamos la informacion del registro.
         const id = consulta.id;
         const descripcionDispositivo = cuerpo.descripcionDispositivo;
+        const nombreDispositivo = cuerpo.nombreDispositivo;
         const idZonaVinculada = cuerpo.idZonaVinculada;
         const idTipoDispositivoVinculado = cuerpo.idTipoDispositivoVinculado;
 
@@ -78,7 +79,27 @@ module.exports = async function modificarDispositivo(
 
         // Cambiamos los datos del registro.
         if(descripcionDispositivo) {
+            // Cambiamos el dato del registro.
             dispositivo.descripcionDispositivo = descripcionDispositivo;
+        }
+        if(nombreDispositivo) {
+            // Buscamos una coincidencia con el
+            // mismo nombre de dispositivo.
+            const coincidencia = await DispositivosIoT.findOne({
+                where: {
+                    nombreDispositivo: nombreDispositivo
+                }
+            });
+
+            // Si existe un registro con el mismo nombre.
+            if(coincidencia) {
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
+                });
+            }
+
+            // Cambiamos el dato del registro.
+            dispositivo.nombreDispositivo = nombreDispositivo;
         }
         if(idZonaVinculada) {
             // Buscamos el registro vinculado.

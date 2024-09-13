@@ -39,6 +39,7 @@ const Horarios = db.horario;
 const Reportes = db.reporte;
 const Empleados = db.empleado;
 const DiasLaborales = db.diaLaboral;
+const TiposReportes = db.tipoReporte;
 const ReportesChequeos = db.reporteChequeo;
 
 // Registra un reporte de chequeo del empleado.
@@ -78,8 +79,13 @@ module.exports = async function registrarReporteChequeo (
             })
         }
 
+        // Verificamos la existencia del registor del empleado.
+        const registroVinculadoEmpleado = await Empleados.findByPk(
+            idEmpleadoVinculado
+        );
+
         // Verificamos que exista el registro del empleado.
-        if(! await existeRegistro(Empleados, idEmpleadoVinculado)) {
+        if(!registroVinculadoEmpleado) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
@@ -114,6 +120,63 @@ module.exports = async function registrarReporteChequeo (
             });
         }
 
+        // Buscamos el tipo de reporte para entrada.
+        const tipoReporteEntrada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoEntrada'
+            }
+        });
+
+        // Buscamos el tipo de reporte para entrada con retraso.
+        const tipoReporteEntradaRetraso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoEntradaRetraso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para salida.
+        const tipoReporteSalida = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoSalida'
+            }
+        });
+
+        // Buscamos el tipo de reporte para salida con horas extra.
+        const tipoReporteSalidaExtras = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoSalidaExtras'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el inicio de descanso.
+        const tipoReporteInicioDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoInicioDescanso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el fin de descanso.
+        const tipoReporteFinDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoFinDescanso'
+            }
+        });
+
+        // Si alguno de los registros no existe.
+        if(
+            !tipoReporteEntrada
+            || !tipoReporteEntradaRetraso
+            || !tipoReporteSalida
+            || !tipoReporteSalidaExtras
+            || !tipoReporteInicioDescanso
+            || !tipoReporteFinDescanso
+        ) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Instanciamos los datos a guardar en el registro y el registro
         // de chequeo vinculado.
         let descripcionReporte = undefined;
@@ -125,7 +188,10 @@ module.exports = async function registrarReporteChequeo (
         const reporteEntrada = await Reportes.findOne({
             where: {
                 idTipoReporteVinculado: {
-                    [Op.or]: [8, 9]
+                    [Op.or]: [
+                        tipoReporteEntrada.id,
+                        tipoReporteEntradaRetraso.id
+                    ]
                 },
                 fechaRegistroReporte: {
                     [Op.between]: rangoHoy(),
@@ -149,12 +215,26 @@ module.exports = async function registrarReporteChequeo (
                 horario.tolerancia,
                 fecha
             )) {
-                descripcionReporte = "Chequeo de llegada de empleado";
-                idTipoReporteVinculado = 8;
+                descripcionReporte = `Chequeo de llegada de ${
+                    registroVinculadoEmpleado.nombres
+                } ${
+                    registroVinculadoEmpleado.apellidoPaterno
+                } ${
+                    registroVinculadoEmpleado.apellidoMaterno
+                }`;
+
+                idTipoReporteVinculado = tipoReporteEntrada.id;
 
             } else {
-                descripcionReporte = "Chequeo de llegada tarde de empleado";
-                idTipoReporteVinculado = 9;
+                descripcionReporte = `Chequeo de llegada con retraso de ${
+                    registroVinculadoEmpleado.nombres
+                } ${
+                    registroVinculadoEmpleado.apellidoPaterno
+                } ${
+                    registroVinculadoEmpleado.apellidoMaterno
+                }`;
+
+                idTipoReporteVinculado = tipoReporteEntradaRetraso.id;
             }
 
         // Si existe un reporte de entrada, buscamos por un
@@ -162,7 +242,7 @@ module.exports = async function registrarReporteChequeo (
         } else {
             const reporteInicioDescanso = await Reportes.findOne({
                 where: {
-                    idTipoReporteVinculado: 15,
+                    idTipoReporteVinculado: tipoReporteInicioDescanso.id,
                     fechaRegistroReporte: {
                         [Op.between]: rangoHoy(),
                     }
@@ -179,8 +259,15 @@ module.exports = async function registrarReporteChequeo (
             // Si no existe un reporte de inicio de descanso
             // registramos uno.
             if(!reporteInicioDescanso) {
-                descripcionReporte = "Inicio de descanso de empleado";
-                idTipoReporteVinculado = 15;
+                descripcionReporte = `Inicio de descanso de ${
+                    registroVinculadoEmpleado.nombres
+                } ${
+                    registroVinculadoEmpleado.apellidoPaterno
+                } ${
+                    registroVinculadoEmpleado.apellidoMaterno
+                }`;
+
+                idTipoReporteVinculado = tipoReporteInicioDescanso.id;
             }
 
             // Si , existe un reporte de inicio de descanso, buscamos
@@ -188,7 +275,7 @@ module.exports = async function registrarReporteChequeo (
             else {
                 const reporteFinDescanso = await Reportes.findOne({
                     where: {
-                        idTipoReporteVinculado: 16,
+                        idTipoReporteVinculado: tipoReporteFinDescanso.id,
                         fechaRegistroReporte: {
                             [Op.between]: rangoHoy(),
                         }
@@ -205,8 +292,15 @@ module.exports = async function registrarReporteChequeo (
                 // Si no existe un reporte de inicio de descanso
                 // registramos uno.
                 if(!reporteFinDescanso) {
-                    descripcionReporte = "Fin de descanso de empleado";
-                    idTipoReporteVinculado = 16;
+                    descripcionReporte = `Inicio de descanso de ${
+                        registroVinculadoEmpleado.nombres
+                    } ${
+                        registroVinculadoEmpleado.apellidoPaterno
+                    } ${
+                        registroVinculadoEmpleado.apellidoMaterno
+                    }`;
+
+                    idTipoReporteVinculado = tipoReporteFinDescanso.id;
 
                 // Si existe un reporte de fin de descanso, entonces
                 // buscamos por un registro de reporte de salida de
@@ -238,12 +332,26 @@ module.exports = async function registrarReporteChequeo (
                             horario.tolerancia,
                             fecha
                         )) {
-                            descripcionReporte = "Chequeo de salida tarde de empleado";
-                            idTipoReporteVinculado = 11;
+                            descripcionReporte = `Chequeo de salida tarde de ${
+                                registroVinculadoEmpleado.nombres
+                            } ${
+                                registroVinculadoEmpleado.apellidoPaterno
+                            } ${
+                                registroVinculadoEmpleado.apellidoMaterno
+                            }`;
+
+                            idTipoReporteVinculado = tipoReporteSalidaExtras.id;
             
                         } else {
-                            descripcionReporte = "Chequeo de salida de empleado";
-                            idTipoReporteVinculado = 10;
+                            descripcionReporte = `Chequeo de salida de ${
+                                registroVinculadoEmpleado.nombres
+                            } ${
+                                registroVinculadoEmpleado.apellidoPaterno
+                            } ${
+                                registroVinculadoEmpleado.apellidoMaterno
+                            }`;
+
+                            idTipoReporteVinculado = tipoReporteSalida.id;
                         }
 
                     // Si ya se encuentran todos los reportes

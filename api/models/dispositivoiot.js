@@ -34,6 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     }
     dispositivoIoT.init({
         descripcionDispositivo: DataTypes.STRING,
+        nombreDispositivo: DataTypes.STRING,
 
         fechaRegistroIoT: {
             type: DataTypes.DATE,

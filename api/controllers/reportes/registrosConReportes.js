@@ -72,6 +72,39 @@ module.exports = async function registrosConReportes(
             semanaReporte
         );
 
+        // Consultamos el tipo de repote para actividad inicada.
+        const tipoReporteAccesoZona = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'accesoGarantizado'
+            }
+        });
+
+        // Consultamos el tipo de repote para actividad iniciada.
+        const tipoReporteActividadIniciada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadIniciada'
+            }
+        });
+
+        // Consultamos el tipo de repote para actividad finalizada.
+        const tipoReporteActividadFinalizada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadFinalizada'
+            }
+        });
+
+        // Si alguno de los tipos de reporte no existe, entonces se
+        // envia un mensaje de error.
+        if(
+            !tipoReporteAccesoZona
+            || !tipoReporteActividadIniciada
+            || !tipoReporteActividadFinalizada
+        ) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Consultamos todos los registros.
         const registrosAccesos = await ReportesAccesos.findAll({
             where: {
@@ -84,7 +117,7 @@ module.exports = async function registrosConReportes(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 1
+                    idTipoReporteVinculado: tipoReporteAccesoZona.id
                 },
                 include: [{
                     model: TiposReportes
@@ -94,6 +127,7 @@ module.exports = async function registrosConReportes(
         });
 
         const idsZonas = [];
+
         registrosAccesos.forEach((registro) => {
             if(!idsZonas.includes(registro.idZonaVinculada)) {
                 idsZonas.push(registro.idZonaVinculada);
@@ -113,7 +147,10 @@ module.exports = async function registrosConReportes(
                 model: Reportes,
                 where: {
                     idTipoReporteVinculado: {
-                        [Op.or]: [12, 13]
+                        [Op.or]: [
+                            tipoReporteActividadIniciada.id,
+                            tipoReporteActividadFinalizada.id
+                        ]
                     }
                 },
                 include: [{

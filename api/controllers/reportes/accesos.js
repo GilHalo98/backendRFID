@@ -31,6 +31,7 @@ const {
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
 const Empleados = db.empleado;
+const TiposReportes = db.tipoReporte;
 const ReportesAccesos = db.reporteAcceso;
 
 // Genera un reporte de intentos de accesos a zonas.
@@ -83,6 +84,20 @@ module.exports = async function reporteIntentosAccesos(
             semanaReporte
         );
 
+        // Verificamos que exista el registro de tipo de reporte.
+        const registroVinculadoTipoReporte = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'accesoNegado'
+            }
+        });
+
+        // Si no existe, entonces retornamos un mensaje de error.        
+        if(!registroVinculadoTipoReporte) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Buscamos el registro vinculado del empleado.
         const registroVinculado = await Empleados.findByPk(
             consulta.idEmpleadoVinculado
@@ -107,7 +122,7 @@ module.exports = async function reporteIntentosAccesos(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 2
+                    idTipoReporteVinculado: registroVinculadoTipoReporte.id
                 }
             }]
         });
@@ -126,7 +141,7 @@ module.exports = async function reporteIntentosAccesos(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 2
+                    idTipoReporteVinculado: registroVinculadoTipoReporte.id
                 }
             }]
         });

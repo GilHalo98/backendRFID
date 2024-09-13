@@ -111,6 +111,21 @@ module.exports = async function reporteOperadoresMaquina(
             });
         }
 
+        // Consultamos el tipo de repote para actividad inicada.
+        const tipoReporteActividadIniciada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadIniciada'
+            }
+        });
+
+        // Si alguno de los tipos de reporte no existe, entonces se
+        // envia un mensaje de error.
+        if(!tipoReporteActividadIniciada) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Consultamos el total de los registros.
         const totalRegistros = await ReportesActividades.count({
             where: datos,
@@ -118,7 +133,7 @@ module.exports = async function reporteOperadoresMaquina(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 13
+                    idTipoReporteVinculado: tipoReporteActividadIniciada.id
                 }
             }]
         });
@@ -132,7 +147,7 @@ module.exports = async function reporteOperadoresMaquina(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 13
+                    idTipoReporteVinculado: tipoReporteActividadIniciada.id
                 }
             }, {
                 model: Empleados

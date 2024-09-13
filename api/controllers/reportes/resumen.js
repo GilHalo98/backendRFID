@@ -95,6 +95,27 @@ module.exports = async function reporteResumen(
             }
         };
 
+        // Buscamos el tipo de reporte para el inicio de descanso.
+        const tipoReporteInicioDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoInicioDescanso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el fin de descanso.
+        const tipoReporteFinDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoFinDescanso'
+            }
+        });
+
+        // Si el registro vinculado no existe.
+        if(!tipoReporteInicioDescanso || !tipoReporteFinDescanso) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Consultamos todas las zonas.
         const registrosZonas = await Zonas.findAll();
 
@@ -130,7 +151,7 @@ module.exports = async function reporteResumen(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 15
+                    idTipoReporteVinculado: tipoReporteInicioDescanso.id
                 }
             }]
         });
@@ -147,7 +168,7 @@ module.exports = async function reporteResumen(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: 16
+                    idTipoReporteVinculado: tipoReporteFinDescanso.id
                 }
             }]
         });

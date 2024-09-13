@@ -3,7 +3,7 @@
 const fs = require('fs');
 const { toSQLDate } = require("../../utils/utils");
 const imagenDefault = fs.readFileSync(
-    process.env.BASE_DIR + 'recursos/imagenPerfilDefault.png'
+    process.env.RECURSOS_DIR + '/imagenPerfilDefault.png'
 )
 
 /** @type {import('sequelize-cli').Migration} */

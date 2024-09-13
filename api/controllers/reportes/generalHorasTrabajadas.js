@@ -110,6 +110,63 @@ module.exports = async function reporteGeneralHorasTrabajadas(
             });
         }
 
+        // Buscamos el tipo de reporte para entrada.
+        const tipoReporteEntrada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoEntrada'
+            }
+        });
+
+        // Buscamos el tipo de reporte para entrada con retraso.
+        const tipoReporteEntradaRetraso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoEntradaRetraso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para salida.
+        const tipoReporteSalida = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoSalida'
+            }
+        });
+
+        // Buscamos el tipo de reporte para salida con horas extra.
+        const tipoReporteSalidaExtras = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoSalidaExtras'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el inicio de descanso.
+        const tipoReporteInicioDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoInicioDescanso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el fin de descanso.
+        const tipoReporteFinDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoFinDescanso'
+            }
+        });
+
+        // Si alguno de los registros no existe.
+        if(
+            !tipoReporteEntrada
+            || !tipoReporteEntradaRetraso
+            || !tipoReporteSalida
+            || !tipoReporteSalidaExtras
+            || !tipoReporteInicioDescanso
+            || !tipoReporteFinDescanso
+        ) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
         // Verificamos que no existan registros de dias faltantes.
         if(horarioVinculado.diaLaborals.length != 7) {
             return respuesta.status(200).send({
@@ -150,7 +207,10 @@ module.exports = async function reporteGeneralHorasTrabajadas(
                     model: Reportes,
                     where: {
                         idTipoReporteVinculado: {
-                            [Op.or]: [8, 9]
+                            [Op.or]: [
+                                tipoReporteEntrada.id,
+                                tipoReporteEntradaRetraso.id
+                            ]
                         }
                     },
                     include: [{
@@ -170,7 +230,7 @@ module.exports = async function reporteGeneralHorasTrabajadas(
                     required: true,
                     model: Reportes,
                     where: {
-                        idTipoReporteVinculado: 15
+                        idTipoReporteVinculado: tipoReporteInicioDescanso.id
                     },
                     include: [{
                         model: TiposReportes
@@ -189,7 +249,7 @@ module.exports = async function reporteGeneralHorasTrabajadas(
                     required: true,
                     model: Reportes,
                     where: {
-                        idTipoReporteVinculado: 16
+                        idTipoReporteVinculado: tipoReporteFinDescanso.id
                     },
                     include: [{
                         model: TiposReportes
@@ -209,7 +269,10 @@ module.exports = async function reporteGeneralHorasTrabajadas(
                     model: Reportes,
                     where: {
                         idTipoReporteVinculado: {
-                            [Op.or]: [10, 11]
+                            [Op.or]: [
+                                tipoReporteSalida.id,
+                                tipoReporteSalidaExtras.id
+                            ]
                         }
                     },
                     include: [{
@@ -246,14 +309,14 @@ module.exports = async function reporteGeneralHorasTrabajadas(
 
                     // Si el tipo de reporte para la entrada
                     // es con retraso.
-                    if(reporteEntrada.reporte.idTipoReporteVinculado == 9) {
+                    if(reporteEntrada.reporte.idTipoReporteVinculado == tipoReporteEntradaRetraso.id) {
                         // entonces se marca un retraso.
                         reporte.retraso ++;
                     }
 
                     // Si el tipo de reporte para la salida
                     // es con extras.
-                    if(reporteSalida.reporte.idTipoReporteVinculado == 11) {
+                    if(reporteSalida.reporte.idTipoReporteVinculado == tipoReporteSalidaExtras.id) {
                         // entonces se marca la salida con extras.
                         reporte.extras ++;
                     }

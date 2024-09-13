@@ -67,6 +67,10 @@ module.exports = async function consultarDispositivo(
             datos.id = consulta.id;
         }
 
+        if(consulta.nombreDispositivo) {
+            datos.nombreDispositivo = consulta.nombreDispositivo;
+        }
+
         if(consulta.idZonaVinculada) {
             // Buscamos en la db el registro vinculado.
             const zonaVinculada = await Zonas.findByPk(

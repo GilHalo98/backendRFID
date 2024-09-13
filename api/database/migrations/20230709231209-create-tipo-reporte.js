@@ -18,6 +18,10 @@ module.exports = {
                 type: Sequelize.STRING
             },
 
+            tagTipoReporte: {
+                type: Sequelize.STRING
+            },
+
             fechaRegistroTipoReporte: {
                 type: Sequelize.DATE
             },

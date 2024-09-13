@@ -51,6 +51,7 @@ module.exports = async function registrarDispositivo(
 
         // Recuperamos los datos del registro.
         const descripcionDispositivo = cuerpo.descripcionDispositivo;
+        const nombreDispositivo = cuerpo.nombreDispositivo;
         const idZonaVinculada = cuerpo.idZonaVinculada;
         const idTipoDispositivoVinculado = cuerpo.idTipoDispositivoVinculado;
 
@@ -59,6 +60,7 @@ module.exports = async function registrarDispositivo(
             !descripcionDispositivo
             || !idZonaVinculada
             || !idTipoDispositivoVinculado
+            || !nombreDispositivo
         ) {
             // Si alguno de los datos no es valido, no se realiza el registro.
             return respuesta.status(200).send({
@@ -93,9 +95,25 @@ module.exports = async function registrarDispositivo(
             });
         }
 
+        // Buscamos una coincidencia con el
+        // mismo nombre de dispositivo.
+        const coincidencia = await DispositivosIoT.findOne({
+            where: {
+                nombreDispositivo: nombreDispositivo
+            }
+        });
+
+        // Si existe un registro con el mismo nombre.
+        if(coincidencia) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
+            });
+        }
+
         // Ahora realizamos el registro del reporte.
         const dispositivoNuevo = {
             descripcionDispositivo: descripcionDispositivo,
+            nombreDispositivo: nombreDispositivo,
             fechaRegistroIoT: fecha,
             idZonaVinculada: idZonaVinculada,
             idTipoDispositivoVinculado: idTipoDispositivoVinculado

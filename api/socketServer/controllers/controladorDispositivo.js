@@ -12,7 +12,13 @@ const {
 } = require('../../utils/logs');
 
 // Administramos la cionexion de un cliente.
-exports.reportarEstatus = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => {
+exports.reportarEstatus = async (
+    io,
+    socket,
+    payload,
+    DISPOSITIVOS,
+    CLIENTES
+) => {
     const consulta = !payload ? {} : payload;
 
     try {
@@ -41,7 +47,13 @@ exports.reportarEstatus = async (io, socket, payload, DISPOSITIVOS, CLIENTES) =>
 };
 
 // Administramos la descionexion de un cliente.
-exports.peticionAccesoBloquear = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => {
+exports.peticionAccesoBloquear = async (
+    io,
+    socket,
+    payload,
+    DISPOSITIVOS,
+    CLIENTES
+) => {
     const consulta = !payload ? {} : payload;
 
     try {
@@ -86,7 +98,13 @@ exports.peticionAccesoBloquear = async (io, socket, payload, DISPOSITIVOS, CLIEN
 };
 
 // Administramos la descionexion de un cliente.
-exports.peticionAccesoDesbloquear = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => {
+exports.peticionAccesoDesbloquear = async (
+    io,
+    socket,
+    payload,
+    DISPOSITIVOS,
+    CLIENTES
+) => {
     const consulta = !payload ? {} : payload;
 
     try {
@@ -131,7 +149,13 @@ exports.peticionAccesoDesbloquear = async (io, socket, payload, DISPOSITIVOS, CL
 };
 
 // Administramos la descionexion de un cliente.
-exports.peticionAcceso = async (io, socket, payload, DISPOSITIVOS, CLIENTES) => {
+exports.peticionAcceso = async (
+    io,
+    socket,
+    payload,
+    DISPOSITIVOS,
+    CLIENTES
+) => {
     const consulta = !payload ? {} : payload;
 
     try {

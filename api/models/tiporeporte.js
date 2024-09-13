@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         // Atributos
         nombreTipoReporte: DataTypes.STRING,
         descripcionTipoReporte: DataTypes.STRING,
+        tagTipoReporte: DataTypes.STRING,
 
         fechaRegistroTipoReporte: {
             type: DataTypes.DATE,

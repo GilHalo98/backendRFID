@@ -26,11 +26,11 @@ const {
 const Reportes = db.reporte;
 const Empleados = db.empleado;
 const TiposReportes = db.tipoReporte;
+const ReportesAccesos = db.reporteAcceso;
 const DispositivosIoT = db.dispositivoIoT;
-const ReportesActividades = db.reporteActividad;
 
-// Registra un reporte de actividad iniciada.
-module.exports = async function registrarReporteInicioActividad (
+// Registra un reporte.
+module.exports = async function registrarReporteSalidaZona(
     request,
     respuesta
 ) {
@@ -43,9 +43,9 @@ module.exports = async function registrarReporteInicioActividad (
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
 
-        // Verificamos que el paload sea valido.
+        // Verificamos que el payload sea valido.
         if(!payload) {
-            return respuesta.status(200).json({
+            return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.TOKEN_INVALIDO
             });
         }
@@ -53,84 +53,90 @@ module.exports = async function registrarReporteInicioActividad (
         // Instanciamos la fecha del registro.
         const fecha = new Date();
 
-        // Desempaquetamos el payload.
-        const idDispositivo = payload.idDispositivo;
-
         // Recuperamos los datos del reporte.
-        const resolucion = (!cuerpo.resolucion?
-            cuerpo.resolucion : parseInt(cuerpo.resolucion)
+        const resolucion = (
+            !cuerpo.resolucion?
+                cuerpo.resolucion : parseInt(cuerpo.resolucion)
         );
 
-        // Recuperamos los datos del registro.
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
-        // Verificamos que existan los datos para generar el registro.
-        if(!idEmpleadoVinculado) {
+        // Verificamos que los datos para el registro del reporte esten
+        // completos, sino es asi, retornamos un mensaje de error.
+        if(!resolucion || !idEmpleadoVinculado) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            })
+            });
         }
 
-        // Verificamos que exista el registro del dispositivo.
+        // Verificamos que el dispositivo este registrado en la DB.
         const registroVinculadoDispositivo = await DispositivosIoT.findByPk(
             idDispositivo
         );
 
-        // Si no existe, retornamos un mensaje de error.
+        // Si no es asi, entonces retorna un mensaje de error.
         if(!registroVinculadoDispositivo) {
-            return respuesta.status(200).send({
+            return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Verificamos que exista el registro del empleado.
+        // Verificamos si existe el registro vinculado del empleado.
         const registroVinculadoEmpleado = await Empleados.findByPk(
             idEmpleadoVinculado
         );
 
-        // Si no existe, retornamos un mensaje de error.
+        // Si no existen el registro del
+        // empleado entoces retorna un error.
         if(!registroVinculadoEmpleado) {
+            return respuesta.status(200).json({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Verificamos que exista el registro vinculado de la zona.
+        const registroVinculadoZona = await Zonas.findByPk({
+            where: {
+                id: registroVinculadoDispositivo.idZonaVinculada
+            }
+        });
+
+        // Si no es asi, entonces retorna un mensaje de error.
+        if(!registroVinculadoZona) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Verificamos que el tipo de reporte exista.
+        // Verificamos que le tipo de reporte vinculado exista.
         const registroVinculadoTipoReporte = await TiposReportes.findOne({
             where: {
-                tagTipoReporte: 'actividadIniciada'
+                tagTipoReporte: resolucion?
+                    'salidaZona' : 'accesoNegado'
             }
         });
 
-        // Si no existe, entonces retornamos un mensaje de error.
+        // Si no es asi, retornamos un mensaje de error.
         if(!registroVinculadoTipoReporte) {
-            return respuesta.statuis(200).send({
+            return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Instanciamos los datos del reporte.
-        const descripcionReporte = resolucion?
-            `Actividad iniciada por ${
-                registroVinculadoEmpleado.nombres
-            } ${
-                registroVinculadoEmpleado.apellidoPaterno
-            } ${
-                registroVinculadoEmpleado.apellidoMaterno
-            } en maquina ${
-                registroVinculadoDispositivo.nombreDispositivo
-            }` : `Credenciales invalidas de ${
-                registroVinculadoEmpleado.nombres
-            } ${
-                registroVinculadoEmpleado.apellidoPaterno
-            } ${
-                registroVinculadoEmpleado.apellidoMaterno
-            } para inicio de actividad en ${
-                registroVinculadoDispositivo.nombreDispositivo
-            }`;
+        // Inicializamos los datos vinculados al reporte.
+        const descripcionReporte = `Salida ${
+            resolucion? 'concedido' : 'negado'
+        } al empelado ${
+            registroVinculadoEmpleado.nombres
+        } ${
+            registroVinculadoEmpleado.apellidoPaterno
+        } ${
+            registroVinculadoEmpleado.apellidoMaterno
+        } de la zona ${
+            registroVinculadoZona.nombreZona
+        }`;
 
-        // Instanciamos los datos del reporte de la actividad.
-        let idReporteVinculado = undefined;
+        const idReporteVinculado = undefined;
 
         // Registramos el reporte.
         await Reportes.create({
@@ -138,16 +144,18 @@ module.exports = async function registrarReporteInicioActividad (
             fechaRegistroReporte: fecha,
             idTipoReporteVinculado: registroVinculadoTipoReporte.id
 
+        // Al terminar el guardado del nuevo registro
+        // guardamos el id del registro del reporte.
         }).then((registro) => {
             idReporteVinculado = registro.id;
         });
 
-        // Registramos el reporte de la actividad.
-        await ReportesActividades.create({
-            fechaRegistroReporteActividad: fecha,
+        // Ahora registramos el reporte de acceso.
+        await ReportesAccesos.create({
+            fechaRegistroReporteAcceso: fecha,
             idReporteVinculado: idReporteVinculado,
             idEmpleadoVinculado: idEmpleadoVinculado,
-            idDispositivoVinculado: idDispositivo
+            idZonaVinculada: registroDispositivo.idZonaVinculada
         });
 
         // Retornamos un mensaje de ok.
