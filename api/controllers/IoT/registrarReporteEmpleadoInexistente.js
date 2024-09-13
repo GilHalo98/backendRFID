@@ -21,6 +21,7 @@ const {
 const Reportes = db.reporte;
 const TiposReportes = db.tipoReporte;
 const DispositivosIoT = db.dispositivoIoT;
+const ReportesDispositivos = db.reporteDispositivo;
 
 // Registra un reporte.
 module.exports = async function registrarReporteEmpleadoInexistente(
