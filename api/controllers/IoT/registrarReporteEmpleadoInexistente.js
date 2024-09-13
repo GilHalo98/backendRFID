@@ -63,7 +63,9 @@ module.exports = async function registrarReporteEmpleadoInexistente(
 
         // Verificamos que el tipo de reporte exista.
         const registroVinculadoTipoReporte = await TiposReportes.findOne({
-            tagTipoReporte: 'registroInexistente'
+            where: {
+                tagTipoReporte: 'registroInexistente'
+            }
         });
 
         // Si no existe, retornamos un mensaje de error.
@@ -92,7 +94,7 @@ module.exports = async function registrarReporteEmpleadoInexistente(
         });
 
         // Guardamos el reporte del dispositivo.
-        await ReportesDispositivo.create({
+        await ReportesDispositivos.create({
             idRepoteVinculado: idReporteVinculado,
             idDispositivoVinculado: idDispositivo
         })
