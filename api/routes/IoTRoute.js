@@ -22,12 +22,6 @@ module.exports = (app) => {
         IoT.registrarReporteAcceso
     );
 
-    // Registra un reporte de salida de zona.
-    router.post(
-        '/registrar/reporte/salida/zona',
-        IoT.registrarReporteSalidaZona
-    );
-
     // Registramos un reporte de erro de autentificacion de tarjeta.
     router.post(
         '/registrar/reporte/errorAutentificacionTarjeta',

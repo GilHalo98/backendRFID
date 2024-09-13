@@ -62,6 +62,11 @@ module.exports = async function registrarReporteAcceso(
                 cuerpo.resolucion : parseInt(cuerpo.resolucion)
         );
 
+        const salida = (
+            !cuerpo.salida?
+                cuerpo.salida : parseInt(cuerpo.salida)
+        );
+
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
         // Verificamos que los datos para el registro del reporte esten
@@ -112,32 +117,43 @@ module.exports = async function registrarReporteAcceso(
         }
 
         // Verificamos que le tipo de reporte vinculado exista.
-        const registroVinculadoTipoReporte = await TiposReportes.findOne({
+        const tipoReporteAcceso = await TiposReportes.findOne({
             where: {
                 tagTipoReporte: resolucion?
-                    'accesoGarantizado' : 'accesoNegado'
+                    salida? 'salidaZona' : 'accesoGarantizado' : 'accesoNegado'
             }
         });
 
         // Si no es asi, retornamos un mensaje de error.
-        if(!registroVinculadoTipoReporte) {
+        if(!tipoReporteAcceso) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
         // Inicializamos los datos vinculados al reporte.
-        const descripcionReporte = `Acceso ${
-            resolucion? 'concedido' : 'negado'
-        } al empelado ${
-            registroVinculadoEmpleado.nombres
-        } ${
-            registroVinculadoEmpleado.apellidoPaterno
-        } ${
-            registroVinculadoEmpleado.apellidoMaterno
-        } a la zona ${
-            registroVinculadoZona.nombreZona
-        }`;
+        const descripcionReporte = salida?
+            `Salida ${
+                resolucion? 'concedida' : 'negada'
+            } al empelado ${
+                registroVinculadoEmpleado.nombres
+            } ${
+                registroVinculadoEmpleado.apellidoPaterno
+            } ${
+                registroVinculadoEmpleado.apellidoMaterno
+            } de la zona ${
+                registroVinculadoZona.nombreZona
+            }` : `Acceso ${
+                resolucion? 'concedido' : 'negado'
+            } al empelado ${
+                registroVinculadoEmpleado.nombres
+            } ${
+                registroVinculadoEmpleado.apellidoPaterno
+            } ${
+                registroVinculadoEmpleado.apellidoMaterno
+            } a la zona ${
+                registroVinculadoZona.nombreZona
+            }`;
 
         const idReporteVinculado = undefined;
 
@@ -145,7 +161,7 @@ module.exports = async function registrarReporteAcceso(
         await Reportes.create({
             descripcionReporte: descripcionReporte,
             fechaRegistroReporte: fecha,
-            idTipoReporteVinculado: registroVinculadoTipoReporte.id
+            idTipoReporteVinculado: tipoReporteAcceso.id
 
         // Al terminar el guardado del nuevo registro
         // guardamos el id del registro del reporte.
