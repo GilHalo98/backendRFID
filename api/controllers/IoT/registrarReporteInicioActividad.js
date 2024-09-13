@@ -38,6 +38,7 @@ module.exports = async function registrarReporteInicioActividad (
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
+    const consulta = request.query;
 
     try {
         // Desencriptamos el payload del token.
@@ -57,12 +58,12 @@ module.exports = async function registrarReporteInicioActividad (
         const idDispositivo = payload.idDispositivo;
 
         // Recuperamos los datos del reporte.
-        const resolucion = (!cuerpo.resolucion?
-            cuerpo.resolucion : parseInt(cuerpo.resolucion)
+        const resolucion = (!consulta.resolucion?
+            consulta.resolucion : parseInt(consulta.resolucion)
         );
 
         // Recuperamos los datos del registro.
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
 
         // Verificamos que existan los datos para generar el registro.
         if(!idEmpleadoVinculado) {

@@ -38,6 +38,7 @@ module.exports = async function registrarReporteFinaliacionActividad(
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
+    const consulta = request.query;
 
     try {
         // Desencriptamos el payload del token.
@@ -51,7 +52,7 @@ module.exports = async function registrarReporteFinaliacionActividad(
         }
 
         // Desempaquetamos los datos del cuerpo.
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
 
         // Instanciamos la fecha del registro.
         const fecha = new Date();

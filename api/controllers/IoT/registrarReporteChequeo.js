@@ -51,6 +51,7 @@ module.exports = async function registrarReporteChequeo (
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
+    const consulta = request.query;
 
     try {
         // Desencriptamos el payload del token.
@@ -70,7 +71,7 @@ module.exports = async function registrarReporteChequeo (
         const dia = fecha.getDay();
 
         // Recuperamos los datos del reporte.
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
 
         // Verificamos que existan los datos para generar el registro.
         if(!idEmpleadoVinculado) {

@@ -34,6 +34,7 @@ module.exports = async function validarRegistroEmpleado(
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
+    const consulta = request.query;
 
     try {
         // Desencriptamos el payload del token.
@@ -46,10 +47,8 @@ module.exports = async function validarRegistroEmpleado(
             });
         }
 
-        console.log(parametros);
-
         // Recuperamos los datos del cuerpo.
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
 
         // Verificamos que existan los datos para realizar la busqueda.
         if(!idEmpleadoVinculado) {

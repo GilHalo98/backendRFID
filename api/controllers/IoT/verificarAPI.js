@@ -23,6 +23,7 @@ module.exports = async function verificarAPI(
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
+    const consulta = request.query;
 
 
     try {

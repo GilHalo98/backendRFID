@@ -38,6 +38,7 @@ module.exports = async function registrarReporteAcceso(
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
+    const consulta = request.query;
 
     try {
         // Desencriptamos el payload del token.
@@ -58,16 +59,16 @@ module.exports = async function registrarReporteAcceso(
 
         // Recuperamos los datos del reporte.
         const resolucion = (
-            !cuerpo.resolucion?
-                cuerpo.resolucion : parseInt(cuerpo.resolucion)
+            !consulta.resolucion?
+                consulta.resolucion : parseInt(consulta.resolucion)
         );
 
         const salida = (
-            !cuerpo.salida?
-                cuerpo.salida : parseInt(cuerpo.salida)
+            !consulta.salida?
+                consulta.salida : parseInt(consulta.salida)
         );
 
-        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
 
         // Verificamos que los datos para el registro del reporte esten
         // completos, sino es asi, retornamos un mensaje de error.
