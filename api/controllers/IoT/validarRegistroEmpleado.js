@@ -52,7 +52,7 @@ module.exports = async function validarRegistroEmpleado(
         // Verificamos que existan los datos para realizar la busqueda.
         if(!idEmpleadoVinculado) {
             return respuesta.status(200).json({
-                codigosRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
+                codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
             });
         }
 
@@ -61,13 +61,13 @@ module.exports = async function validarRegistroEmpleado(
             // Si existe el registro, retornamos un mensaje de OK.
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.OK
-            })
+            });
         }
 
         // Si el registro no existe, retornamos un mensaje de
         // empleado no encontrado.
         return respuesta.status(200).json({
-            codigoRespuetsa: CODIGOS.EMPELADO_NO_ENCONTRADO
+            codigoRespuesta: CODIGOS.EMPELADO_NO_ENCONTRADO
         });
 
     } catch(excepcion) {
