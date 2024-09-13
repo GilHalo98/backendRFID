@@ -51,6 +51,8 @@ module.exports = async function registrarReporteAcceso(
             });
         }
 
+        console.log(consulta);
+
         // Desempaquetamos datos del payload.
         const idDispositivo = payload.idDispositivo;
 
@@ -72,7 +74,7 @@ module.exports = async function registrarReporteAcceso(
 
         // Verificamos que los datos para el registro del reporte esten
         // completos, sino es asi, retornamos un mensaje de error.
-        if(!resolucion || !idEmpleadoVinculado) {
+        if(!resolucion || !idEmpleadoVinculado || !salida) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
             });
