@@ -46,6 +46,8 @@ module.exports = async function validarRegistroEmpleado(
             });
         }
 
+        console.log(cuerpo);
+
         // Recuperamos los datos del cuerpo.
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
