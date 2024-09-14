@@ -52,7 +52,7 @@ module.exports = async function registrarReporteFinaliacionActividad(
         }
 
         // Desempaquetamos los datos del cuerpo.
-        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
         // Instanciamos la fecha del registro.
         const fecha = new Date();

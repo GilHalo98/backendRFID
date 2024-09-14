@@ -58,12 +58,12 @@ module.exports = async function registrarReporteInicioActividad (
         const idDispositivo = payload.idDispositivo;
 
         // Recuperamos los datos del reporte.
-        const resolucion = (!consulta.resolucion?
-            consulta.resolucion : parseInt(consulta.resolucion)
+        const resolucion = (!cuerpo.resolucion?
+            cuerpo.resolucion : parseInt(cuerpo.resolucion)
         );
 
         // Recuperamos los datos del registro.
-        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
         // Verificamos que existan los datos para generar el registro.
         if(!idEmpleadoVinculado) {
