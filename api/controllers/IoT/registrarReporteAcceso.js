@@ -55,10 +55,16 @@ module.exports = async function registrarReporteAcceso(
         // Desempaquetamos datos del payload.
         const idDispositivo = payload.idDispositivo;
 
-        console.log(idDispositivo);
-
         // Instanciamos la fecha del registro.
         const fecha = new Date();
+
+        // Verificamos que los datos para el registro del reporte esten
+        // completos, sino es asi, retornamos un mensaje de error.
+        if(!cuerpo.resolucion || !cuerpo.idEmpleadoVinculado || !cuerpo.salida) {
+            return respuesta.status(200).json({
+                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
+            });
+        }
 
         // Recuperamos los datos del reporte.
         const resolucion = (
@@ -72,14 +78,6 @@ module.exports = async function registrarReporteAcceso(
         );
 
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
-
-        // Verificamos que los datos para el registro del reporte esten
-        // completos, sino es asi, retornamos un mensaje de error.
-        if(!cuerpo.resolucion || !cuerpo.idEmpleadoVinculado || !cuerpo.salida) {
-            return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
 
         // Verificamos que el dispositivo este registrado en la DB.
         const registroVinculadoDispositivo = await DispositivosIoT.findByPk(
