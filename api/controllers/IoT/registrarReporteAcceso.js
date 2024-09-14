@@ -40,8 +40,6 @@ module.exports = async function registrarReporteAcceso(
     const parametros = request.params;
     const consulta = request.query;
 
-    console.log(cuerpo, parametros, consulta)
-
     try {
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
@@ -71,6 +69,8 @@ module.exports = async function registrarReporteAcceso(
         );
 
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
+
+        console.log(!resolucion, !idEmpleadoVinculado, !salida)
 
         // Verificamos que los datos para el registro del reporte esten
         // completos, sino es asi, retornamos un mensaje de error.
