@@ -55,6 +55,8 @@ module.exports = async function registrarReporteAcceso(
         // Desempaquetamos datos del payload.
         const idDispositivo = payload.idDispositivo;
 
+        console.log(idDispositivo);
+
         // Instanciamos la fecha del registro.
         const fecha = new Date();
 
