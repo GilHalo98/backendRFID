@@ -112,23 +112,7 @@ module.exports = async function registrarReporteInicioActividad (
 
         // Instanciamos los datos del reporte.
         const descripcionReporte = resolucion?
-            `Actividad iniciada por ${
-                registroVinculadoEmpleado.nombres
-            } ${
-                registroVinculadoEmpleado.apellidoPaterno
-            } ${
-                registroVinculadoEmpleado.apellidoMaterno
-            } en maquina ${
-                registroVinculadoDispositivo.nombreDispositivo
-            }` : `Credenciales invalidas de ${
-                registroVinculadoEmpleado.nombres
-            } ${
-                registroVinculadoEmpleado.apellidoPaterno
-            } ${
-                registroVinculadoEmpleado.apellidoMaterno
-            } para inicio de actividad en ${
-                registroVinculadoDispositivo.nombreDispositivo
-            }`;
+            `Actividad iniciada por ${registroVinculadoEmpleado.nombres} ${registroVinculadoEmpleado.apellidoPaterno} ${registroVinculadoEmpleado.apellidoMaterno} en maquina ${registroVinculadoDispositivo.nombreDispositivo}` : `Credenciales invalidas de ${registroVinculadoEmpleado.nombres} ${registroVinculadoEmpleado.apellidoPaterno} ${registroVinculadoEmpleado.apellidoMaterno} para inicio de actividad en ${registroVinculadoDispositivo.nombreDispositivo}`;
 
         // Instanciamos los datos del reporte de la actividad.
         let idReporteVinculado = undefined;
