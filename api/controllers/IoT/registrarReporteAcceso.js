@@ -105,11 +105,9 @@ module.exports = async function registrarReporteAcceso(
         }
 
         // Verificamos que exista el registro vinculado de la zona.
-        const registroVinculadoZona = await Zonas.findByPk({
-            where: {
-                id: registroVinculadoDispositivo.idZonaVinculada
-            }
-        });
+        const registroVinculadoZona = await Zonas.findByPk(
+            registroVinculadoDispositivo.idZonaVinculada
+        );
 
         // Si no es asi, entonces retorna un mensaje de error.
         if(!registroVinculadoZona) {
