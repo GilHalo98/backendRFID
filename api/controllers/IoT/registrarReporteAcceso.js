@@ -70,11 +70,9 @@ module.exports = async function registrarReporteAcceso(
 
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
-        console.log(!resolucion, !idEmpleadoVinculado, !salida)
-
         // Verificamos que los datos para el registro del reporte esten
         // completos, sino es asi, retornamos un mensaje de error.
-        if(!resolucion || !idEmpleadoVinculado || !salida) {
+        if(!cuerpo.resolucion || !cuerpo.idEmpleadoVinculado || !cuerpo.salida) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
             });
