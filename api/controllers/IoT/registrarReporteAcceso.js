@@ -23,6 +23,7 @@ const {
 } = require("../../utils/logs");
 
 // Modelos que usara el controlador.
+const Zonas = db.zona;
 const Reportes = db.reporte;
 const Empleados = db.empleado;
 const TiposReportes = db.tipoReporte;
