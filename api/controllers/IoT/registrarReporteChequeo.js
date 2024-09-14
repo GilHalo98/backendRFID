@@ -53,11 +53,6 @@ module.exports = async function registrarReporteChequeo (
     const parametros = request.params;
     const consulta = request.query;
 
-    console.log(cabecera,
-    cuerpo,
-    parametros,
-    consulta);
-
     try {
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
@@ -76,10 +71,10 @@ module.exports = async function registrarReporteChequeo (
         const dia = fecha.getDay();
 
         // Recuperamos los datos del reporte.
-        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
 
         // Verificamos que existan los datos para generar el registro.
-        if(!consulta.idEmpleadoVinculado) {
+        if(!cuerpo.idEmpleadoVinculado) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
             })
