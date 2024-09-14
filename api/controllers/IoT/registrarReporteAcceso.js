@@ -174,7 +174,7 @@ module.exports = async function registrarReporteAcceso(
             fechaRegistroReporteAcceso: fecha,
             idReporteVinculado: idReporteVinculado,
             idEmpleadoVinculado: idEmpleadoVinculado,
-            idZonaVinculada: registroDispositivo.idZonaVinculada
+            idZonaVinculada: registroVinculadoZona.id
         });
 
         // Retornamos un mensaje de ok.
