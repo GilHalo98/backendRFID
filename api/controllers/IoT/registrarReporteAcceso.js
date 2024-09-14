@@ -129,7 +129,7 @@ module.exports = async function registrarReporteAcceso(
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
-        }
+        };
 
         // Inicializamos los datos vinculados al reporte.
         const descripcionReporte = salida?
@@ -155,7 +155,7 @@ module.exports = async function registrarReporteAcceso(
                 registroVinculadoZona.nombreZona
             }`;
 
-        const idReporteVinculado = undefined;
+        let idReporteVinculado = undefined;
 
         // Registramos el reporte.
         await Reportes.create({
