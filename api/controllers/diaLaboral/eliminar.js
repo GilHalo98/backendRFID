@@ -10,6 +10,10 @@ const CODIGOS = new respuestas.CodigoApp();
 // Modelos que usara el controlador.
 const DiasLaborales = db.diaLaboral;
 
+const {
+    mostrarLog
+} = require("../../utils/logs");
+
 // Elimina un registro de la base de datos dado un id.
 module.exports = async function eliminarDiaLaboral(
     request,

@@ -16,6 +16,10 @@ const {
 const DiasLaborales = db.diaLaboral;
 const Horarios = db.horario;
 
+const {
+    mostrarLog
+} = require("../../utils/logs");
+
 // Genera un reporte de intentos de accesos a zonas.
 module.exports = async function modificarDiaLaboral(
     request,
