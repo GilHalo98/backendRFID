@@ -99,15 +99,7 @@ module.exports = async function registrarReporteFinaliacionActividad(
         }
 
         // Recuperamos los datos del registro.
-        const descripcionReporte = `Actividad finalizada por ${
-            registroVinculadoEmpleado.nombres
-        } ${
-            registroVinculadoEmpleado.apellidoPaterno
-        } $ {
-            registroVinculadoEmpleado.apellidoMaterno
-        } en maquina ${
-            registroVinculadoDispositivo.nombreDispositivo
-        }`;
+        const descripcionReporte = `Actividad finalizada por ${registroVinculadoEmpleado.nombres} ${registroVinculadoEmpleado.apellidoPaterno} ${registroVinculadoEmpleado.apellidoMaterno} en maquina ${registroVinculadoDispositivo.nombreDispositivo}`;
 
         // Registramos el reporte.
         await Reportes.create({
