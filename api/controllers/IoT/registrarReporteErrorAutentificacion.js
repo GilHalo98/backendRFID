@@ -52,10 +52,12 @@ module.exports = async function registrarReporteErrorAutentificacion(
         const idDispositivo = payload.idDispositivo;
 
         // Verificamos que el registro del dispositivo exista.
-        const dispositivo = await DispositivosIoT.findByPk(idDispositivo);
+        const registroVinculadoDispositivo = await DispositivosIoT.findByPk(
+            idDispositivo
+        );
 
         // Si el registro no existe, retornamos un error.
-        if(!dispositivo) {
+        if(!registroVinculadoDispositivo) {
             return respuesta.status(200).json({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
