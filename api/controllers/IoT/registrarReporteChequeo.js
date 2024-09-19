@@ -310,7 +310,10 @@ module.exports = async function registrarReporteChequeo (
                     const reporteSalida = await Reportes.findOne({
                         where: {
                             idTipoReporteVinculado: {
-                                [Op.or]: [10, 11]
+                                [Op.or]: [
+                                    tipoReporteSalida.id,
+                                    tipoReporteSalidaExtras.id,
+                                ]
                             },
                             fechaRegistroReporte: {
                                 [Op.between]: rangoHoy(),
