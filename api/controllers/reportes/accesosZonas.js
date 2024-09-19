@@ -132,15 +132,29 @@ module.exports = async function reporteAccesosZona(
             datos.idZonaVinculada = consulta.idZonaVinculada;
         }
 
-        // Verificamos que el tipo de reporte exista.
-        const registroVinculadoTipoReporte = await TiposReportes.findOne({
+        // Verificamos que el tipo de reporte de entrada de zona exista.
+        const tipoReporteEntradaZona = await TiposReportes.findOne({
             where: {
                 tagTipoReporte: 'accesoGarantizado'
             }
         });
 
         // si no existe, entonces retornamos un mensaje de error.
-        if(!registroVinculadoTipoReporte) {
+        if(!tipoReporteEntradaZona) {
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+            });
+        }
+
+        // Verificamos que el tipo de reporte de salida de zona exista.
+        const tipoReporteSalidaZona = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'salidaZona'
+            }
+        });
+
+        // si no existe, entonces retornamos un mensaje de error.
+        if(!tipoReporteSalidaZona) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
@@ -153,7 +167,12 @@ module.exports = async function reporteAccesosZona(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: registroVinculadoTipoReporte.id
+                    idTipoReporteVinculado: {
+                        [Op.or]: [
+                            tipoReporteEntradaZona.id,
+                            tipoReporteSalidaZona.id
+                        ]
+                    }
                 },
                 include: [{
                     model: TiposReportes
@@ -170,7 +189,12 @@ module.exports = async function reporteAccesosZona(
                 required: true,
                 model: Reportes,
                 where: {
-                    idTipoReporteVinculado: registroVinculadoTipoReporte.id
+                    idTipoReporteVinculado: {
+                        [Op.or]: [
+                            tipoReporteEntradaZona.id,
+                            tipoReporteSalidaZona.id
+                        ]
+                    }
                 },
                 include: [{
                     model: TiposReportes
@@ -179,11 +203,59 @@ module.exports = async function reporteAccesosZona(
             order: [['fechaRegistroReporteAcceso', 'DESC']]
         });
 
+        // Index de los elementos.
+        let index = 0;
+
+        // Reporte.
+        const reporte = [];
+
+        // Lo ultimo es por cada registro, calcular la diferencia en el
+        // tipo de registro entre reporte de entrada y salida
+        // y registrarlo como tiempo en zona.
+        while (index < registros.length) {
+            // Consultamos los registros.
+            const registroA = registros[index];
+            const registroB = registros[index + 1];
+
+            // Verificamos que registroA sea de tipo acceso a zona.
+            if(registroA.idTipoReporteVinculado != tipoReporteEntradaZona.id) {
+                // Si no es asi, se salta el ciclo.
+                index ++;
+
+                break;
+            }
+
+            // Verificamos que el registroB sea de tipo salida de zona.
+            if(registroB.idTipoReporteVinculado != tipoReporteSalidaZona.id) {
+                // Si no es asi, se salta el ciclo.
+                index ++;
+
+                break;
+            }
+
+            // Si los dos tipos de reportes son los correctos
+            // se calcula la diferencia de tiempo entre estos.
+            const tiempoEnZona = (
+                registroB.fechaRegistroReporteAcceso
+                - registroA.fechaRegistroReporteAcceso
+            );
+
+            // Guardamos los datos en el reporte.
+            reporte.push({
+                entrada: registroA.fechaRegistroReporteAcceso,
+                salida: registroB.fechaRegistroReporteAcceso,
+                tiempoEnZona: tiempoEnZona
+            });
+
+            // Acumulamos en el index.
+            index += 2;
+        }
+
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: totalRegistros,
-            registros: registros
+            reporte: reporte
         });
 
     } catch(excepcion) {
