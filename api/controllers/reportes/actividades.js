@@ -154,12 +154,6 @@ module.exports = async function reporteActividadesDispositivo(
             });
         }
 
-        // Index de los elementos.
-        let index = 0;
-
-        // Reporte.
-        const reporte = [];
-
         // Consultamos todos los registros.
         const registros = await ReportesActividades.findAll({
             offset: offset,
@@ -182,6 +176,12 @@ module.exports = async function reporteActividadesDispositivo(
             }],
             order: [['fechaRegistroReporteActividad', 'DESC']]
         });
+
+        // Index de los elementos.
+        let index = 0;
+
+        // Reporte.
+        const reporte = [];
 
         // Lo ultimo es por cada registro, calcular la diferencia en el
         // tipo de registro entre reporte de entrada y salida
