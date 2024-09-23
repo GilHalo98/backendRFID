@@ -187,41 +187,34 @@ module.exports = async function reporteAccesosZona(
         // y registrarlo como tiempo en zona.
         while(index < registros.length - 1) {
             // Consultamos los registros.
-            const registroA = registros[index];
-            const registroB = registros[index + 1];
+            const registroA = registros[index]; // Salida
+            const registroB = registros[index + 1]; // Entrada
 
-            // Verificamos que registroA sea de tipo acceso a zona.
-            if(registroA.reporte.idTipoReporteVinculado != tipoReporteSalidaZona.id) {
-                // Si no es asi, se salta el ciclo.
-                index ++;
+            // Verificamos que registroA sea de tipo salida a zona.
+            if(registroA.reporte.idTipoReporteVinculado == tipoReporteSalidaZona.id) {
+                // Verificamos que el registroB sea de tipo acceso de zona.
+                if(registroB.reporte.idTipoReporteVinculado == tipoReporteEntradaZona.id) {
+                    // Si los dos tipos de reportes son los correctos
+                    // se calcula la diferencia de tiempo entre estos.
+                    const tiempoEnZona = (
+                        registroA.fechaRegistroReporteAcceso
+                        - registroB.fechaRegistroReporteAcceso
+                    );
 
-                break;
+                    // Guardamos los datos en el reporte.
+                    reporte.push({
+                        entrada: registroB.fechaRegistroReporteAcceso,
+                        salida: registroA.fechaRegistroReporteAcceso,
+                        tiempoEnZona: tiempoEnZona
+                    });
+
+                    // Acumulamos en el index.
+                    index += 2;
+                }
             }
 
-            // Verificamos que el registroB sea de tipo salida de zona.
-            if(registroB.reporte.idTipoReporteVinculado != tipoReporteEntradaZona.id) {
-                // Si no es asi, se salta el ciclo.
-                index ++;
-
-                break;
-            }
-
-            // Si los dos tipos de reportes son los correctos
-            // se calcula la diferencia de tiempo entre estos.
-            const tiempoEnZona = (
-                registroA.fechaRegistroReporteAcceso
-                - registroB.fechaRegistroReporteAcceso
-            );
-
-            // Guardamos los datos en el reporte.
-            reporte.push({
-                entrada: registroB.fechaRegistroReporteAcceso,
-                salida: registroA.fechaRegistroReporteAcceso,
-                tiempoEnZona: tiempoEnZona
-            });
-
-            // Acumulamos en el index.
-            index += 2;
+            // Aumentamos el index en uno.
+            index ++;
         }
 
         // Retornamos los registros encontrados.
