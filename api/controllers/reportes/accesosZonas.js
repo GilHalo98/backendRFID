@@ -221,8 +221,7 @@ module.exports = async function reporteAccesosZona(
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: reporte.length,
-            reporte: reporte,
-            registros: registros
+            reporte: reporte
         });
 
     } catch(excepcion) {
