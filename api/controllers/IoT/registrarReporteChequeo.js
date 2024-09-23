@@ -293,7 +293,7 @@ module.exports = async function registrarReporteChequeo (
                 // Si no existe un reporte de inicio de descanso
                 // registramos uno.
                 if(!reporteFinDescanso) {
-                    descripcionReporte = `Inicio de descanso de ${
+                    descripcionReporte = `Fin de descanso de ${
                         registroVinculadoEmpleado.nombres
                     } ${
                         registroVinculadoEmpleado.apellidoPaterno
