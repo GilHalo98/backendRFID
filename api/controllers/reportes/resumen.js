@@ -32,6 +32,7 @@ const {
 const Zonas = db.zona;
 const Reportes = db.reporte;
 const Empleados = db.empleado;
+const TiposReportes = db.TiposReportes;
 const ReportesAccesos = db.reporteAcceso;
 const ReportesActividades = db.reporteActividad;
 

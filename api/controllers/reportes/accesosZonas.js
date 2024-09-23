@@ -160,26 +160,6 @@ module.exports = async function reporteAccesosZona(
             });
         }
 
-        // Consultamos el total de los registros.
-        const totalRegistros = await ReportesAccesos.count({
-            where: datos,
-            include: [{
-                required: true,
-                model: Reportes,
-                where: {
-                    idTipoReporteVinculado: {
-                        [Op.or]: [
-                            tipoReporteEntradaZona.id,
-                            tipoReporteSalidaZona.id
-                        ]
-                    }
-                },
-                include: [{
-                    model: TiposReportes
-                }]
-            }]
-        });
-
         // Consultamos todos los registros.
         const registros = await ReportesAccesos.findAll({
             offset: offset,
@@ -254,7 +234,7 @@ module.exports = async function reporteAccesosZona(
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
-            totalRegistros: totalRegistros,
+            totalRegistros: reporte.length,
             reporte: reporte
         });
 
