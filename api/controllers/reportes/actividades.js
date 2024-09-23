@@ -154,25 +154,11 @@ module.exports = async function reporteActividadesDispositivo(
             });
         }
 
-        // Consultamos el total de los registros.
-        const totalRegistros = await ReportesActividades.count({
-            where: datos,
-            include: [{
-                required: true,
-                model: Reportes,
-                where: {
-                    idTipoReporteVinculado: {
-                        [Op.or]: [
-                            tipoReporteActividadIniciada.id,
-                            tipoReporteActividadFinalizada.id
-                        ]
-                    }
-                },
-                include: [{
-                    model: TiposReportes
-                }]
-            }]
-        });
+        // Index de los elementos.
+        let index = 0;
+
+        // Reporte.
+        const reporte = [];
 
         // Consultamos todos los registros.
         const registros = await ReportesActividades.findAll({
@@ -197,11 +183,53 @@ module.exports = async function reporteActividadesDispositivo(
             order: [['fechaRegistroReporteActividad', 'DESC']]
         });
 
+        // Lo ultimo es por cada registro, calcular la diferencia en el
+        // tipo de registro entre reporte de entrada y salida
+        // y registrarlo como tiempo en zona.
+        while(index < registros.length) {
+            // Consultamos los registros.
+            const registroA = registros[index];
+            const registroB = registros[index + 1];
+
+            // Verificamos que registroA sea de tipo acceso a zona.
+            if(registroA.reporte.idTipoReporteVinculado != tipoReporteActividadFinalizada.id) {
+                // Si no es asi, se salta el ciclo.
+                index ++;
+
+                break;
+            }
+
+            // Verificamos que el registroB sea de tipo salida de zona.
+            if(registroB.reporte.idTipoReporteVinculado != tipoReporteActividadIniciada.id) {
+                // Si no es asi, se salta el ciclo.
+                index ++;
+
+                break;
+            }
+
+            // Si los dos tipos de reportes son los correctos
+            // se calcula la diferencia de tiempo entre estos.
+            const tiempoEnActividad = (
+                registroA.fechaRegistroReporteActividad
+                - registroB.fechaRegistroReporteActividad
+            );
+
+            // Guardamos los datos en el reporte.
+            reporte.push({
+                inicio: registroB.fechaRegistroReporteActividad,
+                fin: registroA.fechaRegistroReporteActividad,
+                tiempoEnActividad: tiempoEnActividad
+            });
+
+            // Acumulamos en el index.
+            index += 2;
+        }
+
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
-            totalRegistros: totalRegistros,
-            registros: registros
+            totalRegistros: reporte.length,
+            reporte: reporte
         });
 
     } catch(excepcion) {
