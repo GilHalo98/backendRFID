@@ -139,13 +139,6 @@ module.exports = async function reporteAccesosZona(
             }
         });
 
-        // si no existe, entonces retornamos un mensaje de error.
-        if(!tipoReporteEntradaZona) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
-
         // Verificamos que el tipo de reporte de salida de zona exista.
         const tipoReporteSalidaZona = await TiposReportes.findOne({
             where: {
@@ -154,7 +147,7 @@ module.exports = async function reporteAccesosZona(
         });
 
         // si no existe, entonces retornamos un mensaje de error.
-        if(!tipoReporteSalidaZona) {
+        if(!tipoReporteSalidaZona || !tipoReporteEntradaZona) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
