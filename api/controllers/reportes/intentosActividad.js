@@ -31,7 +31,7 @@ const {
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
 const Empleados = db.empleado;
-const TiposReportes = db.TiposReportes;
+const TiposReportes = db.tipoReporte;
 const ReportesActividades = db.reporteActividad;
 
 // Genera un reporte de intentos de inicio de actividad.
