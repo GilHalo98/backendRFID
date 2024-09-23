@@ -21,8 +21,13 @@ module.exports = {
                 fechaRegistroPermiso: toSQLDate(new Date()),
             },
             {
-                descripcionPermiso: 'Permisos de acceso para Admon',
-                autorizacion: 255,
+                descripcionPermiso: 'Permisos de acceso para Ensamblador',
+                autorizacion: 15,
+                fechaRegistroPermiso: toSQLDate(new Date()),
+            },
+            {
+                descripcionPermiso: 'Permisos de acceso para Maquinista',
+                autorizacion: 15,
                 fechaRegistroPermiso: toSQLDate(new Date()),
             },
             {
@@ -36,13 +41,8 @@ module.exports = {
                 fechaRegistroPermiso: toSQLDate(new Date()),
             },
             {
-                descripcionPermiso: 'Permisos de acceso para Ensamblador',
-                autorizacion: 15,
-                fechaRegistroPermiso: toSQLDate(new Date()),
-            },
-            {
-                descripcionPermiso: 'Permisos de acceso para Maquinista',
-                autorizacion: 15,
+                descripcionPermiso: 'Permisos de acceso para Admon',
+                autorizacion: 255,
                 fechaRegistroPermiso: toSQLDate(new Date()),
             }
         ], {});
