@@ -15,21 +15,6 @@ module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.bulkInsert('empleados', [
             {
-                nombres: 'INVALIDO',
-                apellidoPaterno: '',
-                apellidoMaterno: '',
-
-                numeroTelefonico: '',
-
-                edad: 0,
-                fechaNacimiento: fecha,
-
-                fechaRegistroEmpleado: fecha,
-
-                idRolVinculado: 1,
-                idImagenVinculada: 1
-            },
-            {
                 nombres: 'ADMON',
                 apellidoPaterno: '',
                 apellidoMaterno: '',
