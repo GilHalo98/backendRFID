@@ -192,7 +192,7 @@ module.exports = async function reporteAccesosZona(
         // Lo ultimo es por cada registro, calcular la diferencia en el
         // tipo de registro entre reporte de entrada y salida
         // y registrarlo como tiempo en zona.
-        while(index < registros.length) {
+        while(index < registros.length - 1) {
             // Consultamos los registros.
             const registroA = registros[index];
             const registroB = registros[index + 1];
