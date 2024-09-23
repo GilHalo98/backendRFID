@@ -217,11 +217,8 @@ module.exports = async function reporteAccesosZona(
             const registroA = registros[index];
             const registroB = registros[index + 1];
 
-            console.log(registroA.reporte.idTipoReporteVinculado);
-            console.log(registroB.reporte.idTipoReporteVinculado);
-
             // Verificamos que registroA sea de tipo acceso a zona.
-            if(registroA.idTipoReporteVinculado != tipoReporteEntradaZona.id) {
+            if(registroA.idTipoReporteVinculado != ipoReporteSalidaZona.id) {
                 // Si no es asi, se salta el ciclo.
                 index ++;
 
@@ -229,7 +226,7 @@ module.exports = async function reporteAccesosZona(
             }
 
             // Verificamos que el registroB sea de tipo salida de zona.
-            if(registroB.idTipoReporteVinculado != tipoReporteSalidaZona.id) {
+            if(registroB.idTipoReporteVinculado != tipoReporteEntradaZona.id) {
                 // Si no es asi, se salta el ciclo.
                 index ++;
 
@@ -239,14 +236,14 @@ module.exports = async function reporteAccesosZona(
             // Si los dos tipos de reportes son los correctos
             // se calcula la diferencia de tiempo entre estos.
             const tiempoEnZona = (
-                registroB.fechaRegistroReporteAcceso
-                - registroA.fechaRegistroReporteAcceso
+                registroA.fechaRegistroReporteAcceso
+                - registroB.fechaRegistroReporteAcceso
             );
 
             // Guardamos los datos en el reporte.
             reporte.push({
-                entrada: registroA.fechaRegistroReporteAcceso,
-                salida: registroB.fechaRegistroReporteAcceso,
+                entrada: registroB.fechaRegistroReporteAcceso,
+                salida: registroA.fechaRegistroReporteAcceso,
                 tiempoEnZona: tiempoEnZona
             });
 
