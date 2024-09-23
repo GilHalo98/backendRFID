@@ -1,3 +1,8 @@
+/**
+ * Tomar en cuenta que si no se pasan datos de usuario
+ * no modidicar registro de usuario.
+ */
+
 // Modelos de la DB
 const db = require("../../models/index");
 

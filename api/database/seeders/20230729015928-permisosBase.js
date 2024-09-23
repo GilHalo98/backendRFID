@@ -39,6 +39,11 @@ module.exports = {
                 descripcionPermiso: 'Permisos de acceso para Ensamblador',
                 autorizacion: 15,
                 fechaRegistroPermiso: toSQLDate(new Date()),
+            },
+            {
+                descripcionPermiso: 'Permisos de acceso para Maquinista',
+                autorizacion: 15,
+                fechaRegistroPermiso: toSQLDate(new Date()),
             }
         ], {});
     },
