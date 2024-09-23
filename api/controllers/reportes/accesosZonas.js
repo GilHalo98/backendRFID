@@ -218,7 +218,7 @@ module.exports = async function reporteAccesosZona(
             const registroB = registros[index + 1];
 
             // Verificamos que registroA sea de tipo acceso a zona.
-            if(registroA.idTipoReporteVinculado != ipoReporteSalidaZona.id) {
+            if(registroA.idTipoReporteVinculado != tipoReporteSalidaZona.id) {
                 // Si no es asi, se salta el ciclo.
                 index ++;
 
