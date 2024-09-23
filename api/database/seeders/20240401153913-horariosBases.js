@@ -45,11 +45,11 @@ function generarDiasLaborales(cantidadUsuarios) {
 module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.bulkInsert('horarios', [
-            ...generarSemanasLaborales(102)
+            ...generarSemanasLaborales(6)
         ], {});
 
         await queryInterface.bulkInsert('diasLaborales', [
-            ...generarDiasLaborales(102)
+            ...generarDiasLaborales(6)
         ], {});
     },
 

@@ -26,7 +26,7 @@ module.exports = {
 
                 fechaRegistroEmpleado: fecha,
 
-                idRolVinculado: 2,
+                idRolVinculado: 1,
                 idImagenVinculada: 1
             },
             {
@@ -41,7 +41,7 @@ module.exports = {
 
                 fechaRegistroEmpleado: fecha,
 
-                idRolVinculado: 2,
+                idRolVinculado: 1,
                 idImagenVinculada: 1
             },
             {
@@ -56,7 +56,7 @@ module.exports = {
 
                 fechaRegistroEmpleado: fecha,
 
-                idRolVinculado: 3,
+                idRolVinculado: 2,
                 idImagenVinculada: 1
             },
             {
@@ -71,7 +71,7 @@ module.exports = {
 
                 fechaRegistroEmpleado: fecha,
 
-                idRolVinculado: 3,
+                idRolVinculado: 2,
                 idImagenVinculada: 1
             },
             {
@@ -86,7 +86,7 @@ module.exports = {
 
                 fechaRegistroEmpleado: fecha,
 
-                idRolVinculado: 6,
+                idRolVinculado: 5,
                 idImagenVinculada: 1
             },
             {
@@ -101,7 +101,7 @@ module.exports = {
 
                 fechaRegistroEmpleado: fecha,
 
-                idRolVinculado: 2,
+                idRolVinculado: 1,
                 idImagenVinculada: 1
             },
         ], {});
@@ -123,7 +123,7 @@ module.exports = {
                 nombreUsuario: 'diego',
                 password: passgen(),
                 fechaRegistroUsuario: fecha,
-                idRegistroEmpleadoVinculado: 7
+                idRegistroEmpleadoVinculado: 6
             },
         ], {});
     },

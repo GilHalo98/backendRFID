@@ -15,19 +15,10 @@ const { toSQLDate } = require("../../utils/utils");
 module.exports = {
     async up(queryInterface, Sequelize) {
         await queryInterface.bulkInsert('permisos', [
+
             {
-                descripcionPermiso: 'Permisos de acceso para Roles invalidos',
-                autorizacion: 0,
-                fechaRegistroPermiso: toSQLDate(new Date()),
-            },
-            {
-                descripcionPermiso: 'Permisos de acceso para Ensamblador',
-                autorizacion: 15,
-                fechaRegistroPermiso: toSQLDate(new Date()),
-            },
-            {
-                descripcionPermiso: 'Permisos de acceso para Maquinista',
-                autorizacion: 15,
+                descripcionPermiso: 'Permisos de acceso para Admon',
+                autorizacion: 255,
                 fechaRegistroPermiso: toSQLDate(new Date()),
             },
             {
@@ -41,8 +32,13 @@ module.exports = {
                 fechaRegistroPermiso: toSQLDate(new Date()),
             },
             {
-                descripcionPermiso: 'Permisos de acceso para Admon',
-                autorizacion: 255,
+                descripcionPermiso: 'Permisos de acceso para Maquinista',
+                autorizacion: 15,
+                fechaRegistroPermiso: toSQLDate(new Date()),
+            },
+            {
+                descripcionPermiso: 'Permisos de acceso para Ensamblador',
+                autorizacion: 15,
                 fechaRegistroPermiso: toSQLDate(new Date()),
             }
         ], {});
