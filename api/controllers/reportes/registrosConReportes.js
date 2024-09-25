@@ -28,6 +28,10 @@ const {
     mostrarLog
 } = require("../../utils/logs");
 
+const {
+    verificarContinuidadReportes
+} = require('../../utils/funcionesReportes');
+
 // Modelos que usara el controlador.
 const Zonas = db.zona;
 const Reportes = db.reporte;
@@ -35,42 +39,6 @@ const TiposReportes = db.tipoReporte;
 const ReportesAccesos = db.reporteAcceso;
 const DispositivosIoT = db.dispositivoIoT;
 const ReportesActividades = db.reporteActividad;
-
-// Vericica la continuidad entre los reportes de acceso, actividad.
-async function verificarContinuidadReportes(
-    listaRegistros,
-    tipoReporteA,
-    tipoReporteB,
-    index=0
-) {
-    // Consultamos los registros.
-    const registroA = listaRegistros[index];
-    const registroB = listaRegistros[index + 1];
-
-    // Verificamos que registroA sea de tipo salida a zona.
-    if(registroA == tipoReporteA) {
-        // Verificamos que el registroB sea de tipo acceso de zona.
-        if(registroB == tipoReporteB) {
-            // Terminamos el bucle.
-            return true;
-        }
-    }
-
-    // Si todavia quedan reportes por recorrer.
-    if(index < listaRegistros.length - 1) {
-        // Verificalos recursivamente.
-        return verificarContinuidadReportes(
-            listaRegistros,
-            tipoReporteA,
-            tipoReporteB,
-            index + 1
-        );
-
-    }
-
-    // Sino, retorna falso.
-    return false;
-};
 
 // Busca los dispositivos y las zonas donde el empleado tenga reportes.
 module.exports = async function registrosConReportes(

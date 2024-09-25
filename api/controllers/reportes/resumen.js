@@ -28,12 +28,17 @@ const {
     mostrarLog
 } = require("../../utils/logs");
 
+const {
+    contarContinuidadReprotes
+} = require('../../utils/funcionesReportes');
+
 // Modelos que usara el controlador.
 const Zonas = db.zona;
 const Reportes = db.reporte;
 const Empleados = db.empleado;
 const TiposReportes = db.tipoReporte;
 const ReportesAccesos = db.reporteAcceso;
+const DispositivosIoT = db.dispositivoIoT;
 const ReportesActividades = db.reporteActividad;
 
 // Genera un reporte de resumen de los accesos totales, los inicios
@@ -87,96 +92,173 @@ module.exports = async function reporteResumen(
             });
         }
 
-        // Instanciamos el reporte.
-        const reporte = {
-            accesos: {},
-            actividades: {
-                inicio: undefined,
-                fin: undefined
-            }
-        };
+        /**
+         * Consultamos los registros de los tipos de reportes a usar
+         * para generar el reporte resumen.
+        */
 
-        // Buscamos el tipo de reporte para el inicio de descanso.
-        const tipoReporteInicioDescanso = await TiposReportes.findOne({
+        // Consultamos el tipo de repote para acceso a zona.
+        const tipoReporteAccesoZona = await TiposReportes.findOne({
             where: {
-                tagTipoReporte: 'chequeoInicioDescanso'
+                tagTipoReporte: 'accesoGarantizado'
             }
         });
 
-        // Buscamos el tipo de reporte para el fin de descanso.
-        const tipoReporteFinDescanso = await TiposReportes.findOne({
+        // Consultamos el tipo de repote para salida de zona.
+        const tipoReporteSalidaZona = await TiposReportes.findOne({
             where: {
-                tagTipoReporte: 'chequeoFinDescanso'
+                tagTipoReporte: 'salidaZona'
             }
         });
 
-        // Si el registro vinculado no existe.
-        if(!tipoReporteInicioDescanso || !tipoReporteFinDescanso) {
+        // Consultamos el tipo de repote para actividad iniciada.
+        const tipoReporteActividadIniciada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadIniciada'
+            }
+        });
+
+        // Consultamos el tipo de repote para actividad finalizada.
+        const tipoReporteActividadFinalizada = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'actividadFinalizada'
+            }
+        });
+
+        // Si alguno de los tipos de reporte no existe, entonces se
+        // envia un mensaje de error.
+        if(
+            !tipoReporteAccesoZona
+            || !tipoReporteActividadIniciada
+            || !tipoReporteActividadFinalizada
+            || !tipoReporteSalidaZona
+        ) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
+        /**
+         * Generamos un reporte de resumen de las actividades del
+         * empleado, asi como de las zonas visitadas y el tiempo total
+         * en actividad, en general.
+        */
+
+        // Instanciamos el reporte.
+        const reporte = {
+            accesos: {},
+            actividades: {}
+        };
+
         // Consultamos todas las zonas.
         const registrosZonas = await Zonas.findAll();
 
-        // Por cada zona en los registros de zona.
+        // Por cada zona que existe.
         for (let i = 0; i < registrosZonas.length; i++) {
-            // Instanciamos los registros.
+            // Desempaquetamos un registro de zona.
             const registroZona = registrosZonas[i];
 
-            // Consultamos los reportes de accesos por zona.
-            const conteoReportes = await ReportesAccesos.count({
+            // Consultamos todos los registros.
+            const registrosAccesos = await ReportesAccesos.findAll({
                 where: {
                     idEmpleadoVinculado: consulta.idEmpleadoVinculado,
                     idZonaVinculada: registroZona.id,
                     fechaRegistroReporteAcceso: {
                         [Op.between]: rangoDiaReporte
-                    }
-                }
+                    },
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [
+                                tipoReporteAccesoZona.id,
+                                tipoReporteSalidaZona.id
+                            ]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }],
+                order: [['fechaRegistroReporteAcceso', 'DESC']]
             });
 
-            // Guardamos el conteo de accesos a la zona.
-            reporte.accesos[registroZona.nombreZona] = conteoReportes;
+            // Contamos los ingresos y egresos a la zona.
+            const conteo = await contarContinuidadReprotes(
+                registrosAccesos.map((registro) => {
+                    return registro.reporte.idTipoReporteVinculado;
+                }),
+                tipoReporteSalidaZona.id,   // Salida
+                tipoReporteAccesoZona.id,    // Entrada
+                0
+            );
+
+            // Si el conteo de los registros es mayor que 0, entonces
+            // se agregan los accesos al reporte.
+            if(conteo > 0) {
+                // Guardamos el conteo de los reportes.
+                reporte.accesos[
+                    registroZona.nombreZona
+                ] = conteo;
+            }
         }
 
-        // Realizamos el conteo de reportres de actividad iniciadas.
-        const conteoReportesInicioActividad = await ReportesActividades.count({
-            where: {
-                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
-                fechaRegistroReporteActividad: {
-                    [Op.between]: rangoDiaReporte
-                }
-            },
-            inlcude: [{
-                required: true,
-                model: Reportes,
-                where: {
-                    idTipoReporteVinculado: tipoReporteInicioDescanso.id
-                }
-            }]
-        });
+        // Consultamos todos los dispositivos.
+        const registrosDispositivos = await DispositivosIoT.findAll();
 
-        // Realizamos el conteo de reportres de actividad finalizadas.
-        const conteoReportesFinActividad = await ReportesActividades.count({
-            where: {
-                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
-                fechaRegistroReporteActividad: {
-                    [Op.between]: rangoDiaReporte
-                }
-            },
-            inlcude: [{
-                required: true,
-                model: Reportes,
-                where: {
-                    idTipoReporteVinculado: tipoReporteFinDescanso.id
-                }
-            }]
-        });
+        // Por cada dispositivo que existe.
+        for (let i = 0; i < registrosDispositivos.length; i++) {
+            // Desempaquetamos un registro de dispositivo.
+            const registroDispositivo = registrosDispositivos[i];
 
-        // Guardamos los conteos en el reporte.
-        reporte.actividades.inicio = conteoReportesInicioActividad;
-        reporte.actividades.fin = conteoReportesFinActividad;
+            // Consultamos todos los registros.
+            const registrosActividades = await ReportesActividades.findAll({
+                where: {
+                    idEmpleadoVinculado: consulta.idEmpleadoVinculado,
+                    idDispositivoVinculado: registroDispositivo.id,
+                    fechaRegistroReporteActividad: {
+                        [Op.between]: rangoDiaReporte
+                    },
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [
+                                tipoReporteActividadIniciada.id,
+                                tipoReporteActividadFinalizada.id
+                            ]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }],
+                order: [['fechaRegistroReporteActividad', 'DESC']]
+            });
+
+            // Contamos los inicios y fines de actividad.
+            const conteo = await contarContinuidadReprotes(
+                registrosActividades.map((registro) => {
+                    return registro.reporte.idTipoReporteVinculado;
+                }),
+                tipoReporteActividadFinalizada.id,   // Fin
+                tipoReporteActividadIniciada.id,    // Inicio
+                0
+            );
+
+            // Si el conteo de los registros es mayor que 0, entonces
+            // se agregan los accesos al reporte.
+            if(conteo > 0) {
+                // Guardamos el conteo de la continuidad de los reportes.
+                reporte.actividades[
+                    registroDispositivo.nombreDispositivo
+                ] = conteo;
+            }
+        }
 
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
