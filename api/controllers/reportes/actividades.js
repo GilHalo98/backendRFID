@@ -156,8 +156,6 @@ module.exports = async function reporteActividadesDispositivo(
 
         // Consultamos todos los registros.
         const registros = await ReportesActividades.findAll({
-            offset: offset,
-            limit: limit,
             where: datos,
             include: [{
                 required: true,
@@ -188,41 +186,34 @@ module.exports = async function reporteActividadesDispositivo(
         // y registrarlo como tiempo en zona.
         while(index < registros.length - 1) {
             // Consultamos los registros.
-            const registroA = registros[index];
-            const registroB = registros[index + 1];
+            const registroA = registros[index]; // Fin
+            const registroB = registros[index + 1]; // Inicio
 
-            // Verificamos que registroA sea de tipo acceso a zona.
-            if(registroA.reporte.idTipoReporteVinculado != tipoReporteActividadFinalizada.id) {
-                // Si no es asi, se salta el ciclo.
-                index ++;
+            // Verificamos que registroA sea de tipo fin de actividad.
+            if(registroA.reporte.idTipoReporteVinculado == tipoReporteActividadFinalizada.id) {
+                // Verificamos que el registroB sea de tipo inicio de actividad.
+                if(registroB.reporte.idTipoReporteVinculado == tipoReporteActividadIniciada.id) {
+                    // Si los dos tipos de reportes son los correctos
+                    // se calcula la diferencia de tiempo entre estos.
+                    const tiempoEnActividad = (
+                        registroA.fechaRegistroReporteActividad
+                        - registroB.fechaRegistroReporteActividad
+                    );
 
-                break;
+                    // Guardamos los datos en el reporte.
+                    reporte.push({
+                        inicio: registroB.fechaRegistroReporteActividad,
+                        fin: registroA.fechaRegistroReporteActividad,
+                        tiempoEnActividad: tiempoEnActividad
+                    });
+
+                    // Acumulamos en el index.
+                    index += 2;
+                }
             }
 
-            // Verificamos que el registroB sea de tipo salida de zona.
-            if(registroB.reporte.idTipoReporteVinculado != tipoReporteActividadIniciada.id) {
-                // Si no es asi, se salta el ciclo.
-                index ++;
-
-                break;
-            }
-
-            // Si los dos tipos de reportes son los correctos
-            // se calcula la diferencia de tiempo entre estos.
-            const tiempoEnActividad = (
-                registroA.fechaRegistroReporteActividad
-                - registroB.fechaRegistroReporteActividad
-            );
-
-            // Guardamos los datos en el reporte.
-            reporte.push({
-                inicio: registroB.fechaRegistroReporteActividad,
-                fin: registroA.fechaRegistroReporteActividad,
-                tiempoEnActividad: tiempoEnActividad
-            });
-
-            // Acumulamos en el index.
-            index += 2;
+            // Aumentamos el index en uno.
+            index ++;
         }
 
         // Paginamos la lista de reportes.
@@ -235,7 +226,7 @@ module.exports = async function reporteActividadesDispositivo(
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: reporte.length,
-            reporte: pagina
+            reporte: !(offset + limit)? reporte : pagina
         });
 
     } catch(excepcion) {
