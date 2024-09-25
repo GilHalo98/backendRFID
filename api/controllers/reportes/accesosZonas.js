@@ -1,3 +1,12 @@
+/**
+ * Arreglar lo de la paginacion
+ * la paginacion no es tan sencilla debido a que los reportes de
+ * acceso y salida de juntan en pares de 2, se manera secuencial, uno
+ * de entrada y uno de salida y los restantes se descartan, si de manera
+ * secuencial se encuentra entrada, entrada o salida salida, entonces se
+ * descarta uno.
+ */
+
 // Modelos de la DB
 const db = require("../../models/index");
 
@@ -70,7 +79,8 @@ module.exports = async function reporteAccesosZona(
                 consulta.offset : parseInt(consulta.offset)
         );
 
-        // Verificamos si se selecciono un maximo de elementos por pagina.
+        // Verificamos si se selecciono un maximo de elementos
+        // por pagina.
         const limit = (
             !consulta.limit?
                 consulta.limit : parseInt(consulta.limit)

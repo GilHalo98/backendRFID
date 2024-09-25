@@ -145,6 +145,7 @@ module.exports = async function reporteChequeos(
         // Consultamos el reporte de entrada.
         const reporteEntrada = await ReportesChequeos.findOne({
             where: {
+                idEmpleadoVinculado: registroVinculado.id,
                 fechaRegistroReporteChequeo: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -169,6 +170,7 @@ module.exports = async function reporteChequeos(
         // Consultamos el reporte de inicio de descanso.
         const reporteInicioDescanso = await ReportesChequeos.findOne({
             where: {
+                idEmpleadoVinculado: registroVinculado.id,
                 fechaRegistroReporteChequeo: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -188,6 +190,7 @@ module.exports = async function reporteChequeos(
         // Consultamos el reporte de fin de descanso.
         const reporteFinDescanso = await ReportesChequeos.findOne({
             where: {
+                idEmpleadoVinculado: registroVinculado.id,
                 fechaRegistroReporteChequeo: {
                     [Op.between]: rangoDiaReporte
                 }
@@ -207,6 +210,7 @@ module.exports = async function reporteChequeos(
         // Consultamos el reporte de salida.
         const reporteSalida = await ReportesChequeos.findOne({
             where: {
+                idEmpleadoVinculado: registroVinculado.id,
                 fechaRegistroReporteChequeo: {
                     [Op.between]: rangoDiaReporte
                 }
