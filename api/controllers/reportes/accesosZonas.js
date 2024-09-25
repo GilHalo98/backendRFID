@@ -165,8 +165,6 @@ module.exports = async function reporteAccesosZona(
 
         // Consultamos todos los registros.
         const registros = await ReportesAccesos.findAll({
-            offset: offset,
-            limit: limit,
             where: datos,
             include: [{
                 required: true,
@@ -226,6 +224,10 @@ module.exports = async function reporteAccesosZona(
             // Aumentamos el index en uno.
             index ++;
         }
+
+        const aux = reporte.slice(offset, limit);
+
+        console.log(aux);
 
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
