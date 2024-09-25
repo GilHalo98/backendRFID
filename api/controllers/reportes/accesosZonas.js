@@ -206,9 +206,6 @@ module.exports = async function reporteAccesosZona(
                         salida: registroA.fechaRegistroReporteAcceso,
                         tiempoEnZona: tiempoEnZona
                     });
-
-                    // Acumulamos en el index.
-                    index += 2;
                 }
             }
 

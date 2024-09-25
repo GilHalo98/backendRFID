@@ -206,9 +206,6 @@ module.exports = async function reporteActividadesDispositivo(
                         fin: registroA.fechaRegistroReporteActividad,
                         tiempoEnActividad: tiempoEnActividad
                     });
-
-                    // Acumulamos en el index.
-                    index += 2;
                 }
             }
 
