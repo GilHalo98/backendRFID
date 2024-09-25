@@ -20,6 +20,7 @@ const {
 // Funciones de manipulacion de tiempo.
 const {
     deserealizarSemana,
+    dateDiaSemana,
     rangoDia
 } = require("../../utils/tiempo");
 
@@ -59,6 +60,9 @@ module.exports = async function reporteGeneralHorasTrabajadas(
                 codigoRespuesta: CODIGOS.TOKEN_INVALIDO
             });
         }
+
+        // Instanciamos la fecha de hoy.
+        const hoy = new Date();
 
         // Construimos la consulta hacia la db.
         const datos = Object();
@@ -195,9 +199,16 @@ module.exports = async function reporteGeneralHorasTrabajadas(
                 semanaReporte
             );
 
+            // Fecha del dia del reporte
+            const fechaDia = dateDiaSemana(
+                diaLaboral.dia,
+                semanaReporte
+            );
+
             // Consultamos el reporte de entrada.
             const reporteEntrada = await ReportesChequeos.findOne({
                 where: {
+                    idEmpleadoVinculado: registroVinculado.id,
                     fechaRegistroReporteChequeo: {
                         [Op.between]: rangoDiaReporte
                     }
@@ -222,6 +233,7 @@ module.exports = async function reporteGeneralHorasTrabajadas(
             // Consultamos el reporte de inicio de descanso.
             const reporteInicioDescanso = await ReportesChequeos.findOne({
                 where: {
+                    idEmpleadoVinculado: registroVinculado.id,
                     fechaRegistroReporteChequeo: {
                         [Op.between]: rangoDiaReporte
                     }
@@ -241,6 +253,7 @@ module.exports = async function reporteGeneralHorasTrabajadas(
             // Consultamos el reporte de fin de descanso.
             const reporteFinDescanso = await ReportesChequeos.findOne({
                 where: {
+                    idEmpleadoVinculado: registroVinculado.id,
                     fechaRegistroReporteChequeo: {
                         [Op.between]: rangoDiaReporte
                     }
@@ -260,6 +273,7 @@ module.exports = async function reporteGeneralHorasTrabajadas(
             // Consultamos el reporte de salida.
             const reporteSalida = await ReportesChequeos.findOne({
                 where: {
+                    idEmpleadoVinculado: registroVinculado.id,
                     fechaRegistroReporteChequeo: {
                         [Op.between]: rangoDiaReporte
                     }
@@ -295,8 +309,12 @@ module.exports = async function reporteGeneralHorasTrabajadas(
                 if(!reporteEntrada && !reporteSalida) {
                     // Y no es un descanso.
                     if(!diaLaboral.esDescanso) {
-                        // Se marca una falta.
-                        reporte.faltas ++;
+                        // Si el dia del reporte es mayor que el dia actual.
+                        // no se marca como falta.
+                        if(fechaDia < hoy) {
+                            // De lo contrario, se marca una falta.
+                            reporte.faltas ++;
+                        }
                     }
 
                 // Si hay registro de entrada y salida.
