@@ -29,10 +29,48 @@ const {
 } = require("../../utils/logs");
 
 // Modelos que usara el controlador.
+const Zonas = db.zona;
 const Reportes = db.reporte;
 const TiposReportes = db.tipoReporte;
 const ReportesAccesos = db.reporteAcceso;
+const DispositivosIoT = db.dispositivoIoT;
 const ReportesActividades = db.reporteActividad;
+
+// Vericica la continuidad entre los reportes de acceso, actividad.
+async function verificarContinuidadReportes(
+    listaRegistros,
+    tipoReporteA,
+    tipoReporteB,
+    index=0
+) {
+    // Consultamos los registros.
+    const registroA = listaRegistros[index];
+    const registroB = listaRegistros[index + 1];
+
+    // Verificamos que registroA sea de tipo salida a zona.
+    if(registroA == tipoReporteA) {
+        // Verificamos que el registroB sea de tipo acceso de zona.
+        if(registroB == tipoReporteB) {
+            // Terminamos el bucle.
+            return true;
+        }
+    }
+
+    // Si todavia quedan reportes por recorrer.
+    if(index < listaRegistros.length - 1) {
+        // Verificalos recursivamente.
+        return verificarContinuidadReportes(
+            listaRegistros,
+            tipoReporteA,
+            tipoReporteB,
+            index + 1
+        );
+
+    }
+
+    // Sino, retorna falso.
+    return false;
+};
 
 // Busca los dispositivos y las zonas donde el empleado tenga reportes.
 module.exports = async function registrosConReportes(
@@ -72,10 +110,17 @@ module.exports = async function registrosConReportes(
             semanaReporte
         );
 
-        // Consultamos el tipo de repote para actividad inicada.
+        // Consultamos el tipo de repote para acceso a zona.
         const tipoReporteAccesoZona = await TiposReportes.findOne({
             where: {
                 tagTipoReporte: 'accesoGarantizado'
+            }
+        });
+
+        // Consultamos el tipo de repote para salida de zona.
+        const tipoReporteSalidaZona = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'salidaZona'
             }
         });
 
@@ -99,73 +144,133 @@ module.exports = async function registrosConReportes(
             !tipoReporteAccesoZona
             || !tipoReporteActividadIniciada
             || !tipoReporteActividadFinalizada
+            || !tipoReporteSalidaZona
         ) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
 
-        // Consultamos todos los registros.
-        const registrosAccesos = await ReportesAccesos.findAll({
-            where: {
-                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
-                fechaRegistroReporteAcceso: {
-                    [Op.between]: rangoDiaReporte
-                },
-            },
-            include: [{
-                required: true,
-                model: Reportes,
-                where: {
-                    idTipoReporteVinculado: tipoReporteAccesoZona.id
-                },
-                include: [{
-                    model: TiposReportes
-                }]
-            }],
-            order: [['fechaRegistroReporteAcceso', 'DESC']]
-        });
-
+        // Lista de ids de zonas con registros
+        // de reportes vinculados.
         const idsZonas = [];
 
-        registrosAccesos.forEach((registro) => {
-            if(!idsZonas.includes(registro.idZonaVinculada)) {
-                idsZonas.push(registro.idZonaVinculada);
-            }
-        });
+        // Lista de ids de dispositivos con registros 
+        // de reportes vinculados-.
+        const idsDispositivos = [];
 
-        // Consultamos todos los registros.
-        const registrosDispositivos = await ReportesActividades.findAll({
-            where: {
-                idEmpleadoVinculado: consulta.idEmpleadoVinculado,
-                fechaRegistroReporteActividad: {
-                    [Op.between]: rangoDiaReporte
-                }
-            },
-            include: [{
-                required: true,
-                model: Reportes,
+        /**
+         * Verificamos que minimo exista un reporte completo, esto es
+         * entrada y salida de zona, por cada zona, si es asi, lo
+         * agregamos a la lista de zonas con reportes vinculados, al
+         * igual que con los reportes de actividad
+        */
+
+        // Consultamos todas las zonas.
+        const registrosZonas = await Zonas.findAll();
+
+        // Por cada zona que existe.
+        for (let i = 0; i < registrosZonas.length; i++) {
+            // Desempaquetamos un registro de zona.
+            const registroZona = registrosZonas[i];
+
+            // Consultamos todos los registros.
+            const registrosAccesos = await ReportesAccesos.findAll({
                 where: {
-                    idTipoReporteVinculado: {
-                        [Op.or]: [
-                            tipoReporteActividadIniciada.id,
-                            tipoReporteActividadFinalizada.id
-                        ]
-                    }
+                    idEmpleadoVinculado: consulta.idEmpleadoVinculado,
+                    idZonaVinculada: registroZona.id,
+                    fechaRegistroReporteAcceso: {
+                        [Op.between]: rangoDiaReporte
+                    },
                 },
                 include: [{
-                    model: TiposReportes
-                }]
-            }],
-            order: [['fechaRegistroReporteActividad', 'DESC']]
-        });
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [
+                                tipoReporteAccesoZona.id,
+                                tipoReporteSalidaZona.id
+                            ]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }],
+                order: [['fechaRegistroReporteAcceso', 'DESC']]
+            });
 
-        const idsDispositivos = [];
-        registrosDispositivos.forEach((registro) => {
-            if(!idsDispositivos.includes(registro.idDispositivoVinculado)) {
-                idsDispositivos.push(registro.idDispositivoVinculado);
+            // Verificamos la continuidad de los reportes de
+            // acceso a zona, esto es, que por cada reporte de entrada
+            // le siga uno de salida.
+            const continuidadEnReportesAcceso = await verificarContinuidadReportes(
+                registrosAccesos.map((registro) => {
+                    return registro.reporte.idTipoReporteVinculado;
+                }),
+                tipoReporteSalidaZona.id,   // Salida
+                tipoReporteAccesoZona.id    // Entrada
+            );
+
+            // Si la zona tiene continuidad en los reportes
+            // la agregamos a la lista de zonas con reportes.
+            if(continuidadEnReportesAcceso) {
+                idsZonas.push(registroZona.id);
             }
-        });
+        }
+
+        // Consultamos todos los dispositivos.
+        const registrosDispositivos = await DispositivosIoT.findAll();
+
+        // Por cada dispositivo que existe.
+        for (let i = 0; i < registrosDispositivos.length; i++) {
+            // Desempaquetamos un registro de dispositivo.
+            const registroDispositivo = registrosDispositivos[i];
+
+            // Consultamos todos los registros.
+            const registrosActividades = await ReportesActividades.findAll({
+                where: {
+                    idEmpleadoVinculado: consulta.idEmpleadoVinculado,
+                    idDispositivoVinculado: registroDispositivo.id,
+                    fechaRegistroReporteActividad: {
+                        [Op.between]: rangoDiaReporte
+                    },
+                },
+                include: [{
+                    required: true,
+                    model: Reportes,
+                    where: {
+                        idTipoReporteVinculado: {
+                            [Op.or]: [
+                                tipoReporteActividadIniciada.id,
+                                tipoReporteActividadFinalizada.id
+                            ]
+                        }
+                    },
+                    include: [{
+                        model: TiposReportes
+                    }]
+                }],
+                order: [['fechaRegistroReporteActividad', 'DESC']]
+            });
+
+            // Verificamos la continuidad de los reportes de
+            // actividad, esto es, que por cada reporte de inicio de
+            // actividad le siga uno de fin de actividad.
+            const continuidadEnReportesActividad = await verificarContinuidadReportes(
+                registrosActividades.map((registro) => {
+                    return registro.reporte.idTipoReporteVinculado;
+                }),
+                tipoReporteActividadIniciada.id,   // Fin
+                tipoReporteActividadIniciada.id    // Inicio
+            );
+
+            // Si el dispositivo tiene continuidad en los reportes
+            // la agregamos a la lista de dispositivos con reportes.
+            if(continuidadEnReportesActividad) {
+                idsDispositivos.push(registroDispositivo.id);
+            }
+        }
 
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
