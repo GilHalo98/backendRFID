@@ -225,10 +225,6 @@ module.exports = async function reporteAccesosZona(
             index ++;
         }
 
-        const aux = reporte.slice(offset, limit);
-
-        console.log(aux);
-
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
