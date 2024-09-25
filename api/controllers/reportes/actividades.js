@@ -225,11 +225,17 @@ module.exports = async function reporteActividadesDispositivo(
             index += 2;
         }
 
+        // Paginamos la lista de reportes.
+        const pagina = reporte.slice(
+            offset,
+            offset + limit
+        );
+
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: reporte.length,
-            reporte: reporte
+            reporte: pagina
         });
 
     } catch(excepcion) {

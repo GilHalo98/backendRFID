@@ -1,12 +1,3 @@
-/**
- * Arreglar lo de la paginacion
- * la paginacion no es tan sencilla debido a que los reportes de
- * acceso y salida de juntan en pares de 2, se manera secuencial, uno
- * de entrada y uno de salida y los restantes se descartan, si de manera
- * secuencial se encuentra entrada, entrada o salida salida, entonces se
- * descarta uno.
- */
-
 // Modelos de la DB
 const db = require("../../models/index");
 
@@ -225,11 +216,17 @@ module.exports = async function reporteAccesosZona(
             index ++;
         }
 
+        // Paginamos la lista de reportes.
+        const pagina = reporte.slice(
+            offset,
+            offset + limit
+        );
+
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             totalRegistros: reporte.length,
-            reporte: reporte
+            reporte: pagina
         });
 
     } catch(excepcion) {
