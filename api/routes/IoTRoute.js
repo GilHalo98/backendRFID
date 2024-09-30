@@ -50,6 +50,14 @@ module.exports = (app) => {
         IoT.registrarReporteChequeo
     );
 
+    // Registra un reporte de chequeo del empleo y toma en cuenta el
+    // descanso.
+    router.post(
+        'registrar/reporte/chequeo/conDescanso',
+        upload.any(),
+        IoT.registrarReporteChequeoConDescanso
+    );
+
     // Registra un reporte de inicio de actividad.
     router.post(
         '/registrar/reporte/actividad/iniciada',
