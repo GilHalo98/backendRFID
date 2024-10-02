@@ -69,43 +69,48 @@ function generarReportePorDia(
     // Identificamos si el dia es mayor que el dia actual.
     let diaFueraDeRango = false;
 
-    // Si existen el reporte de entrada y salida.
-    if(!(!reporteSalida || !reporteEntrada)) {
-        // Calculamos el tiempo de trabajo en milisegundos.
-        tiempoTrabajo = reporteSalida.fechaRegistroReporteChequeo
-            - reporteEntrada.fechaRegistroReporteChequeo;
+    // Si la fecha del dia es mayor que el dia actual, entonces el dia
+    //  del reporte es invalido.
+    if(fechaDia > hoy) {
+        // Indica si el dia es mayor que el dia actual.
+        diaFueraDeRango = true;
 
-        llegoTarde = reporteEntrada.reporte.idTipoReporteVinculado == tipoReporteEntradaRetraso.id?
-            true : false;
+    } else {
+        // Si existen el reporte de entrada y salida.
+        if(!(!reporteSalida || !reporteEntrada)) {
+            // Calculamos el tiempo de trabajo en milisegundos.
+            tiempoTrabajo = reporteSalida.fechaRegistroReporteChequeo
+                - reporteEntrada.fechaRegistroReporteChequeo;
 
-        salioTarde = reporteSalida.reporte.idTipoReporteVinculado == tipoReporteSalidaExtras.id?
-            true : false;
+            llegoTarde = reporteEntrada.reporte.idTipoReporteVinculado == tipoReporteEntradaRetraso.id?
+                true : false;
 
-    }
+            salioTarde = reporteSalida.reporte.idTipoReporteVinculado == tipoReporteSalidaExtras.id?
+                true : false;
 
-    if(!reporteEntrada && !reporteSalida) {
-        // Y no es un descanso.
-        if(!registroDiaLaboral.esDescanso) {
-            // Si el dia del reporte es mayor que el dia actual.
-            // no se marca como falta.
-            if(fechaDia < hoy) {
-                // De lo contrario, se marca una falta.
-                falto = true;
-            } else {
-                // Indica si el dia es mayor que el dia actual.
-                diaFueraDeRango = true;
+        }
+
+        if(!reporteEntrada && !reporteSalida) {
+            // Y no es un descanso.
+            if(!registroDiaLaboral.esDescanso) {
+                // Si el dia del reporte es mayor que el dia actual.
+                // no se marca como falta.
+                if(fechaDia < hoy) {
+                    // De lo contrario, se marca una falta.
+                    falto = true;
+                }
             }
         }
+
+        // Construimos los datos a detalle del reporte.
+        const datosDetalle = {
+            entrada: !reporteEntrada?
+                null : reporteEntrada.fechaRegistroReporteChequeo,
+
+            salida: !reporteSalida?
+                null : reporteSalida.fechaRegistroReporteChequeo ,
+        };
     }
-
-    // Construimos los datos a detalle del reporte.
-    const datosDetalle = {
-        entrada: !reporteEntrada?
-            null : reporteEntrada.fechaRegistroReporteChequeo,
-
-        salida: !reporteSalida?
-            null : reporteSalida.fechaRegistroReporteChequeo ,
-    };
 
     // Guardamos la informacion en el diccionario.
     return {
