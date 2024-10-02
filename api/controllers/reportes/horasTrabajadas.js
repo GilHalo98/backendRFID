@@ -69,6 +69,12 @@ function generarReportePorDia(
     // Identificamos si el dia es mayor que el dia actual.
     let diaFueraDeRango = false;
 
+    // Construimos los datos a detalle del reporte.
+    const datosDetalle = {
+        entrada: undefined,
+        salida: undefined
+    };
+
     // Si la fecha del dia es mayor que el dia actual, entonces el dia
     //  del reporte es invalido.
     if(fechaDia > hoy) {
@@ -103,13 +109,11 @@ function generarReportePorDia(
         }
 
         // Construimos los datos a detalle del reporte.
-        const datosDetalle = {
-            entrada: !reporteEntrada?
-                null : reporteEntrada.fechaRegistroReporteChequeo,
+        datosDetalle.entrada = !reporteEntrada?
+            null : reporteEntrada.fechaRegistroReporteChequeo;
 
-            salida: !reporteSalida?
-                null : reporteSalida.fechaRegistroReporteChequeo ,
-        };
+        datosDetalle.salida = !reporteSalida?
+            null : reporteSalida.fechaRegistroReporteChequeo;
     }
 
     // Guardamos la informacion en el diccionario.
