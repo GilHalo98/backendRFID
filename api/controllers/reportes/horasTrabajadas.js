@@ -66,6 +66,9 @@ function generarReportePorDia(
     // Identificamos si salio tarde.
     let salioTarde = false;
 
+    // Identificamos si el dia es mayor que el dia actual.
+    let diaFueraDeRango = false;
+
     // Si existen el reporte de entrada y salida.
     if(!(!reporteSalida || !reporteEntrada)) {
         // Calculamos el tiempo de trabajo en milisegundos.
@@ -88,6 +91,9 @@ function generarReportePorDia(
             if(fechaDia < hoy) {
                 // De lo contrario, se marca una falta.
                 falto = true;
+            } else {
+                // Indica si el dia es mayor que el dia actual.
+                diaFueraDeRango = true;
             }
         }
     }
@@ -109,7 +115,8 @@ function generarReportePorDia(
         llegoTarde: llegoTarde,
         salioTarde: salioTarde,
         esDescanso: registroDiaLaboral.esDescanso,
-        falto: falto
+        falto: falto,
+        diaFueraDeRango: diaFueraDeRango
     };
 };
 
