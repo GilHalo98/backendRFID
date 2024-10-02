@@ -126,7 +126,7 @@ function rangoDia(dia, semana=null) {
 };
 
 function dateDiaSemana(dia, semana) {
-        // Le quitamos una unidad al dia pasado, si el dia es 7 o domingo,
+    // Le quitamos una unidad al dia pasado, si el dia es 7 o domingo,
     // se establece a -1 para empezar con el domingo de
     // la semana pasada.
     dia = dia == 7?

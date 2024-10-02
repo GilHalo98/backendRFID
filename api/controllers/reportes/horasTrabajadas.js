@@ -19,8 +19,9 @@ const {
 
 // Funciones de manipulacion de tiempo.
 const {
+    rangoDia,
+    dateDiaSemana,
     deserealizarSemana,
-    rangoDia
 } = require("../../utils/tiempo");
 
 // Funciones extra.
@@ -48,7 +49,9 @@ function generarReportePorDia(
     reporteEntrada,
     reporteSalida,
     tipoReporteEntradaRetraso,
-    tipoReporteSalidaExtras
+    tipoReporteSalidaExtras,
+    fechaDia,
+    hoy
 ) {
     // Para realizar el calculo de las horas
     // trabajadas y descansadas.
@@ -75,6 +78,18 @@ function generarReportePorDia(
         salioTarde = reporteSalida.reporte.idTipoReporteVinculado == tipoReporteSalidaExtras.id?
             true : false;
 
+    }
+
+    if(!reporteEntrada && !reporteSalida) {
+        // Y no es un descanso.
+        if(!registroDiaLaboral.esDescanso) {
+            // Si el dia del reporte es mayor que el dia actual.
+            // no se marca como falta.
+            if(fechaDia < hoy) {
+                // De lo contrario, se marca una falta.
+                falto = true;
+            }
+        }
     }
 
     // Construimos los datos a detalle del reporte.
@@ -106,6 +121,7 @@ async function generarReporte(
     tipoReporteEntradaRetraso,
     tipoReporteSalida,
     tipoReporteSalidaExtras,
+    hoy
 ) {
     // Horas trabajadas por dia.
     const horasTrabajadas = []
@@ -157,6 +173,12 @@ async function generarReporte(
     for(let j = 0; j < diasLaborales.length; j++) {
         // Desempaquetamos el registro del dia laboral.
         const registroDiaLaboral = diasLaborales[j];
+
+        // Fecha del dia del reporte
+        const fechaDia = dateDiaSemana(
+            registroDiaLaboral.dia,
+            semanaReporte
+        );
 
         // Calculamos el rango del dia para el reporte.
         const rangoDiaReporte = rangoDia(
@@ -220,7 +242,9 @@ async function generarReporte(
             reporteEntrada,
             reporteSalida,
             tipoReporteEntradaRetraso,
-            tipoReporteSalidaExtras
+            tipoReporteSalidaExtras,
+            fechaDia,
+            hoy
         );
 
         // Acumulamos el tiempo de trabajo total.
@@ -289,6 +313,9 @@ module.exports = async function reporteHorasTrabajadas(
 
         // Construimos la consulta hacia la db.
         const datos = Object();
+
+        // Instanciamos la fecha de hoy.
+        const hoy = new Date();
 
         // Agregamos los parametros de la consulta.
         if(consulta.idEmpleadoVinculado) {
@@ -406,7 +433,8 @@ module.exports = async function reporteHorasTrabajadas(
                 tipoReporteEntrada,
                 tipoReporteEntradaRetraso,
                 tipoReporteSalida,
-                tipoReporteSalidaExtras
+                tipoReporteSalidaExtras,
+                hoy
             )));
         }
 
