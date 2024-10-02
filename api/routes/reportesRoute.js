@@ -63,6 +63,14 @@ module.exports = (app) => {
         controlador.reporteGeneralHorasTrabajadas
     );
 
+    // Genera un reporte general de las horas trabajadas
+    // con descansos del empleado.
+    router.get(
+        '/horasTrabajadas/detalles/general/conDescanso',
+        upload.any(),
+        controlador.reporteGeneralHorasTrabajadasConDescanso
+    );
+
     // Genera un reporte de los movimientos del empelado.
     router.get(
         '/horasTrabajadas/detalles/tracker',
