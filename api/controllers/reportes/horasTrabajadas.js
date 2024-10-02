@@ -215,13 +215,19 @@ async function generarReporte(
         });
 
         // Agregamos la promesa al Pool de promesas.
-        horasTrabajadas.push(generarReportePorDia(
+        const reporteDia = generarReportePorDia(
             registroDiaLaboral,
             reporteEntrada,
             reporteSalida,
             tipoReporteEntradaRetraso,
             tipoReporteSalidaExtras
-        ));
+        );
+
+        // Acumulamos el tiempo de trabajo total.
+        horasTrabajadas.push(reporteDia);
+
+        // Acumulamos el tiempo de trabajo total.
+        tiempoTrabajoTotal += reporteDia.tiempoTrabajo;
     }
 
     return {
