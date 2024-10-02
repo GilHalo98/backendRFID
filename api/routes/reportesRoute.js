@@ -23,6 +23,14 @@ module.exports = (app) => {
         controlador.reporteHorasTrabajadas
     );
 
+    // Consulta los registros de la DB de los reportes de
+    // horas trabajadas por dias con descanso.
+    router.get(
+        '/horasTrabajadas/conDescanso', 
+        upload.any(),
+        controlador.reporteHorasTrabajadasConDescanso
+    );
+
     // Consulta los registros de la DB.
     router.get(
         '/historial/actividad/maquina', 
@@ -67,6 +75,14 @@ module.exports = (app) => {
         '/horasTrabajadas/detalles/chequeos',
         upload.any(),
         controlador.reporteChequeos
+    );
+
+    // Genera un reporte de los chequeos del empleado
+    // con chequeos de descanso.
+    router.get(
+        '/horasTrabajadas/detalles/chequeos/conDescanso',
+        upload.any(),
+        controlador.reporteChequeosConDescanso
     );
 
     // Genera un reporte resumen de las horas trabajadas del empleado.

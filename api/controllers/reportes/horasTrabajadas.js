@@ -42,6 +42,200 @@ const TiposReportes = db.tipoReporte;
 const DiasLaborales = db.diaLaboral;
 const ReportesChequeos = db.reporteChequeo;
 
+// Genera los reportes por dia laboral.
+function generarReportePorDia(
+    registroDiaLaboral,
+    reporteEntrada,
+    reporteSalida,
+    tipoReporteEntradaRetraso,
+    tipoReporteSalidaExtras
+) {
+    // Para realizar el calculo de las horas
+    // trabajadas y descansadas.
+    let tiempoTrabajo = 0;
+
+    // Identificamos si falto.
+    let falto = false;
+
+    // Identificamos si llego tarde.
+    let llegoTarde = false;
+
+    // Identificamos si salio tarde.
+    let salioTarde = false;
+
+    // Si existen el reporte de entrada y salida.
+    if(!(!reporteSalida || !reporteEntrada)) {
+        // Calculamos el tiempo de trabajo en milisegundos.
+        tiempoTrabajo = reporteSalida.fechaRegistroReporteChequeo
+            - reporteEntrada.fechaRegistroReporteChequeo;
+
+        llegoTarde = reporteEntrada.reporte.idTipoReporteVinculado == tipoReporteEntradaRetraso.id?
+            true : false;
+
+        salioTarde = reporteSalida.reporte.idTipoReporteVinculado == tipoReporteSalidaExtras.id?
+            true : false;
+
+    }
+
+    // Construimos los datos a detalle del reporte.
+    const datosDetalle = {
+        entrada: !reporteEntrada?
+            null : reporteEntrada.fechaRegistroReporteChequeo,
+
+        salida: !reporteSalida?
+            null : reporteSalida.fechaRegistroReporteChequeo ,
+    };
+
+    // Guardamos la informacion en el diccionario.
+    return {
+        dia: registroDiaLaboral.dia,
+        detalle: datosDetalle,
+        tiempoTrabajo: tiempoTrabajo,
+        llegoTarde: llegoTarde,
+        salioTarde: salioTarde,
+        esDescanso: registroDiaLaboral.esDescanso,
+        falto: falto
+    };
+};
+
+// Genera los reportes por empleado.
+async function generarReporte(
+    registroEmpleado,
+    semanaReporte,
+    tipoReporteEntrada,
+    tipoReporteEntradaRetraso,
+    tipoReporteSalida,
+    tipoReporteSalidaExtras,
+) {
+    // Horas trabajadas por dia.
+    const horasTrabajadas = []
+
+    // Registro del horario del empleado.
+    const horario = registroEmpleado.horario;
+
+    // Registros de dias laborales del horario.
+    const diasLaborales = horario.diaLaborals;
+
+    // Tiempo total de trabajo en milisegundos.
+    let tiempoTrabajoTotal = 0;
+
+    // Si el registroEmpleado del empleado tiene horario.
+    if(!horario) {
+        // Guardamos los datos a enviar
+        return {
+            id: registroEmpleado.id,
+            nombres: registroEmpleado.nombres,
+            apellidoPaterno: registroEmpleado.apellidoPaterno,
+            apellidoMaterno: registroEmpleado.apellidoMaterno,
+            idImagenVinculada: registroEmpleado.idImagenVinculada,
+            idRolVinculado: registroEmpleado.idRolVinculado,
+            tiempoTrabajoTotal: tiempoTrabajoTotal,
+            horasTrabajadas: null
+        };
+    }
+
+    // Si el registroEmpleado del empelado no tiene dias laborales.
+    if(!diasLaborales) {
+        // Guardamos los datos a enviar
+        return {
+            id: registroEmpleado.id,
+            nombres: registroEmpleado.nombres,
+            apellidoPaterno: registroEmpleado.apellidoPaterno,
+            apellidoMaterno: registroEmpleado.apellidoMaterno,
+            idImagenVinculada: registroEmpleado.idImagenVinculada,
+            idRolVinculado: registroEmpleado.idRolVinculado,
+            tiempoTrabajoTotal: tiempoTrabajoTotal,
+            horasTrabajadas: null
+        };
+    }
+
+    /**
+     * Se realiza el reporte de las horas trabajadas.
+    */
+
+    // Por cada dia laboral en el horario.
+    for(let j = 0; j < diasLaborales.length; j++) {
+        // Desempaquetamos el registro del dia laboral.
+        const registroDiaLaboral = diasLaborales[j];
+
+        // Calculamos el rango del dia para el reporte.
+        const rangoDiaReporte = rangoDia(
+            registroDiaLaboral.dia,
+            semanaReporte
+        );
+
+        // Consultamos los reportes de chequeos.
+        const reporteEntrada = await ReportesChequeos.findOne({
+            where: {
+                idEmpleadoVinculado: registroEmpleado.id,
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte,
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: {
+                        [Op.or]: [
+                            tipoReporteEntrada.id,
+                            tipoReporteEntradaRetraso.id
+                        ]
+                    }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        // Consultamos los reportes de salida.
+        const reporteSalida = await ReportesChequeos.findOne({
+            where: {
+                idEmpleadoVinculado: registroEmpleado.id,
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte,
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: {
+                        [Op.or]: [
+                            tipoReporteSalida.id,
+                            tipoReporteSalidaExtras.id
+                        ]
+                    }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        // Agregamos la promesa al Pool de promesas.
+        horasTrabajadas.push(generarReportePorDia(
+            registroDiaLaboral,
+            reporteEntrada,
+            reporteSalida,
+            tipoReporteEntradaRetraso,
+            tipoReporteSalidaExtras
+        ));
+    }
+
+    return {
+        id: registroEmpleado.id,
+        nombres: registroEmpleado.nombres,
+        apellidoPaterno: registroEmpleado.apellidoPaterno,
+        apellidoMaterno: registroEmpleado.apellidoMaterno,
+        idImagenVinculada: registroEmpleado.idImagenVinculada,
+        idRolVinculado: registroEmpleado.idRolVinculado,
+        tiempoTrabajoTotal: tiempoTrabajoTotal,
+        horasTrabajadas: horasTrabajadas
+    };
+};
+
 // Genera un reporte de horas trabajadas en el
 // periodo de tiempo dado.
 module.exports = async function reporteHorasTrabajadas(
@@ -56,8 +250,9 @@ module.exports = async function reporteHorasTrabajadas(
 
     try {
         /**
-         * Procesamos el token.
-         */
+         * Verificamos el token del header.
+        */
+
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(
             cabecera.authorization
@@ -71,8 +266,8 @@ module.exports = async function reporteHorasTrabajadas(
         }
 
         /**
-         * Desempaquetamos los datos de la consulta.
-         */
+         * Desempaquetamos los datos del request.
+        */
 
         // Verificamos si se selecciono un offset.
         const offset = (
@@ -91,60 +286,42 @@ module.exports = async function reporteHorasTrabajadas(
 
         // Agregamos los parametros de la consulta.
         if(consulta.idEmpleadoVinculado) {
-           datos.id = consulta.idEmpleadoVinculado; 
-        }
+            datos.id = consulta.idEmpleadoVinculado; 
+         }
+ 
+         if(consulta.nombres) {
+             datos.nombres = {
+                 [Op.substring]: consulta.nombres
+             };
+         }
+ 
+         // Si existe el parametro de busqueda de rol vinculado.
+         if(consulta.idRolVinculado) {
+             // Buscamos por el registroEmpleado de roles.
+             const existeRegistroRoles = await existeRegistro(
+                 Roles,
+                 consulta.idRolVinculado
+             );
+ 
+             // Si no existe.
+             if(!existeRegistroRoles) {
+                 // Retornamos un mensaje de error.
+                 return respuesta.status(200).send({
+                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                 });
+             }
+ 
+             // Si existe, se agrega el dato a la busqueda.
+             datos.idRolVinculado = consulta.idRolVinculado;
+         }
 
-        if(consulta.nombres) {
-            datos.nombres = {
-                [Op.substring]: consulta.nombres
-            };
-        }
-
-        // Si existe el parametro de busqueda de rol vinculado.
-        if(consulta.idRolVinculado) {
-            // Buscamos por el registro de roles.
-            const existeRegistroRoles = await existeRegistro(
-                Roles,
-                consulta.idRolVinculado
-            );
-
-            // Si no existe.
-            if(!existeRegistroRoles) {
-                // Retornamos un mensaje de error.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-                });
-            }
-
-            // Si existe, se agrega el dato a la busqueda.
-            datos.idRolVinculado = consulta.idRolVinculado;
-        }
-
-        // Inicializamos el rango de la semana a generar el reporte.
+        // Instanciamos la semana del reporte.
         const semanaReporte = consulta.semanaReporte?
             deserealizarSemana(consulta.semanaReporte) : null;
 
         /**
-         * Consultamos el total de registros y los registros.
-         */
-
-        // Consultamos el total de los registros.
-        const totalRegistros = await Empleados.count({
-            where: datos
-        });
-
-        // Consultamos todos los registros.
-        const registros = await Empleados.findAll({
-            offset: offset,
-            limit: limit,
-            where: datos,
-            include: [{
-                model: Horarios,
-                include: [{
-                    model: DiasLaborales
-                }]
-            }]
-        });
+         * Consultamos los datos vinculados.
+        */
 
         // Buscamos el tipo de reporte para entrada.
         const tipoReporteEntrada = await TiposReportes.findOne({
@@ -174,28 +351,11 @@ module.exports = async function reporteHorasTrabajadas(
             }
         });
 
-        // Buscamos el tipo de reporte para el inicio de descanso.
-        const tipoReporteInicioDescanso = await TiposReportes.findOne({
-            where: {
-                tagTipoReporte: 'chequeoInicioDescanso'
-            }
-        });
-
-        // Buscamos el tipo de reporte para el fin de descanso.
-        const tipoReporteFinDescanso = await TiposReportes.findOne({
-            where: {
-                tagTipoReporte: 'chequeoFinDescanso'
-            }
-        });
-
         // Si alguno de los registros no existe.
-        if(
-            !tipoReporteEntrada
+        if(!tipoReporteEntrada
             || !tipoReporteEntradaRetraso
             || !tipoReporteSalida
             || !tipoReporteSalidaExtras
-            || !tipoReporteInicioDescanso
-            || !tipoReporteFinDescanso
         ) {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
@@ -205,258 +365,52 @@ module.exports = async function reporteHorasTrabajadas(
 
         /**
          * Generamos el reporte.
-         */
+        */
 
-        // Lista de datos por empleado.
-        const datosPorEmpleado = [];
+        // Consultamos el total de los registros.
+        const totalRegistros = await Empleados.count({
+            where: datos
+        });
 
-        // Por cada registro en los registros de los empleados.
-        for(let i = 0; i < registros.length; i++) {
-            // Registro de empleado.
-            const registro = registros[i];
+        // Consultamos todos los registros.
+        const registrosEmpleados = await Empleados.findAll({
+            offset: offset,
+            limit: limit,
+            where: datos,
+            include: [{
+                model: Horarios,
+                include: [{
+                    model: DiasLaborales
+                }]
+            }]
+        });
 
-            // Tiempo total de trabajo en milisegundos.
-            let tiempoTrabajoTotal = 0;
+        // Lista de datos por empelado.
+        const promesas = [];
 
-            // Lista de horas trabajadas por dia.
-            const datosPorDia = [];
+        // Inicializamos la lista de datos por empelado.
+        for(let i  = 0; i < registrosEmpleados.length; i ++) {
+            // Desempaquetamos el registro del empleado.
+            const registroEmpleado = registrosEmpleados[i];
 
-            // Registro de horario del empleado.
-            const horario = registro.horario;
-
-            // Si el registro del empelado no tiene horario.
-            if(!horario) {
-                // Guardamos los datos a enviar
-                datosPorEmpleado.push({
-                    id: registro.id,
-                    nombres: registro.nombres,
-                    apellidoPaterno: registro.apellidoPaterno,
-                    apellidoMaterno: registro.apellidoMaterno,
-                    idImagenVinculada: registro.idImagenVinculada,
-                    idRolVinculado: registro.idRolVinculado,
-                    tiempoTrabajoTotal: tiempoTrabajoTotal,
-                    horasTrabajadas: null
-                });
-
-                // Se retorna un nulo.
-                continue;
-            }
-
-            // Registros de dias laborales del horario.
-            const diasLaborales = horario.diaLaborals;
-
-            // Si el registro del empelado no tiene dias laborales.
-            if(!diasLaborales) {
-                // Guardamos los datos a enviar
-                datosPorEmpleado.push({
-                    id: registro.id,
-                    nombres: registro.nombres,
-                    apellidoPaterno: registro.apellidoPaterno,
-                    apellidoMaterno: registro.apellidoMaterno,
-                    idImagenVinculada: registro.idImagenVinculada,
-                    idRolVinculado: registro.idRolVinculado,
-                    tiempoTrabajoTotal: tiempoTrabajoTotal,
-                    horasTrabajadas: null
-                });
-
-                // Se retorna un nulo.
-                continue;
-            }
-
-            /**
-             * Se realiza el reporte de las horas trabajadas.
-             */
-
-            // Por cada dia laboral en el horario.
-            for(let j = 0; j < diasLaborales.length; j++) {
-                // Registro de dia laboral.
-                const diaLaboral = diasLaborales[j];
-
-                // Calculamos el rango del dia para el reporte.
-                const rangoDiaReporte = rangoDia(
-                    diaLaboral.dia,
-                    semanaReporte
-                );
-
-                // Consultamos los reportes de chequeos.
-                const reporteEntrada = await ReportesChequeos.findOne({
-                    where: {
-                        idEmpleadoVinculado: registro.id,
-                        fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDiaReporte,
-                        }
-                    },
-                    include: [{
-                        required: true,
-                        model: Reportes,
-                        where: {
-                            idTipoReporteVinculado: {
-                                [Op.or]: [
-                                    tipoReporteEntrada.id,
-                                    tipoReporteEntradaRetraso.id
-                                ]
-                            }
-                        },
-                        include: [{
-                            model: TiposReportes
-                        }]
-                    }]
-                });
-
-                // Consultamos los reportes de inicio de descanso.
-                const reporteInicioDescanso = await ReportesChequeos.findOne({
-                    where: {
-                        idEmpleadoVinculado: registro.id,
-                        fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDiaReporte,
-                        }
-                    },
-                    include: [{
-                        required: true,
-                        model: Reportes,
-                        where: {
-                            idTipoReporteVinculado: tipoReporteInicioDescanso.id
-                        },
-                        include: [{
-                            model: TiposReportes
-                        }]
-                    }]
-                });
-
-                // Consultamos los reportes de fin de descanso.
-                const reporteFinDescanso = await ReportesChequeos.findOne({
-                    where: {
-                        idEmpleadoVinculado: registro.id,
-                        fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDiaReporte,
-                        }
-                    },
-                    include: [{
-                        required: true,
-                        model: Reportes,
-                        where: {
-                            idTipoReporteVinculado: tipoReporteFinDescanso.id
-                        },
-                        include: [{
-                            model: TiposReportes
-                        }]
-                    }]
-                });
-
-                // Consultamos los reportes de salida.
-                const reporteSalida = await ReportesChequeos.findOne({
-                    where: {
-                        idEmpleadoVinculado: registro.id,
-                        fechaRegistroReporteChequeo: {
-                            [Op.between]: rangoDiaReporte,
-                        }
-                    },
-                    include: [{
-                        required: true,
-                        model: Reportes,
-                        where: {
-                            idTipoReporteVinculado: {
-                                [Op.or]: [
-                                    tipoReporteSalida.id,
-                                    tipoReporteSalidaExtras.id
-                                ]
-                            }
-                        },
-                        include: [{
-                            model: TiposReportes
-                        }]
-                    }]
-                });
-
-                // Para realizar el calculo de las horas
-                // trabajadas y descansadas.
-                let tiempoTrabajo = 0;
-                let tiempoDescanso = 0;
-
-                // Identificamos si falto.
-                let falto = false;
-
-                // Identificamos si llego tarde.
-                let llegoTarde = false;
-
-                // Identificamos si salio tarde.
-                let salioTarde = false;
-
-                // Si existen el reporte de entrada y salida.
-                if(!(!reporteSalida || !reporteEntrada)) {
-                    // Calculamos el tiempo de trabajo en milisegundos.
-                    tiempoTrabajo = reporteSalida.fechaRegistroReporteChequeo
-                        - reporteEntrada.fechaRegistroReporteChequeo;
-
-                    llegoTarde = reporteEntrada.reporte.idTipoReporteVinculado == tipoReporteEntradaRetraso.id?
-                        true : false;
-
-                    salioTarde = reporteSalida.reporte.idTipoReporteVinculado == tipoReporteSalidaExtras.id?
-                        true : false;
-
-                } else {
-                    // Si existe el reporte de inicio y fin de descanso.
-                    if(!(!reporteInicioDescanso || !reporteFinDescanso)) {
-                        // Marcamos que el empleado no falto.
-                        falto = false;
-
-                    // Si ninguno de estos existe, entonces es una falta
-                    } else {
-                        falto = diaLaboral.esDescanso == 1?
-                            false : true;
-                    }
-                }
-
-                // Si existen el reporte de inicio y fin de descanso.
-                if(!(!reporteInicioDescanso || !reporteFinDescanso)) {
-                    // Calculamos el tiempo de descanso en milisegundos.
-                    tiempoDescanso = reporteFinDescanso.fechaRegistroReporteChequeo
-                        - reporteInicioDescanso.fechaRegistroReporteChequeo;
-                }
-
-                // Construimos los datos a detalle del reporte.
-                const datosDetalle = {
-                    entrada: !reporteEntrada?
-                        null : reporteEntrada.fechaRegistroReporteChequeo,
-
-                    inicioDescanso: !reporteInicioDescanso?
-                        null : reporteInicioDescanso.fechaRegistroReporteChequeo,
-
-                    finDescanso: !reporteFinDescanso?
-                        null : reporteFinDescanso.fechaRegistroReporteChequeo,
-
-                    salida: !reporteSalida?
-                        null : reporteSalida.fechaRegistroReporteChequeo ,
-                };
-
-                // Guardamos la informacion en el diccionario.
-                datosPorDia.push({
-                    dia: diaLaboral.dia,
-                    detalle: datosDetalle,
-                    tiempoTrabajo: tiempoTrabajo - tiempoDescanso,
-                    tiempoDescanso: tiempoDescanso,
-                    llegoTarde: llegoTarde,
-                    salioTarde: salioTarde,
-                    esDescanso: diaLaboral.esDescanso,
-                    falto: falto
-                });
-
-                // Acumulamos el tiempo de trabajo total
-                tiempoTrabajoTotal += tiempoTrabajo - tiempoDescanso;
-            }
-
-            // Guardamos los datos a enviar
-            datosPorEmpleado.push({
-                id: registro.id,
-                nombres: registro.nombres,
-                apellidoPaterno: registro.apellidoPaterno,
-                apellidoMaterno: registro.apellidoMaterno,
-                idImagenVinculada: registro.idImagenVinculada,
-                idRolVinculado: registro.idRolVinculado,
-                tiempoTrabajoTotal: tiempoTrabajoTotal,
-                horasTrabajadas: datosPorDia
-            });
+            // Agregamos la promesa al Pool de promesas.
+            promesas.push(Promise.resolve(generarReporte(
+                registroEmpleado,
+                semanaReporte,
+                tipoReporteEntrada,
+                tipoReporteEntradaRetraso,
+                tipoReporteSalida,
+                tipoReporteSalidaExtras
+            )));
         }
+
+        // Reporte de horas trabajadas por empleado.
+        let datosPorEmpleado = [];
+
+        // Resolvemos las promesas en el pool.
+        await Promise.all(promesas).then((respuestas) => {
+            datosPorEmpleado = respuestas;
+        });
 
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({

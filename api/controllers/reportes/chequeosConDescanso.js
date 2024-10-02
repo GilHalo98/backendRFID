@@ -36,7 +36,7 @@ const ReportesChequeos = db.reporteChequeo;
 
 // Genera un reporte de chequeo de entrada y salida, así como el inico
 // y fin del descanso.
-module.exports = async function reporteChequeos(
+module.exports = async function reporteChequeosConDescanso(
     request,
     respuesta
 ) {
@@ -113,12 +113,28 @@ module.exports = async function reporteChequeos(
             }
         });
 
+        // Buscamos el tipo de reporte para el inicio de descanso.
+        const tipoReporteInicioDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoInicioDescanso'
+            }
+        });
+
+        // Buscamos el tipo de reporte para el fin de descanso.
+        const tipoReporteFinDescanso = await TiposReportes.findOne({
+            where: {
+                tagTipoReporte: 'chequeoFinDescanso'
+            }
+        });
+
         // Si alguno de los registros no existe.
         if(
             !tipoReporteEntrada
             || !tipoReporteEntradaRetraso
             || !tipoReporteSalida
             || !tipoReporteSalidaExtras
+            || !tipoReporteInicioDescanso
+            || !tipoReporteFinDescanso
         ) {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
@@ -144,6 +160,46 @@ module.exports = async function reporteChequeos(
                             tipoReporteEntradaRetraso.id
                         ]
                     }
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        // Consultamos el reporte de inicio de descanso.
+        const reporteInicioDescanso = await ReportesChequeos.findOne({
+            where: {
+                idEmpleadoVinculado: registroVinculado.id,
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: tipoReporteInicioDescanso.id
+                },
+                include: [{
+                    model: TiposReportes
+                }]
+            }]
+        });
+
+        // Consultamos el reporte de fin de descanso.
+        const reporteFinDescanso = await ReportesChequeos.findOne({
+            where: {
+                idEmpleadoVinculado: registroVinculado.id,
+                fechaRegistroReporteChequeo: {
+                    [Op.between]: rangoDiaReporte
+                }
+            },
+            include: [{
+                required: true,
+                model: Reportes,
+                where: {
+                    idTipoReporteVinculado: tipoReporteFinDescanso.id
                 },
                 include: [{
                     model: TiposReportes
@@ -181,7 +237,9 @@ module.exports = async function reporteChequeos(
             codigoRespuesta: CODIGOS.OK,
             reporte: {
                 salida: reporteSalida,
-                entrada: reporteEntrada
+                entrada: reporteEntrada,
+                finDescanso: reporteFinDescanso,
+                inicioDescanso: reporteInicioDescanso
             }
         });
 
