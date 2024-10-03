@@ -57,18 +57,20 @@ module.exports = async function validarRegistroEmpleado(
             });
         }
 
+        // Buscamos el registro del empleado.
+        const registroEmpleado = await Empleados.findByPk(idEmpleadoVinculado);
+
         // Verificamos la existencia del registro.
-        if(await existeRegistro(Empleados, idEmpleadoVinculado)) {
-            // Si existe el registro, retornamos un mensaje de OK.
+        if(!registroEmpleado) {
+            // Si el registro no existe, manda un mensaje de error.
             return respuesta.status(200).json({
-                codigoRespuesta: CODIGOS.OK
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
             });
         }
 
-        // Si el registro no existe, retornamos un mensaje de
-        // empleado no encontrado.
+        // Si el registro existe entonces manda un mensaje de OK.
         return respuesta.status(200).json({
-            codigoRespuesta: CODIGOS.EMPELADO_NO_ENCONTRADO
+            codigoRespuesta: CODIGOS.OK
         });
 
     } catch(excepcion) {
