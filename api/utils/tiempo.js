@@ -125,7 +125,7 @@ function rangoDia(dia, semana=null) {
     ];
 };
 
-function dateDiaSemana(dia, semana) {
+function dateDiaSemana(dia, semana, setToCero=false) {
     // Le quitamos una unidad al dia pasado, si el dia es 7 o domingo,
     // se establece a -1 para empezar con el domingo de
     // la semana pasada.
@@ -138,8 +138,14 @@ function dateDiaSemana(dia, semana) {
     // Calculamos el dia de la semana.
     fecha.setDate(fecha.getDate() + (dia - fecha.getDay()) + 1);
 
-    // La segunda tendra hora de 23:59:59
-    fecha.setHours(23, 59, 59);
+    if(setToCero) {
+        // Establecemos la hora a las 00:00:00
+        fecha.setHours(0, 0, 0);
+
+    } else {
+        // Establecemos la hora a las 23:59:59
+        fecha.setHours(23, 59, 59);
+    }
 
     // Cambiamos el formato y las retornamos.
     return fecha;

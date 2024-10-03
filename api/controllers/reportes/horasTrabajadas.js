@@ -75,6 +75,8 @@ function generarReportePorDia(
         salida: undefined
     };
 
+    console.log(`${fechaDia} > ${hoy} = ${fechaDia > hoy}`);
+
     // Si la fecha del dia es mayor que el dia actual, entonces el dia
     //  del reporte es invalido.
     if(fechaDia > hoy) {
@@ -193,7 +195,8 @@ async function generarReporte(
         // Fecha del dia del reporte
         const fechaDia = dateDiaSemana(
             registroDiaLaboral.dia,
-            semanaReporte
+            semanaReporte,
+            true
         );
 
         // Calculamos el rango del dia para el reporte.
