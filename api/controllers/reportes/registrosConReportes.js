@@ -108,8 +108,7 @@ module.exports = async function registrosConReportes(
 
         // Si alguno de los tipos de reporte no existe, entonces se
         // envia un mensaje de error.
-        if(
-            !tipoReporteAccesoZona
+        if(!tipoReporteAccesoZona
             || !tipoReporteActividadIniciada
             || !tipoReporteActividadFinalizada
             || !tipoReporteSalidaZona
@@ -138,7 +137,7 @@ module.exports = async function registrosConReportes(
         const registrosZonas = await Zonas.findAll();
 
         // Por cada zona que existe.
-        for (let i = 0; i < registrosZonas.length; i++) {
+        for(let i = 0; i < registrosZonas.length; i++) {
             // Desempaquetamos un registro de zona.
             const registroZona = registrosZonas[i];
 
@@ -191,7 +190,7 @@ module.exports = async function registrosConReportes(
         const registrosDispositivos = await DispositivosIoT.findAll();
 
         // Por cada dispositivo que existe.
-        for (let i = 0; i < registrosDispositivos.length; i++) {
+        for(let i = 0; i < registrosDispositivos.length; i++) {
             // Desempaquetamos un registro de dispositivo.
             const registroDispositivo = registrosDispositivos[i];
 
@@ -230,7 +229,7 @@ module.exports = async function registrosConReportes(
                     return registro.reporte.idTipoReporteVinculado;
                 }),
                 tipoReporteActividadIniciada.id,   // Fin
-                tipoReporteActividadIniciada.id    // Inicio
+                tipoReporteActividadFinalizada.id    // Inicio
             );
 
             // Si el dispositivo tiene continuidad en los reportes
