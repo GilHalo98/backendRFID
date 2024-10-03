@@ -128,8 +128,7 @@ module.exports = async function reporteChequeosConDescanso(
         });
 
         // Si alguno de los registros no existe.
-        if(
-            !tipoReporteEntrada
+        if(!tipoReporteEntrada
             || !tipoReporteEntradaRetraso
             || !tipoReporteSalida
             || !tipoReporteSalidaExtras

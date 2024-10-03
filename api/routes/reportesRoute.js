@@ -138,6 +138,14 @@ module.exports = (app) => {
         controlador.registrosConReportes
     );
 
+    // Lista los dias del horario del empleado con un formato para
+    // poder ponerlos sobre del navegador.
+    router.get(
+        '/horasTrabajadas/dias/horairo',
+        upload.any(),
+        controlador.listarDiasHorario
+    )
+
     // Ruta general de reportes.
     app.use(process.env.API_URL + 'reportes', router);
 };

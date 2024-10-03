@@ -114,8 +114,7 @@ module.exports = async function reporteChequeos(
         });
 
         // Si alguno de los registros no existe.
-        if(
-            !tipoReporteEntrada
+        if(!tipoReporteEntrada
             || !tipoReporteEntradaRetraso
             || !tipoReporteSalida
             || !tipoReporteSalidaExtras
