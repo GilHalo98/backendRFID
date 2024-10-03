@@ -75,8 +75,6 @@ function generarReportePorDia(
         salida: undefined
     };
 
-    console.log(`${fechaDia} > ${hoy} = ${fechaDia > hoy}`);
-
     // Si la fecha del dia es mayor que el dia actual, entonces el dia
     //  del reporte es invalido.
     if(fechaDia > hoy) {
