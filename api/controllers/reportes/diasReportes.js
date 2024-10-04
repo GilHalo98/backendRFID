@@ -179,10 +179,10 @@ module.exports = async function listarDiasHorario(request, respuesta) {
         );
 
         // Desempaquetamos los datos.
-        const idEmpleado = consulta.idEmpleado;
+        const idEmpleadoVinculado = consulta.idEmpleadoVinculado;
 
         // Si no se pasa el id del empleado.
-        if(!idEmpleado) {
+        if(!idEmpleadoVinculado) {
             // Se retorna un mensaje de error.
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
@@ -190,7 +190,7 @@ module.exports = async function listarDiasHorario(request, respuesta) {
         }
 
         // Consultamos el registor del empleado.
-        const registroEmpleado = await Empleados.findByPk(idEmpleado);
+        const registroEmpleado = await Empleados.findByPk(idEmpleadoVinculado);
 
         // Si no se encuentra el registro de empleado.
         if(!registroEmpleado) {
