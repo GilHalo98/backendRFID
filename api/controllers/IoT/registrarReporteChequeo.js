@@ -135,8 +135,7 @@ module.exports = async function registrarReporteChequeo (
         });
 
         // Si alguno de los registros no existe.
-        if(
-            !registroEmpleado
+        if(!registroEmpleado
             || !registroHorario
             || !registroDiaLaboral
             || !tipoReporteEntrada

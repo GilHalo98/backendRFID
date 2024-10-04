@@ -141,7 +141,7 @@ module.exports = (app) => {
     // Lista los dias del horario del empleado con un formato para
     // poder ponerlos sobre del navegador.
     router.get(
-        '/horasTrabajadas/dias/horairo',
+        '/horasTrabajadas/dias/horario',
         upload.any(),
         controlador.listarDiasHorario
     )
