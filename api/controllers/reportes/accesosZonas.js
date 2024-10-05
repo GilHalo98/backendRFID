@@ -80,6 +80,10 @@ module.exports = async function reporteAccesosZona(
         // Construimos la consulta hacia la db.
         const datos = Object();
 
+        // Se desempaquetan los datost.
+        datos.idZonaVinculada = consulta.idZonaVinculada;
+        datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+
         // Instanciamos la semana del reporte.
         const semanaReporte = deserealizarSemana(
             consulta.semanaReporte
@@ -96,41 +100,38 @@ module.exports = async function reporteAccesosZona(
             [Op.between]: rangoDiaReporte
         };
 
-        if(consulta.idEmpleadoVinculado) {
-            // Verificamos que exista el registro vinculado.
-            const existeRegistroVinculadoEmpleado =  await existeRegistro(
-                Empleados,
-                consulta.idEmpleadoVinculado
-            );
-
-            // Si no existe el registro.
-            if(!existeRegistroVinculadoEmpleado) {
-                // Retornamos un mensaje de error.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-                });
-            }
-
-            // Si existe, se agrega el dato a la busqueda.
-            datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        // Verificamos que los datos de busqueda esten completos.
+        if(!consulta.idEmpleadoVinculado || !consulta.idZonaVinculada) {
+            // Si no es asi, se retorna un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DATOS_BUSQUEDA_INCOMPLETOS
+            });
         }
 
-        if(consulta.idZonaVinculada) {
-            // Verificamos que exista el registro vinculado.
-            const existeRegistroVinculadoZona =  await existeRegistro(
-                Zonas,
-                consulta.idZonaVinculada
-            );
+        // Verificamos que exista el registro vinculado.
+        const registroEmpleado =  await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
-            // Si no existe el registro.
-            if(!existeRegistroVinculadoZona) {
-                // Retornamos un mensaje de error.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-                });
-            }
-            // Si existe, se agrega el dato a la busqueda.
-            datos.idZonaVinculada = consulta.idZonaVinculada;
+        // Si no existe el registro.
+        if(!registroEmpleado) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
+            });
+        }
+
+        // Verificamos que exista el registro vinculado.
+        const registroZona =  await Zonas.findByPk(
+            consulta.idZonaVinculada
+        );
+
+        // Si no existe el registro.
+        if(!registroZona) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.ZONA_NO_ENCONTRADA
+            });
         }
 
         // Verificamos que el tipo de reporte de entrada de zona exista.
@@ -222,6 +223,7 @@ module.exports = async function reporteAccesosZona(
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
+            zona: registroZona,
             totalRegistros: reporte.length,
             reporte: !(offset + limit)? reporte : pagina
         });

@@ -98,16 +98,15 @@ module.exports = async function reporteUsosMaquina(
         }
 
         // Verificamos que exista el registro vinculado.
-        const existeRegistroDispositivo = await existeRegistro(
-            DispositivosIoT,
+        const registroDispositivo = await DispositivosIoT.findByPk(
             consulta.idDispositivoVinculado
         );
 
         // Verificamos los datos del registro.
-        if(!existeRegistroDispositivo)  {
+        if(!registroDispositivo)  {
             // Retornamos un mensaje de error.
             return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                codigoRespuesta: CODIGOS.DISPOSITIVO_IOT_NO_ENCONTRADO
             });
         }
 
@@ -132,6 +131,7 @@ module.exports = async function reporteUsosMaquina(
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
+            dispositivo: registroDispositivo,
             totalRegistros: totalRegistros,
             registros: registros
         });
