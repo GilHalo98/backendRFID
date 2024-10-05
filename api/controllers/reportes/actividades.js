@@ -79,6 +79,10 @@ module.exports = async function reporteActividadesDispositivo(
         // Construimos la consulta hacia la db.
         const datos = Object();
 
+        // Desempaquetamos los datos.
+        datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        datos.idDispositivoVinculado = consulta.idDispositivoVinculado;
+
         // Instanciamos la semana del reporte.
         const semanaReporte = deserealizarSemana(
             consulta.semanaReporte
@@ -95,41 +99,30 @@ module.exports = async function reporteActividadesDispositivo(
             [Op.between]: rangoDiaReporte
         };
 
-        if(consulta.idEmpleadoVinculado) {
-            // Verificamos que exista el registro vinculado.
-            const existeRegistroVinculadoEmpleado =  await existeRegistro(
-                Empleados,
-                consulta.idEmpleadoVinculado
-            );
+        // Verificamos que exista el registro vinculado.
+        const registroEmpleado =  await Empleados.findByPk(
+            consulta.idEmpleadoVinculado
+        );
 
-            // Si no existe el registro.
-            if(!existeRegistroVinculadoEmpleado) {
-                // Retornamos un mensaje de error.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-                });
-            }
-
-            // Si existe, se agrega el dato a la busqueda.
-            datos.idEmpleadoVinculado = consulta.idEmpleadoVinculado;
+        // Si no existe el registro.
+        if(!registroEmpleado) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
+            });
         }
 
-        if(consulta.idDispositivoVinculado) {
-            // Verificamos que exista el registro vinculado.
-            const existeRegistroVinculadoDispositivo =  await existeRegistro(
-                DispositivosIoT,
-                consulta.idDispositivoVinculado
-            );
+        // Verificamos que exista el registro vinculado.
+        const registroDispositivo = await DispositivosIoT.findByPk(
+            consulta.idDispositivoVinculado
+        );
 
-            // Si no existe el registro.
-            if(!existeRegistroVinculadoDispositivo) {
-                // Retornamos un mensaje de error.
-                return respuesta.status(200).send({
-                    codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-                });
-            }
-            // Si existe, se agrega el dato a la busqueda.
-            datos.idDispositivoVinculado = consulta.idDispositivoVinculado;
+        // Si no existe el registro.
+        if(!registroDispositivo) {
+            // Retornamos un mensaje de error.
+            return respuesta.status(200).send({
+                codigoRespuesta: CODIGOS.DISPOSITIVO_IOT_NO_ENCONTRADO
+            });
         }
 
         // Consultamos el tipo de repote para actividad inicada.
@@ -222,6 +215,7 @@ module.exports = async function reporteActividadesDispositivo(
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
+            dispositivo: registroDispositivo,
             totalRegistros: reporte.length,
             reporte: !(offset + limit)? reporte : pagina
         });
