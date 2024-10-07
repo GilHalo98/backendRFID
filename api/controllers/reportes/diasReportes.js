@@ -122,9 +122,9 @@ async function formatearRegistros(
         // Si el dia es descanso.
         if(diaLaboral.esDescanso) {
             // Si hay registros de entrada y salida
-            if(reporteEntrada && reporteSalida) {
+            if(reporteEntrada && reporteSalida) {;
                 // entonces se toma como un descanso laborado.
-                descansosLaborados = true;
+                descansoLaborado = true;
             }
 
         // Si el dia es uno normal.

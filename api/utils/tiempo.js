@@ -149,7 +149,7 @@ function dateDiaSemana(dia, semana, setToCero=false) {
 
     // Cambiamos el formato y las retornamos.
     return fecha;
-}
+};
 
 function rangoSemana() {
     // Instanciamos dos fechas.
