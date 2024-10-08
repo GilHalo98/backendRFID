@@ -71,8 +71,6 @@ module.exports = async function reporteChequeos(
             consulta.semanaReporte
         ) : rangoSemana(false);
 
-        console.log(semanaReporte);
-
         // Instanciamos el rango del dia del reporte.
         const rangoDiaReporte = rangoDia(
             consulta.dia,

@@ -10,7 +10,7 @@ function toSQLDate(fecha, timeOffset=true) {
         const timeZone = fechaAux.getTimezoneOffset() * 2;
 
         const offsetHoras = Math.floor(timeZone / 60);
-        const offsetMinutos = Math.floor(timeZone / (60*60));
+        const offsetMinutos = Math.floor(timeZone / (60 * 60));
     
         fechaAux.setHours(
             fechaAux.getHours() - offsetHoras,
