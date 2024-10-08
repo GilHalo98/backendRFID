@@ -209,52 +209,45 @@ module.exports = async function registrarEmpleadoCompleto(
         const password = cuerpo.password;
         const idRegistroEmpleadoVinculado = idEmpelado;
 
-        // Validamos que exista la informacion necesaria para
-        // realizar el registro del usuario.
-        if(
-            !nombreUsuario
-            || !password
-            || !idRegistroEmpleadoVinculado
-        ) {
-            // Si no estan completos mandamos
-            // un mensaje de datos incompletos.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
-
         // Buscamos que el registro vinculado exista.
         if(! await existeRegistro(Empleados, idRegistroEmpleadoVinculado)) {
             return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
             });
         }
 
-        // Buscamos que no exista otro registro con los mismos datos.
-        coincidencia = await Usuarios.findOne({
-            where: {
-                nombreUsuario: nombreUsuario,
+        // Validamos que exista la informacion necesaria para
+        // realizar el registro del usuario.
+        if(!(!nombreUsuario
+            || !password
+            || !idRegistroEmpleadoVinculado
+        )) {
+            // Buscamos que no exista otro registro con los mismos datos.
+            coincidencia = await Usuarios.findOne({
+                where: {
+                    nombreUsuario: nombreUsuario,
+                }
+            });
+
+            // Si existe un registro con los mismos datos terminamos
+            // la operacion.
+            if(coincidencia) {
+                return respuesta.status(200).send({
+                    codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
+                });
             }
-        });
 
-        // Si existe un registro con los mismos datos terminamos
-        // la operacion.
-        if(coincidencia) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
-            });
+            // Creamos el registro.
+            nuevoRegistro = {
+                nombreUsuario: nombreUsuario,
+                password: password,
+                fechaRegistroUsuario: fecha,
+                idRegistroEmpleadoVinculado: idRegistroEmpleadoVinculado
+            };
+
+            // Guardamos el registro en la DB.
+            await Usuarios.create(nuevoRegistro);
         }
-
-        // Creamos el registro.
-        nuevoRegistro = {
-            nombreUsuario: nombreUsuario,
-            password: password,
-            fechaRegistroUsuario: fecha,
-            idRegistroEmpleadoVinculado: idRegistroEmpleadoVinculado
-        };
-
-        // Guardamos el registro en la DB.
-        await Usuarios.create(nuevoRegistro);
 
         // La proxima parte es la del registro del horario.
 
