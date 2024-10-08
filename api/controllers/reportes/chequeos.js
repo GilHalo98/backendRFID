@@ -19,8 +19,9 @@ const {
 
 // Funciones de manipulacion de tiempo.
 const {
+    rangoDia,
+    rangoSemana,
     deserealizarSemana,
-    rangoDia
 } = require("../../utils/tiempo");
 
 // Funciones extra.
@@ -66,9 +67,11 @@ module.exports = async function reporteChequeos(
         const hoy = new Date();
 
         // Instanciamos la semana del reporte.
-        const semanaReporte = consulta.semana? deserealizarSemana(
+        const semanaReporte = consulta.semanaReporte? deserealizarSemana(
             consulta.semanaReporte
-        ) : null;
+        ) : rangoSemana(false);
+
+        console.log(semanaReporte);
 
         // Instanciamos el rango del dia del reporte.
         const rangoDiaReporte = rangoDia(
