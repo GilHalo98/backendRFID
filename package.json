@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "0.1.0",
-  "description": "API REST del sistema RFID",
+  "description": "Ver 0.1.0: Primera versión estable",
   "main": "app.js",
   "scripts": {
     "start": "nodemon api/app.js",

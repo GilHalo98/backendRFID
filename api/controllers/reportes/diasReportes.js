@@ -174,9 +174,8 @@ module.exports = async function listarDiasHorario(request, respuesta) {
         const hoy = new Date();
 
         // Instanciamos la semana del reporte.
-        const semanaReporte = deserealizarSemana(
-            consulta.semanaReporte
-        );
+        const semanaReporte = consulta.semanaReporte?
+            deserealizarSemana(consulta.semanaReporte) : null;
 
         // Desempaquetamos los datos.
         const idEmpleadoVinculado = consulta.idEmpleadoVinculado;

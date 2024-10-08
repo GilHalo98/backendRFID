@@ -70,9 +70,8 @@ module.exports = async function reporteResumen(
         const datos = Object();
 
         // Instanciamos la semana del reporte.
-        const semanaReporte = deserealizarSemana(
-            consulta.semanaReporte
-        );
+        const semanaReporte = consulta.semanaReporte?
+            deserealizarSemana(consulta.semanaReporte) : null;
 
         // Instanciamos el rango del dia del reporte.
         const rangoDiaReporte = rangoDia(

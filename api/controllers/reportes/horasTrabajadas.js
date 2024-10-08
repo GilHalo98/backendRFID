@@ -336,15 +336,15 @@ module.exports = async function reporteHorasTrabajadas(
 
         // Agregamos los parametros de la consulta.
         if(consulta.idEmpleadoVinculado) {
-            datos.id = consulta.idEmpleadoVinculado; 
+            datos.id = consulta.idEmpleadoVinculado;
          }
- 
+
          if(consulta.nombres) {
              datos.nombres = {
                  [Op.substring]: consulta.nombres
              };
          }
- 
+
          // Si existe el parametro de busqueda de rol vinculado.
          if(consulta.idRolVinculado) {
              // Buscamos por el registroEmpleado de roles.
@@ -352,15 +352,15 @@ module.exports = async function reporteHorasTrabajadas(
                  Roles,
                  consulta.idRolVinculado
              );
- 
+
              // Si no existe.
              if(!existeRegistroRoles) {
                  // Retornamos un mensaje de error.
                  return respuesta.status(200).send({
-                     codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+                     codigoRespuesta: CODIGOS.ROL_NO_ENCONTRADO
                  });
              }
- 
+
              // Si existe, se agrega el dato a la busqueda.
              datos.idRolVinculado = consulta.idRolVinculado;
          }

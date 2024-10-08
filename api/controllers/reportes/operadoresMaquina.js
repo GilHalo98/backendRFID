@@ -89,12 +89,14 @@ module.exports = async function reporteOperadoresMaquina(
             };
         }
 
+        // Instanciamos la semana del reporte.
+        const semanaReporte = consulta.semanaReporte?
+            deserealizarSemana(consulta.semanaReporte) : null;
+
         // Inicializamos el rango de la semana a generar el reporte.
-        if(consulta.semanaReporte) {
+        if(semanaReporte) {
             datos.fechaRegistroReporteActividad = {
-                [Op.between]: deserealizarSemana(
-                    consulta.semanaReporte
-                )
+                [Op.between]: semanaReporte
             };
         }
 

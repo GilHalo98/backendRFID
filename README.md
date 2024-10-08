@@ -41,3 +41,10 @@ npx sequelize-cli db:seed:all
 
 y para ejecutar el servidor del backend se ejecuta el comando
 npm start
+
+---
+## Control de Versiónes.
+
+| Versión | Descripción |
+| :-----: | :---------: |
+| 0.1.0   | Primera versión de salida estable |

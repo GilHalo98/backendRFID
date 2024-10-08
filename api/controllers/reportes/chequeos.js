@@ -62,10 +62,13 @@ module.exports = async function reporteChequeos(
         // Construimos la consulta hacia la db.
         const datos = Object();
 
+        // Instanciamos la fecha actual.
+        const hoy = new Date();
+
         // Instanciamos la semana del reporte.
-        const semanaReporte = deserealizarSemana(
+        const semanaReporte = consulta.semana? deserealizarSemana(
             consulta.semanaReporte
-        );
+        ) : null;
 
         // Instanciamos el rango del dia del reporte.
         const rangoDiaReporte = rangoDia(

@@ -73,12 +73,11 @@ module.exports = async function reporteGeneralHorasTrabajadasConDescanso(
         }
 
         // Instanciamos la semana del reporte.
-        const semanaReporte = deserealizarSemana(
-            consulta.semanaReporte
-        );
+        const semanaReporte = consulta.semanaReporte?
+            deserealizarSemana(consulta.semanaReporte) : null;
 
         // Agregamos el rango de la semana a la consulta.
-        if(consulta.semanaReporte) {
+        if(semanaReporte) {
             datos.fechaRegistroReporteChequeo = {
                 [Op.between]: semanaReporte
             };

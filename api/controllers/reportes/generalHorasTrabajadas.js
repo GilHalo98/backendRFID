@@ -203,9 +203,8 @@ module.exports = async function reporteGeneralHorasTrabajadas(
         }
 
         // Instanciamos la semana del reporte.
-        const semanaReporte = deserealizarSemana(
-            consulta.semanaReporte
-        );
+        const semanaReporte = consulta.semanaReporte?
+            deserealizarSemana(consulta.semanaReporte) : null;
 
         // Agregamos el rango de la semana a la consulta.
         if(consulta.semanaReporte) {
