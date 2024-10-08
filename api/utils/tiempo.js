@@ -151,7 +151,7 @@ function dateDiaSemana(dia, semana, setToCero=false) {
     return fecha;
 };
 
-function rangoSemana() {
+function rangoSemana(comoFechaSQL=true) {
     // Instanciamos dos fechas.
     const fechaA = new Date();
     const fechaB = new Date();
@@ -169,13 +169,15 @@ function rangoSemana() {
     fechaA.setHours(0, 0, 0);
 
     // Calculamos el dia en el que termina la semana.
-    fechaB.setDate(fechaB.getDate() + (6 - fechaB.getDay()));
+    fechaB.setDate(fechaB.getDate() + (5 - fechaB.getDay()));
 
     // La segunda tendra hora de 23:59:59
     fechaB.setHours(23, 59, 59);
 
-    return [
+    return comoFechaSQL? [
         toSQLDate(fechaA), toSQLDate(fechaB)
+    ] : [
+        fechaA, fechaB
     ];
 };
 
