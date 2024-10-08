@@ -175,12 +175,19 @@ module.exports = async function reporteChequeos(
             }]
         });
 
+        // Calculamos el tiempo laboral total.
+        const tiempoLaboralTotal = !reporteEntrada || !reporteSalida? 0 : (
+            reporteSalida.fechaRegistroReporteChequeo
+            - reporteEntrada.fechaRegistroReporteChequeo
+        );
+
         // Retornamos los registros encontrados.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK,
             reporte: {
                 salida: reporteSalida,
-                entrada: reporteEntrada
+                entrada: reporteEntrada,
+                tiempoLaboralTotal: tiempoLaboralTotal
             }
         });
 
