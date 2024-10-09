@@ -39,7 +39,7 @@ const Empleados = db.empleado;
 const DiasLaborales = db.diaLaboral;
 
 // Registra un empleado completo, con usuario, horario y dia laboral.
-module.exports = async function registrarEmpleadoCompleto(
+module.exports = async function registrarEmpleadoCompletoConDescanso(
     request,
     respuesta
 ) {

@@ -49,7 +49,7 @@ const Empleados = db.empleado;
 const DiasLaborales = db.diaLaboral;
 
 // Modifica un registro en la base de datos del empleado, completo.
-module.exports = async function modificarEmpleadoCompleto(
+module.exports = async function modificarEmpleadoCompletoConDescanso(
     request,
     respuesta
 ) {
