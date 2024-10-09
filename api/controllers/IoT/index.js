@@ -1,39 +1,47 @@
-// Libreria estandar para la manipulacion de directorios.
+// Funcion de carga dinamica de los controladores.
 const {
-    parse,
-    join
-} = require('path');
+    cargaDinamicaControladores
+} = require('../../utils/controladores.js');
 
-// Libreria estandar para la manipulacion de archivos.
-const {
-    readdirSync
-} = require('fs');
+function cargaEstaticaControladores() {
+    // Controladores a exportar.
+    const controladores = {};
 
-// Controladores a exportar.
-const controladores = {};
+    // Importamos los controladores.
+    const verificarAPI = require('./verificarAPI.js');
+    const generarReporteChequeo = require('./registrarReporteChequeo.js');
+    const registrarReporteAcceso = require('./registrarReporteAcceso.js');
+    const validarRegistroEmpleado = require('./validarRegistroEmpleado.js');
+    const registrarReporteInicioActividad = require('./registrarReporteInicioActividad.js');
+    const registrarReporteChequeoConDescanso = require('./registrarReporteChequeoConDescanso.js');
+    const registrarReporteEmpleadoInexistente = require('./registrarReporteEmpleadoInexistente.js');
+    const registrarReporteErrorAutentificacion = require('./registrarReporteErrorAutentificacion.js');
+    const registrarReporteFinaliacionActividad = require('./registrarReporteFinaliacionActividad.js');
 
-// Resolvemos el directorio de los controladores.
-const directorioResuelto = __dirname;
+    // Instanciamos una lista de las funciones de los controladores.
+    const funciones = [
+        verificarAPI,
+        generarReporteChequeo,
+        registrarReporteAcceso,
+        validarRegistroEmpleado,
+        registrarReporteInicioActividad,
+        registrarReporteChequeoConDescanso,
+        registrarReporteEmpleadoInexistente,
+        registrarReporteErrorAutentificacion,
+        registrarReporteFinaliacionActividad
+    ];
 
-// Consultamos todos los archivos en el directorio.
-const archivos = readdirSync(directorioResuelto);
+    // Asociamos las funciones de los controladores con los controladores.
+    funciones.forEach(funcion => {
+        controladores[funcion.name] = funcion;
+    });
 
-// Por cada archivo en le directorio.
-archivos.forEach(archivo => {
-    // Instanciamos el objeto archivo.
-    const objetoArchivo = parse(archivo);
+    return controladores;
+};
 
-    // Si el archivo no es index y es un archivo javascript.
-    if(objetoArchivo.name != 'index' && objetoArchivo.ext == '.js') {
-        // Importamos el controlador.
-        const controlador = require(
-            join(directorioResuelto, objetoArchivo.name)
-        );
-
-        // Agregamos el controlador a la lista de controladores.
-        controladores[controlador.name] = controlador;
-    }
-});
+// Funciones de los controladores.
+// const controladores = cargaDinamicaControladores(__dirname);
+const controladores = cargaEstaticaControladores();
 
 // Exportamos los controladores.
 module.exports = controladores;
