@@ -143,7 +143,7 @@ module.exports = (app) => {
     router.get(
         '/horasTrabajadas/dias/horario',
         upload.any(),
-        controlador.listarDiasHorario
+        controlador.reporteListarDiasHorario
     )
 
     // Ruta general de reportes.
