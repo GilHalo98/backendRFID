@@ -12,13 +12,14 @@ const {
     existeRegistro
 } = require("../../utils/registros");
 
-// Modelos que usara el controlador.
-const DiasLaborales = db.diaLaboral;
-const Horarios = db.horario;
-
+// Funciones extra.
 const {
     mostrarLog
 } = require("../../utils/logs");
+
+// Modelos que usara el controlador.
+const DiasLaborales = db.diaLaboral;
+const Horarios = db.horario;
 
 // Genera un reporte de intentos de accesos a zonas.
 module.exports = async function registrarDiaLaboral(

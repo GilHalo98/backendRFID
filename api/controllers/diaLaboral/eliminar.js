@@ -7,12 +7,13 @@ const respuestas = require("../../utils/codigosAPI");
 // Instanciamos los codigos.
 const CODIGOS = new respuestas.CodigoApp();
 
-// Modelos que usara el controlador.
-const DiasLaborales = db.diaLaboral;
-
+// Funciones extra.
 const {
     mostrarLog
 } = require("../../utils/logs");
+
+// Modelos que usara el controlador.
+const DiasLaborales = db.diaLaboral;
 
 // Elimina un registro de la base de datos dado un id.
 module.exports = async function eliminarDiaLaboral(
