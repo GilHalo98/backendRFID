@@ -32,7 +32,8 @@ function cargaEstaticaControladores() {
 };
 
 // Funciones de los controladores.
-const controladores = cargaDinamicaControladores(__dirname);
+// const controladores = cargaDinamicaControladores(__dirname);
+const controladores = cargaEstaticaControladores();
 
 // Exportamos los controladores.
 module.exports = controladores;
