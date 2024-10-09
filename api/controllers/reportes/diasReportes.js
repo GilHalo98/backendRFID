@@ -152,7 +152,7 @@ async function formatearRegistros(
 
 // Lista los dias del horario del empleado junto con una
 // serie de banderas por dia.
-module.exports = async function listarDiasHorario(request, respuesta) {
+module.exports = async function reporteListarDiasHorario(request, respuesta) {
     // GET Request.
     const cabecera = request.headers;
     const cuerpo = request.body;
