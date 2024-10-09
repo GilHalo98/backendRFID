@@ -21,6 +21,11 @@ function cargaEstaticaControladores() {
         registrarTipoDispositivo
     ];
 
+    // Asociamos las funciones de los controladores con los controladores.
+    funciones.forEach(funcion => {
+        controladores[funcion.name] = funcion;
+    });
+
     return controladores;
 };
 
