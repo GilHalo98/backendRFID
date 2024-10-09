@@ -1,39 +1,37 @@
-// Libreria estandar para la manipulacion de directorios.
+// Funcion de carga dinamica de los controladores.
 const {
-    parse,
-    join
-} = require('path');
+    cargaDinamicaControladores
+} = require('../../utils/controladores.js');
 
-// Libreria estandar para la manipulacion de archivos.
-const {
-    readdirSync
-} = require('fs');
+function cargaEstaticaControladores() {
+    // Controladores a exportar.
+    const controladores = {};
 
-// Controladores a exportar.
-const controladores = {};
+    // Importamos los controladores.
+    const consultaZona = require('./consultar.js');
+    const eliminarZona = require('./eliminar.js');
+    const modificarZona = require('./modificar.js');
+    const registrarZona = require('./registrar.js');
 
-// Resolvemos el directorio de los controladores.
-const directorioResuelto = __dirname;
+    // Instanciamos una lista de las funciones de los controladores.
+    const funciones = [
+        consultaZona,
+        eliminarZona,
+        modificarZona,
+        registrarZona,
+    ];
 
-// Consultamos todos los archivos en el directorio.
-const archivos = readdirSync(directorioResuelto);
+    // Asociamos las funciones de los controladores con los controladores.
+    funciones.forEach(funcion => {
+        controladores[funcion.name] = funcion;
+    });
 
-// Por cada archivo en le directorio.
-archivos.forEach(archivo => {
-    // Instanciamos el objeto archivo.
-    const objetoArchivo = parse(archivo);
+    return controladores;
+};
 
-    // Si el archivo no es index y es un archivo javascript.
-    if(objetoArchivo.name != 'index' && objetoArchivo.ext == '.js') {
-        // Importamos el controlador.
-        const controlador = require(
-            join(directorioResuelto, objetoArchivo.name)
-        );
-
-        // Agregamos el controlador a la lista de controladores.
-        controladores[controlador.name] = controlador;
-    }
-});
+// Funciones de los controladores.
+// const controladores = cargaDinamicaControladores(__dirname);
+const controladores = cargaEstaticaControladores();
 
 // Exportamos los controladores.
 module.exports = controladores;
