@@ -12,8 +12,9 @@ function cargaEstaticaControladores() {
     const eliminarEmpleado = require('./eliminar.js');
     const modificarEmpleado = require('./modificar.js');
     const registrarEmpleado = require('./registrar.js');
-    const registrarEmpleadoCompleto = require('./registrarCompleto.js');
     const consultaEmpleadoCompleto = require('./consultarCompleto.js');
+    const registrarEmpleadoCompleto = require('./registrarCompleto.js');
+    const modificarEmpleadoCompleto = require('./modificarCompleto.js');
     const registrarEmpleadoCompletoConDescanso = require('./registrarCompletoConDescanso.js');
     const modificarEmpleadoCompletoConDescanso = require('./modificarCompletoConDescanso.js');
 
@@ -23,10 +24,11 @@ function cargaEstaticaControladores() {
         eliminarEmpleado,
         modificarEmpleado,
         registrarEmpleado,
-        registrarEmpleadoCompleto,
         consultaEmpleadoCompleto,
+        registrarEmpleadoCompleto,
+        modificarEmpleadoCompleto,
         registrarEmpleadoCompletoConDescanso,
-        modificarEmpleadoCompletoConDescanso
+        modificarEmpleadoCompletoConDescanso,
     ];
 
     // Asociamos las funciones de los controladores con los controladores.
