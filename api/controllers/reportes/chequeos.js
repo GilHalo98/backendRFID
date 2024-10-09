@@ -180,7 +180,7 @@ module.exports = async function reporteChequeos(
         });
 
         // Calculamos el tiempo laboral total.
-        const tiempoLaboralTotal = !reporteEntrada || !reporteSalida? 0 : (
+        const tiempoLaboralTotal = (!reporteEntrada || !reporteSalida)? 0 : (
             reporteSalida.fechaRegistroReporteChequeo
             - reporteEntrada.fechaRegistroReporteChequeo
         );
