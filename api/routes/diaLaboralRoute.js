@@ -44,6 +44,20 @@ module.exports = (app) => {
         controlador.eliminarDiaLaboral
     );
 
+    // Registra un dato en la DB.
+    router.post(
+        '/registrarConDescanso',
+        upload.any(),
+        controlador.registrarDiaLaboralConDescanso
+    );
+
+    // Modifica un registro de la DB.
+    router.put(
+        '/modificarConDescanso',
+        upload.any(),
+        controlador.modificarDiaLaboralConDescanso
+    );
+
     // Ruta general de roles.
     app.use(process.env.API_URL + 'diaLaboral', router);
 };
