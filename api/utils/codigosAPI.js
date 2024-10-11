@@ -17,6 +17,7 @@ class CodigoApp {
     TIPO_DISPOSITIVO_NO_ENCONTRADO = 9;
     HORARIO_NO_ENCONTRADO = 10;
     DIA_LABORAL_NO_ENCONTRADO = 11;
+    RECURSO_NO_ENCONTRADO = 12;
 
     // Códigos de datos para registros/Busqueda invalidos/incompletos.
     // (256, 512)
