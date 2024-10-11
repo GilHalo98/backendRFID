@@ -63,6 +63,12 @@ module.exports = (app) => {
         controlador.modificarHorarioCompleto
     );
 
+    // Modifica un horario de un empleado completo.
+    router.put(
+        '/modificar/completoConDescanso',
+        uploadForm.any(),
+        controlador.modificarHorarioCompletoConDescanso
+    );
     // Ruta general de empleados.
     app.use(process.env.API_URL + 'horario', router);
 };
