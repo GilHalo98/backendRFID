@@ -71,6 +71,21 @@ module.exports = (app) => {
         controlador.modificarEmpleadoCompleto
     );
 
+    // Registra un empleado completo, empleado, usuario
+    // horario y dias laborales.
+    router.post(
+        '/registrar/completoConDescanso',
+        upload.single("file"),
+        controlador.registrarEmpleadoCompletoConDescanso
+    );
+
+    // Modifica un registro de la DB.
+    router.put(
+        '/modificar/completoConDescanso',
+        upload.single("file"),
+        controlador.modificarEmpleadoCompletoConDescanso
+    );
+
     // Ruta general de empleados.
     app.use(process.env.API_URL + 'empleado', router);
 };
