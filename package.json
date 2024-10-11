@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "0.1.0",
-  "description": "Ver 0.1.1: Se agrego la carga de controladores estatica para poder compilar el programa",
+  "description": "Ver 0.1.2: Cambio de controladores de endpoints",
   "main": "app.js",
   "scripts": {
     "start": "nodemon api/app.js",

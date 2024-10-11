@@ -49,3 +49,4 @@ npm start
 | :-----: | :---------: |
 | 0.1.0   | Primera versión de salida estable |
 | 0.1.1   | Se agrego la importacion estatica de los controladores de los endpoints |
+| 0.1.2   | Se cambiaron los controladores de registro de empleados completos |

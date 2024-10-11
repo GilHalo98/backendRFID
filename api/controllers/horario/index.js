@@ -14,6 +14,7 @@ function cargaEstaticaControladores() {
     const registrarHorario = require('./registrar.js');
     const consultaHorarioCompleto = require('./consultarCompleto.js');
     const modificarHorarioCompleto = require('./modificarCompleto.js');
+    const modificarHorarioCompletoConDescanso = require('./modificarCompletoConDescanso.js');
 
     // Instanciamos una lista de las funciones de los controladores.
     const funciones = [
@@ -22,7 +23,8 @@ function cargaEstaticaControladores() {
         modificarHorario,
         registrarHorario,
         consultaHorarioCompleto,
-        modificarHorarioCompleto
+        modificarHorarioCompleto,
+        modificarHorarioCompletoConDescanso,
     ];
 
     // Asociamos las funciones de los controladores con los controladores.

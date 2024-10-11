@@ -1,3 +1,6 @@
+// Manipulacion de ficheros y directorios.
+const fs = require("fs");
+
 // Modelos de la DB
 const db = require("../../models/index");
 
@@ -12,8 +15,9 @@ const {
     existeRegistro
 } = require("../../utils/registros");
 
-// Manipulacion de ficheros y directorios.
-const fs = require("fs");
+const {
+    numeroDiaANombreDia
+} = require("../../utils/tiempo");
 
 // Para la creacion y lectura de tokens.
 const {
@@ -38,6 +42,300 @@ const Usuarios = db.usuario;
 const Empleados = db.empleado;
 const DiasLaborales = db.diaLaboral;
 
+async function registrarRecurso(
+    imagenEmpleado,
+    hoy
+) {
+    // Variables de coincidencias y nuevo registro.
+    let coincidencia = undefined;
+    let nuevoRegistro = undefined;
+
+    // Buscamos que no exista otro registro con los mismos datos.
+    coincidencia = await Recursos.findOne({
+        where: {
+            nombre: imagenEmpleado.filename
+        }
+    });
+
+    // Si existe un registro con los mismos datos terminamos
+    // la operacion.
+    if(coincidencia) {
+        return undefined;
+    }
+
+    // Creamos el registro de la imagen del empleado.
+    nuevoRegistro = {
+        tipo: imagenEmpleado.mimetype,
+        nombre: imagenEmpleado.filename,
+        data: fs.readFileSync(imagenEmpleado.path),
+        fechaRegistroRecurso: hoy,
+    };
+
+    // Guardamos el registro en la DB.
+    await Recursos.create(nuevoRegistro).then((registro) => {
+        idImagenVinculada = registro.id;
+    });
+
+    return idImagenVinculada;
+};
+
+async function registrarEmpleado(
+    nombres,
+    apellidoPaterno,
+    apellidoMaterno,
+    numeroTelefonico,
+    fechaNacimiento,
+    idRolVinculado,
+    idImagenVinculada,
+    hoy
+) {
+    // Variables de coincidencias y nuevo registro.
+    let coincidencia = undefined;
+    let nuevoRegistro = undefined;
+
+    // Verificamos que los registros vinculados existan.
+    if(! await existeRegistro(Roles, idRolVinculado)) {
+        // Retornamos un mensaje de error.
+        return respuesta.status(200).send({
+            codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
+        });
+    }
+
+    // Buscamos que no exista otro registro con los mismos datos.
+    coincidencia = await Empleados.findOne({
+        where: {
+            nombres: nombres,
+            apellidoPaterno: apellidoPaterno,
+            apellidoMaterno: apellidoMaterno,
+            numeroTelefonico: numeroTelefonico
+        }
+    });
+
+    // Si existe un registro con los mismos datos terminamos
+    // la operacion.
+    if(coincidencia) {
+        return undefined;
+    }
+
+    // Creamos el registro.
+    nuevoRegistro = {
+        nombres: nombres,
+        apellidoPaterno: apellidoPaterno,
+        apellidoMaterno: apellidoMaterno,
+        numeroTelefonico: numeroTelefonico,
+        fechaNacimiento: new Date(fechaNacimiento),
+        fechaRegistroEmpleado: hoy,
+        idRolVinculado: idRolVinculado,
+        idImagenVinculada: idImagenVinculada
+    };
+
+    // Guardamos el registro en la DB.
+    await Empleados.create(nuevoRegistro).then((registro) => {
+        idEmpelado = registro.id;
+    });
+
+    return idEmpelado;
+};
+
+async function registrarUsuario(
+    nombreUsuario,
+    password,
+    idRegistroEmpleadoVinculado,
+    hoy
+) {
+    // Variables de coincidencias y nuevo registro.
+    let coincidencia = undefined;
+    let nuevoRegistro = undefined;
+
+    // Buscamos que no exista otro registro con los mismos datos.
+    coincidencia = await Usuarios.findOne({
+        where: {
+            nombreUsuario: nombreUsuario,
+        }
+    });
+
+    // Si existe un registro con los mismos datos terminamos
+    // la operacion.
+    if(coincidencia) {
+        return undefined;
+    }
+
+    // Creamos el registro.
+    nuevoRegistro = {
+        nombreUsuario: nombreUsuario,
+        password: password,
+        fechaRegistroUsuario: hoy,
+        idRegistroEmpleadoVinculado: idRegistroEmpleadoVinculado
+    };
+
+    // Guardamos el registro en la DB.
+    await Usuarios.create(nuevoRegistro);
+
+    return 1;
+};
+
+async function registrarHorario(
+    descripcionHorario,
+    tolerancia,
+    idEmpleadoVinculado,
+    hoy
+) {
+    // Variables de coincidencias y nuevo registro.
+    let coincidencia = undefined;
+    let nuevoRegistro = undefined;
+
+    // Buscamos por registros con el id del registro vinculado.
+    coincidencia = await Horarios.findOne({
+        where: {
+            idEmpleadoVinculado: idEmpleadoVinculado
+        }
+    });
+
+    // Si existe un registro con los mismos datos terminamos
+    // la operacion.
+    if(coincidencia) {
+        return undefined;
+    }
+
+    // Creamos el registro.
+    nuevoRegistro = {
+        descripcionHorario: descripcionHorario,
+        tolerancia: toSQLTime(tolerancia),
+        idEmpleadoVinculado: idEmpleadoVinculado,
+        fechaRegistroHorario: hoy
+    };
+
+    // Guardamos el registro en la DB.
+    await Horarios.create(nuevoRegistro).then((registro) => {
+        idHorario = registro.id;
+    });
+
+    return idHorario;
+};
+
+async function registrarDiaLaboral(
+    horarioCompleto,
+    idHorarioVinculado,
+    hoy
+) {
+    const pool = []
+
+    const dias = Object.keys(horarioCompleto);
+
+    for(let i = 0; i < dias.length; i ++) {
+        const dia = i + 1 ;
+
+
+        console.log(horarioCompleto[dias[i]]);
+
+        const esDescanso = horarioCompleto[dias[i]].esDescanso;
+        const horaEntrada = horarioCompleto[dias[i]].Entrada;
+        const horaSalida = horarioCompleto[dias[i]].Salida;
+
+        pool.push(Promise.resolve(DiasLaborales.create({
+            dia: dia,
+            esDescanso: esDescanso,
+            horaEntrada: horaEntrada.length > 0? toSQLTime(horaEntrada) : '',
+            horaSalida: horaEntrada.length > 0? toSQLTime(horaSalida) : '',
+            fechaRegistroDia: hoy,
+            idHorarioVinculado: idHorarioVinculado
+        })));
+    }
+
+    await Promise.all(pool);
+
+    return 1;
+};
+
+// Desempaqueta el registro del horario completo del empleado.
+function desempaquetarRegistroHorarioCompleto(cuerpo) {
+    // Desempaquetamos los campos del cuerpo.
+    const campos = Object.keys(cuerpo);
+
+    /**
+     * Filtramos unicamente los campos que necesitamos.
+     */
+
+    // Instancia de campos filtrados y formateados.
+    const camposFiltrados = {};
+
+    // Filtros de los campos.
+    const filtros = []
+
+    // Preparamos el filtro de los campos.
+    for(let i = 1; i <= 7; i ++) {
+        // Instanciamos el nombre del dia.
+        const nombreDia = numeroDiaANombreDia(i);
+
+        // Lo agregamos a los filtros.
+        filtros.push(nombreDia);
+
+        // Instanciamos el campo filtrado y su formato.
+        camposFiltrados[nombreDia] = {};
+    }
+
+    // Por cada campo.
+    campos.forEach((campo) => {
+        // Por cada filtro.
+        filtros.forEach((filtro) => {
+            // Si el campo incluye el filtro.
+            if(campo.includes(filtro)) {
+                // Si el campo es de tipo descanso.
+                if(campo.includes('esDescanso')) {
+                    // Agregamos el campo filtrado al formato.
+                    camposFiltrados[filtro]['esDescanso'] = cuerpo[
+                        campo
+                    ].toLowerCase() == 'true'?
+                        true : false;
+                }
+
+                // Si el campo es de tipo entrada.
+                if(campo.includes('Entrada')) {
+                    // Agregamos el campo filtrado al formato.
+                    camposFiltrados[filtro]['Entrada'] = camposFiltrados[
+                        filtro
+                    ]['esDescanso']? '' : cuerpo[campo];
+                }
+
+                // Si el campo es de tipo salida.
+                if(campo.includes('Salida')) {
+                    // Agregamos el campo filtrado al formato.
+                    camposFiltrados[filtro]['Salida'] = camposFiltrados[
+                        filtro
+                    ]['esDescanso']? '' : cuerpo[campo];
+
+                }
+
+                // Terminamos el ciclo.
+                return;
+            }
+        });
+    });
+
+    return camposFiltrados;
+};
+
+// Valida el registro para el horario completo del empleado.
+function validarRegistroHorario(horarioCompleto) {
+    let registroValidado = true;
+
+    const dias = Object.keys(horarioCompleto);
+
+    for(let i = 0; i < dias.length; i ++) {
+        const datos = horarioCompleto[dias[i]];
+
+        if(!datos.esDescanso) {
+            if(datos.Entrada.length <= 0 || datos.Salida <= 0) {
+                registroValidado = false;
+
+                break;
+            }
+        }
+    }
+
+    return registroValidado;
+};
+
 // Registra un empleado completo, con usuario, horario y dia laboral.
 module.exports = async function registrarEmpleadoCompleto(
     request,
@@ -49,6 +347,10 @@ module.exports = async function registrarEmpleadoCompleto(
     const parametros = request.params;
 
     try {
+        /**
+         * Desempaquetamos y validamos el token.
+         */
+
         // Desencriptamos el payload del token.
         const payload = await getTokenPayload(cabecera.authorization);
 
@@ -59,80 +361,16 @@ module.exports = async function registrarEmpleadoCompleto(
             });
         }
 
-        // Lista de dias.
-        const listaDias = [
-            { nombreDia: 'Lunes', id: 1 },
-            { nombreDia: 'Martes', id: 2 },
-            { nombreDia: 'Miercoles', id: 3 },
-            { nombreDia: 'Jueves', id: 4 },
-            { nombreDia: 'Viernes', id: 5 },
-            { nombreDia: 'Sabado', id: 6 },
-            { nombreDia: 'Domingo', id: 7 }
-        ];
+        /**
+         * Instanciamos la fecha actual.
+         */
+        const hoy = new Date();
 
-        // Instanciamos la fecha del registro.
-        const fecha = new Date();
+        /**
+         * Desempaquetamos los datos del request.
+         */
+        const imagenEmpleado = request.file;
 
-        // ID de imagen por default de empleado.
-        let idImagenVinculada = 1;
-
-        // Recuperamos la informacion por registro.
-        const archivoImagen = request.file;
-
-        // ID del registro del empelado.
-        let idEmpelado = undefined;
-
-        // ID del registro del horario.
-        let idHorario = undefined;
-
-        // Variables de coincidencias y nuevo registro.
-        let coincidencia = undefined;
-        let nuevoRegistro = undefined;
-
-        // Separamos los registros por partes, primero registramos
-        // la imagen del empleado.
-
-        // Validamos que exista la informacion necesaria para
-        // realizar el registro del empleado.
-        if(!archivoImagen) {
-            // Si no estan completos mandamos
-            // un mensaje de datos incompletos.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
-
-        // Buscamos que no exista otro registro con los mismos datos.
-        coincidencia = await Recursos.findOne({
-            where: {
-                nombre: archivoImagen.filename
-            }
-        });
-
-        // Si existe un registro con los mismos datos terminamos
-        // la operacion.
-        if(coincidencia) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
-            });
-        }
-
-        // Creamos el registro de la imagen del empleado.
-        nuevoRegistro = {
-            tipo: archivoImagen.mimetype,
-            nombre: archivoImagen.filename,
-            data: fs.readFileSync(archivoImagen.path),
-            fechaRegistroRecurso: fecha,
-        };
-
-        // Guardamos el registro en la DB.
-        await Recursos.create(nuevoRegistro).then((registro) => {
-            idImagenVinculada = registro.id;
-        });
-
-        // La siguiente parte es para el registro del empleado.
-
-        // Recuperamos la informacion del registro.
         const nombres = cuerpo.nombres;
         const apellidoPaterno = cuerpo.apellidoPaterno;
         const apellidoMaterno = cuerpo.apellidoMaterno;
@@ -140,222 +378,92 @@ module.exports = async function registrarEmpleadoCompleto(
         const fechaNacimiento = cuerpo.fechaNacimiento;
         const idRolVinculado = cuerpo.idRolVinculado;
 
-        // Validamos que exista la informacion necesaria para
-        // realizar el registro del registro.
-        if(
-            !nombres
+        const nombreUsuario = cuerpo.nombreUsuario;
+        const password = cuerpo.password;
+
+        const tolerancia = cuerpo.tolerancia;
+        const descripcionHorario = cuerpo.descripcionHorario;
+
+        const horarioCompleto = desempaquetarRegistroHorarioCompleto(
+            cuerpo
+        );
+
+        /**
+         * Validamos los datos desempaquetados.
+         */
+        const datosValidados = (!imagenEmpleado
+            || !nombres
             || !apellidoPaterno
             || !apellidoMaterno
-            || !numeroTelefonico
-            || !fechaNacimiento
             || !idRolVinculado
-        ) {
-            // Si no estan completos mandamos
-            // un mensaje de datos incompletos.
+            || !tolerancia
+            || !descripcionHorario
+            || validarRegistroHorario(horarioCompleto)
+        );
+
+        if(!datosValidados) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
             });
         }
 
-        // Verificamos que los registros vinculados existan.
-        if(! await existeRegistro(Roles, idRolVinculado)) {
-            // Retornamos un mensaje de error.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
+        const idImagenVinculada = await registrarRecurso(
+            imagenEmpleado,
+            hoy
+        );
 
-        // Buscamos que no exista otro registro con los mismos datos.
-        coincidencia = await Empleados.findOne({
-            where: {
-                nombres: nombres,
-                apellidoPaterno: apellidoPaterno,
-                apellidoMaterno: apellidoMaterno,
-                numeroTelefonico: numeroTelefonico
-            }
-        });
-
-        // Si existe un registro con los mismos datos terminamos
-        // la operacion.
-        if(coincidencia) {
+        if(!idImagenVinculada) {
             return respuesta.status(200).send({
                 codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
             });
         }
 
-        // Creamos el registro.
-        nuevoRegistro = {
-            nombres: nombres,
-            apellidoPaterno: apellidoPaterno,
-            apellidoMaterno: apellidoMaterno,
-            numeroTelefonico: numeroTelefonico,
-            fechaNacimiento: new Date(fechaNacimiento),
-            fechaRegistroEmpleado: fecha,
-            idRolVinculado: idRolVinculado,
-            idImagenVinculada: idImagenVinculada
-        };
+        const idEmpleado = await registrarEmpleado(
+            nombres,
+            apellidoPaterno,
+            apellidoMaterno,
+            numeroTelefonico,
+            fechaNacimiento,
+            idRolVinculado,
+            idImagenVinculada,
+            hoy
+        );
 
-        // Guardamos el registro en la DB.
-        await Empleados.create(nuevoRegistro).then((registro) => {
-            idEmpelado = registro.id;
-        });
-
-        // La siguiente parte es para el usuario del empelado,
-        // este registro es meramente ocional y util para acceso
-        // al sistema.
-
-        // Recuperamos la informacion del registro.
-        const nombreUsuario = cuerpo.nombreUsuario;
-        const password = cuerpo.password;
-        const idRegistroEmpleadoVinculado = idEmpelado;
-
-        // Buscamos que el registro vinculado exista.
-        if(! await existeRegistro(Empleados, idRegistroEmpleadoVinculado)) {
+        if(!idEmpleado) {
             return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
+                codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
             });
         }
 
-        // Validamos que exista la informacion necesaria para
-        // realizar el registro del usuario.
-        if(!(!nombreUsuario
-            || !password
-            || !idRegistroEmpleadoVinculado
-        )) {
-            // Buscamos que no exista otro registro con los mismos datos.
-            coincidencia = await Usuarios.findOne({
-                where: {
-                    nombreUsuario: nombreUsuario,
-                }
-            });
+        if(nombreUsuario && password) {
+            const idUsuario = await registrarUsuario(
+                nombreUsuario,
+                password,
+                idEmpleado,
+                hoy
+            );
 
-            // Si existe un registro con los mismos datos terminamos
-            // la operacion.
-            if(coincidencia) {
+            if(!idUsuario) {
                 return respuesta.status(200).send({
                     codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
                 });
             }
-
-            // Creamos el registro.
-            nuevoRegistro = {
-                nombreUsuario: nombreUsuario,
-                password: password,
-                fechaRegistroUsuario: fecha,
-                idRegistroEmpleadoVinculado: idRegistroEmpleadoVinculado
-            };
-
-            // Guardamos el registro en la DB.
-            await Usuarios.create(nuevoRegistro);
         }
 
-        // La proxima parte es la del registro del horario.
+        const idHorario = await registrarHorario(
+            descripcionHorario,
+            tolerancia,
+            idEmpleado,
+            hoy
+        );
 
-        // Recuperamos la informacion del registro.
-        const descripcionHorario = cuerpo.descripcionHorario;
-        const tolerancia = cuerpo.tolerancia;
-        const idEmpleadoVinculado = idEmpelado;
+        const idDiasLaborales = await registrarDiaLaboral(
+            horarioCompleto,
+            idHorario,
+            hoy
+        );
 
-        // Validamos que exista la informacion necesaria para
-        // realizar el registro del permiso.
-        if(
-            !descripcionHorario
-            || !tolerancia
-            || !idEmpleadoVinculado
-        ) {
-            // Si no estan completos mandamos
-            // un mensaje de datos incompletos.
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
-
-        // Buscamos por registros con el id del registro vinculado.
-        coincidencia = await Horarios.findOne({
-            where: {
-                idEmpleadoVinculado: idEmpleadoVinculado
-            }
-        });
-
-        // Si existe un registro con los mismos datos terminamos
-        // la operacion.
-        if(coincidencia) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_YA_EXISTE
-            });
-        }
-
-        // Creamos el registro.
-        nuevoRegistro = {
-            descripcionHorario: descripcionHorario,
-            tolerancia: toSQLTime(tolerancia),
-            idEmpleadoVinculado: idEmpleadoVinculado,
-            fechaRegistroHorario: fecha
-        };
-
-        // Guardamos el registro en la DB.
-        await Horarios.create(nuevoRegistro).then((registro) => {
-            idHorario = registro.id;
-        });
-
-        // Verificamos si el registro vinculado existe en la db.
-        if(! await existeRegistro(Horarios, idHorario)) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
-            });
-        }
-
-        // Mapeamos los datos de la lista de los dias laborales.
-        const nuevosRegistros = listaDias.map((diaSemana) => {
-            // Datos del registro del dia laboral.
-            const dia = diaSemana.id;
-            const esDescanso = cuerpo[
-                'esDescanso' + diaSemana.nombreDia
-            ];
-            const horaEntrada = cuerpo[
-                'horaEntrada' + diaSemana.nombreDia
-            ];
-            const horaSalidaDescanso = cuerpo[
-                'horaSalidaDescanso' + diaSemana.nombreDia
-            ];
-            const horaEntradaDescanso = cuerpo[
-                'horaEntradaDescanso' + diaSemana.nombreDia
-            ];
-            const horaSalida = cuerpo[
-                'horaSalida' + diaSemana.nombreDia
-            ];
-            const idHorarioVinculado = idHorario;
-
-            // Validamos que exista la informacion necesaria para
-            // realizar el registro del permiso.
-            if(!(!esDescanso || !idHorarioVinculado)) {
-                // Si existe la informacion, entonces se agrega a
-                // la lista de datos validos.
-                return DiasLaborales.create({
-                    dia: dia,
-                    esDescanso: esDescanso,
-                    horaEntrada: toSQLTime(horaEntrada),
-                    horaSalidaDescanso: toSQLTime(horaSalidaDescanso),
-                    horaEntradaDescanso: toSQLTime(horaEntradaDescanso),
-                    horaSalida: toSQLTime(horaSalida),
-                    fechaRegistroDia: fecha,
-                    idHorarioVinculado: idHorarioVinculado
-                });
-            }
-        });
-
-        // Si los registros del horario laboral son diferente de 7,
-        // se retorna un error de datos de registro incompletos.
-        if(nuevosRegistros.length != 7) {
-            return respuesta.status(200).send({
-                codigoRespuesta: CODIGOS.DATOS_REGISTRO_INCOMPLETOS
-            });
-        }
-
-        // Guardamos los nuevos registros.
-        await Promise.all(nuevosRegistros);
-
-        // Retornamos una respuesta de exito.
+        // Retornamos un codigo de error.
         return respuesta.status(200).send({
             codigoRespuesta: CODIGOS.OK
         });

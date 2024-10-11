@@ -28,7 +28,7 @@ const Empleados = db.empleado;
 const DiasLaborales = db.diaLaboral;
 
 // Modifica un horario y sus dias laborales dado un empleado.
-module.exports = async function modificarHorarioCompleto(
+module.exports = async function modificarHorarioCompletoConDescanso(
     request,
     respuesta
 ) {
@@ -134,6 +134,12 @@ module.exports = async function modificarHorarioCompleto(
                 const horaEntrada = cuerpo[
                     'horaEntrada' + listaDias[registroVinculado.dia - 1]
                 ];
+                const horaSalidaDescanso = cuerpo[
+                    'horaSalidaDescanso' + listaDias[registroVinculado.dia - 1]
+                ];
+                const horaEntradaDescanso = cuerpo[
+                    'horaEntradaDescanso' + listaDias[registroVinculado.dia - 1]
+                ];
                 const horaSalida = cuerpo[
                     'horaSalida' + listaDias[registroVinculado.dia - 1]
                 ];
@@ -146,6 +152,8 @@ module.exports = async function modificarHorarioCompleto(
                     // Limpiamos las horas de entrada,
                     // salida, inicio de descanso y fin de descanso.
                     registroVinculado.horaEntrada = null;
+                    registroVinculado.horaSalidaDescanso = null;
+                    registroVinculado.horaEntradaDescanso = null;
                     registroVinculado.horaSalida = null;
 
                 // Si no esta marcado como dia de descanso.
@@ -153,10 +161,17 @@ module.exports = async function modificarHorarioCompleto(
                     // Guardamos el cambio de si el dia es descanso.
                     registroVinculado.esDescanso = esDescanso;
 
-                    // Guardamos los cambios realizados en los demas
-                    // campos.
+                    // Guardamos los cambios realizados en los demas campos.
                     if(horaEntrada) {
                         registroVinculado.horaEntrada = horaEntrada;
+                    }
+
+                    if(horaSalidaDescanso) {
+                        registroVinculado.horaSalidaDescanso = horaSalidaDescanso;
+                    }
+
+                    if(horaEntradaDescanso) {
+                        registroVinculado.horaEntradaDescanso = horaEntradaDescanso;
                     }
 
                     if(horaSalida) {
