@@ -13,12 +13,17 @@ function cargaEstaticaControladores() {
     const modificarDiaLaboral = require('./modificar.js');
     const registrarDiaLaboral = require('./registrar.js');
 
+    const modificarDiaLaboralConDescanso = require('./modificarConDescanso.js');
+    const registrarDiaLaboralConDescanso = require('./registrarConDescanso.js');
+
     // Instanciamos una lista de las funciones de los controladores.
     const funciones = [
-        consultaDiaLaboral,
         eliminarDiaLaboral,
+        consultaDiaLaboral,
+        registrarDiaLaboral,
         modificarDiaLaboral,
-        registrarDiaLaboral
+        registrarDiaLaboralConDescanso,
+        modificarDiaLaboralConDescanso,
     ];
 
     // Asociamos las funciones de los controladores con los controladores.

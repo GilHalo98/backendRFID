@@ -22,7 +22,7 @@ const DiasLaborales = db.diaLaboral;
 const Horarios = db.horario;
 
 // Genera un reporte de intentos de accesos a zonas.
-module.exports = async function modificarDiaLaboral(
+module.exports = async function modificarDiaLaboralConDescanso(
     request,
     respuesta
 ) {
@@ -51,6 +51,8 @@ module.exports = async function modificarDiaLaboral(
         const dia = cuerpo.dia;
         const esDescanso = cuerpo.esDescanso;
         const horaEntrada = cuerpo.horaEntrada;
+        const horaSalidaDescanso = cuerpo.horaSalidaDescanso;
+        const horaEntradaDescanso = cuerpo.horaEntradaDescanso;
         const horaSalida = cuerpo.horaSalida;
         const idHorarioVinculado = cuerpo.idHorarioVinculado;
 
@@ -83,6 +85,12 @@ module.exports = async function modificarDiaLaboral(
         }
         if(horaEntrada) {
             registro.horaEntrada = horaEntrada;
+        }
+        if(horaSalidaDescanso) {
+            registro.horaSalidaDescanso = horaSalidaDescanso;
+        }
+        if(horaEntradaDescanso) {
+            registro.horaEntradaDescanso = horaEntradaDescanso;
         }
         if(horaSalida) {
             registro.horaSalida = horaSalida;
