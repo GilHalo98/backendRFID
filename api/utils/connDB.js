@@ -5,8 +5,7 @@ const { Sequelize } = require("sequelize");
 require("dotenv").config();
 
 // Variables del entorno.
-const PORT = process.env.PORT;
-const HOST = process.env.HOST;
+const DB_HOST = process.env.DB_HOST;
 const DB_USER = process.env.DB_USER;
 const DB_PASS = process.env.DB_PASS;
 const DB_DIALECT = process.env.DB_DIALECT;
@@ -27,7 +26,7 @@ const validarConexionDB = (
         DB_USER,
         DB_PASS,
         {
-            host: HOST,
+            host: DB_HOST,
             dialect: DB_DIALECT
         }
     );
