@@ -9,6 +9,7 @@ var multer = require('multer');
 
 // Incluimos las funciones propias
 const { mostrarLog } = require("./utils/logs");
+const { validarConexionDB } = require("./utils/connDB");
 
 // Para poder procesar form-data.
 var upload = multer();
@@ -55,52 +56,53 @@ require("./routes/rolRoute")(app);
 require("./routes/IoTRoute")(app);
 require("./routes/zonaRoute")(app);
 
-
 // Instancia un objeto servidor.
 const server = http.createServer(app);
 
-// Se instancia el io para el socket.
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
-});
-
-// Aqui se agregan los eventos que puede manejar el socket.
-require("./socketServer/manajerEventos")(io);
-
-// Escuchamos sobre una IP y Puerto definido e instanciamos el servidor.
-server.listen(PORT, HOST, (error) => {
+validarConexionDB(() => {
     console.clear();
 
-    if(error){
-        return mostrarLog(`Cannot listen on Port: ${PORT}`);
-    }
+    // Se instancia el io para el socket.
+    const io = new Server(server, {
+        cors: {
+            origin: "*",
+            methods: ["GET", "POST"]
+        }
+    });
 
-    mostrarLog(`Server is listening on: http://${HOST}:${PORT}/`);
+    // Aqui se agregan los eventos que puede manejar el socket.
+    require("./socketServer/manajerEventos")(io);
 
-    /* Creamos los directorios a usar por el api. */
+    // Escuchamos sobre una IP y Puerto definido e instanciamos el servidor.
+    server.listen(PORT, HOST, (error) => {
+        if(error){
+            return mostrarLog(`Cannot listen on Port: ${PORT}`);
+        }
 
-    // Si el directorio de los logs del servidor no existe.
-    if(!fs.existsSync(LOG_DIR)) {
-        // Creamos el directorio.
-        fs.mkdirSync(LOG_DIR);
+        mostrarLog(`Server is listening on: http://${HOST}:${PORT}/`);
 
-        mostrarLog('Directorio de logs creado exitosamente...');
+        /* Creamos los directorios a usar por el api. */
 
-    } else {
-        mostrarLog('Directorio de logs cargado exitosamente...');
-    }
+        // Si el directorio de los logs del servidor no existe.
+        if(!fs.existsSync(LOG_DIR)) {
+            // Creamos el directorio.
+            fs.mkdirSync(LOG_DIR);
 
-    // Si el directorio de los recursos del servidor no existe.
-    if(!fs.existsSync(RECURSOS_DIR)) {
-        // Creamos el directorio.
-        fs.mkdirSync(RECURSOS_DIR);
+            mostrarLog('Directorio de logs creado exitosamente...');
 
-        mostrarLog('Directorio de recursos creado exitosamente...');
+        } else {
+            mostrarLog('Directorio de logs cargado exitosamente...');
+        }
 
-    } else {
-        mostrarLog('Directorio de recursos cargado exitosamente...');
-    }
+        // Si el directorio de los recursos del servidor no existe.
+        if(!fs.existsSync(RECURSOS_DIR)) {
+            // Creamos el directorio.
+            fs.mkdirSync(RECURSOS_DIR);
+
+            mostrarLog('Directorio de recursos creado exitosamente...');
+
+        } else {
+            mostrarLog('Directorio de recursos cargado exitosamente...');
+        }
+    });
 });
