@@ -45,6 +45,9 @@ const validarConexionDB = (
 
     }).catch((ERROR) => {
         console.log('BASE DE DATOS NO OPERATIVA');
+
+        console.log(ERROR);
+
         console.log('REINTENTANDO VALIDACION EN 3s...');
 
         // Si la validacion no fue correcta, entonces reintentamos.
