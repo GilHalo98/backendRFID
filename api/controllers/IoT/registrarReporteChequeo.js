@@ -25,11 +25,17 @@ const {
 // Procesamiento de tiempo y fechas.
 const {
     rangoHoy,
+    ajustarTimeZone,
     empleadoSalioTarde,
     empleadoLlegoATiempo,
 } = require("../../utils/tiempo");
 
 // Funciones extra.
+const {
+    toDateTime,
+    toSQLDate
+} = require("../../utils/utils");
+
 const {
     mostrarLog
 } = require("../../utils/logs");
@@ -53,11 +59,12 @@ function generarReporteChequeo(
     tipoReporteEntradaRetraso,
     tipoReporteSalida,
     tipoReporteSalidaExtras,
+    extras,
     fecha
 ) {
     /**
      * Registramos un reporte de chequo, ya sea entrada o salida, en
-     * la base de datos
+     * la base de datos dado el ultimo reporte de entrada y de salida.
     */
 
     // Instanciamos los datos a guardar en el registro y el registro
@@ -159,15 +166,28 @@ function generarReporteChequeo(
                     idTipoReporteVinculado = tipoReporteSalidaExtras.id;
 
                 } else {
-                    descripcionReporte = `Chequeo de salida de ${
-                        registroEmpleado.nombres
-                    } ${
-                        registroEmpleado.apellidoPaterno
-                    } ${
-                        registroEmpleado.apellidoMaterno
-                    }`;
+                    if(extras) {
+                        descripcionReporte = `Chequeo de salida de ${
+                            registroEmpleado.nombres
+                        } ${
+                            registroEmpleado.apellidoPaterno
+                        } ${
+                            registroEmpleado.apellidoMaterno
+                        } con horas extras`;
 
-                    idTipoReporteVinculado = tipoReporteSalida.id;
+                        idTipoReporteVinculado = tipoReporteSalidaExtras.id;
+
+                    } else {
+                        descripcionReporte = `Chequeo de salida de ${
+                            registroEmpleado.nombres
+                        } ${
+                            registroEmpleado.apellidoPaterno
+                        } ${
+                            registroEmpleado.apellidoMaterno
+                        }`;
+
+                        idTipoReporteVinculado = tipoReporteSalida.id;
+                    }
                 }
 
             // Si ya se encuentran todos los reportes
@@ -216,7 +236,7 @@ module.exports = async function registrarReporteChequeo (
         const fecha = new Date();
 
         // Dia de la semana actual.
-        const dia = fecha.getDay() == 0? 7 : fecha.getDay();
+        const dia = fecha.getDay() == 0 ? 7 : fecha.getDay();
 
         // Recuperamos los datos del reporte.
         const idEmpleadoVinculado = cuerpo.idEmpleadoVinculado;
@@ -319,7 +339,28 @@ module.exports = async function registrarReporteChequeo (
          * del empleado del dia.
         */
 
-        // Consultamos el reporte de entrada del empleado.
+        // !!!LAS HORAS EXTRA PASADAS DE LAS 12:59 SE TOMAN EN CUENTA
+        // JUSTO ANTES DE LA HORA DE ENTRADA, AQUÍ ES IMPORTANTE AGREGAR
+        // ALGUN MARGEN PARA QUE NO DETECTE MUY JUSTAMENTE COMO SI FUERAN
+        // HORAS EXTRA, ESTO PUEDE SER UNA HORA O MAS ANTES DE LA HORA
+        // DE ENTRADA¡¡¡
+        const horaEntradaAjustada = ajustarTimeZone(toDateTime(
+            registroDiaLaboral.horaEntrada
+        ));
+
+        horaEntradaAjustada.setHours(
+            horaEntradaAjustada.getHours() - 2
+        );
+
+        // Detectamos si hubo horas extras pasadas de las 12:59 p.m.
+        const extras = ajustarTimeZone(
+            fecha
+        ) < horaEntradaAjustada;
+
+        // Ajustamos por las horas extras.
+        const offsetDias = extras ? -1 : 0;
+
+        // Consultamos el ultimo reporte de entrada del empleado.
         const registroReporteEntrada = await Reportes.findOne({
             where: {
                 idTipoReporteVinculado: {
@@ -329,19 +370,21 @@ module.exports = async function registrarReporteChequeo (
                     ]
                 },
                 fechaRegistroReporte: {
-                    [Op.between]: rangoHoy(),
+                    [Op.between]: rangoHoy(offsetDias),
                 }
             },
+            order: [
+                ["fechaRegistroReporte", "DESC"]
+            ],
             include: [{
                 model: ReportesChequeos,
                 where: {
                     idEmpleadoVinculado: idEmpleadoVinculado
                 }
-
             }]
         });
 
-        // Consultamos el reporte de salida del empleado.
+        // Consultamos el ultimo reporte de salida del empleado.
         const registroReporteSalida = await Reportes.findOne({
             where: {
                 idTipoReporteVinculado: {
@@ -354,6 +397,9 @@ module.exports = async function registrarReporteChequeo (
                     [Op.between]: rangoHoy(),
                 }
             },
+            order: [
+                ["fechaRegistroReporte", "DESC"]
+            ],
             include: [{
                 model: ReportesChequeos,
                 where: {
@@ -374,9 +420,10 @@ module.exports = async function registrarReporteChequeo (
             tipoReporteEntradaRetraso,
             tipoReporteSalida,
             tipoReporteSalidaExtras,
+            extras,
             fecha
         );
-        
+
         // Si los datos no fueron generados, entonces ocurrio un error.
         if(!datosReporte) {
             mostrarLog(

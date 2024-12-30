@@ -3,6 +3,22 @@ const {
     toSQLDate
 } = require("./utils");
 
+
+function ajustarTimeZone(tiempo) {
+    // Les quitamos el offset del timezone.
+    const timeZone = tiempo.getTimezoneOffset();
+
+    const offsetHoras = Math.floor(timeZone / 60);
+    const offsetMinutos = Math.floor(timeZone / (60 * 60));
+
+    tiempo.setHours(
+        tiempo.getHours() - offsetHoras,
+        tiempo.getMinutes() - offsetMinutos
+    );
+
+    return tiempo
+};
+
 function empleadoLlegoATiempo(
     horaEntrada, toleranciaEntrada, fecha
 ) {
@@ -81,7 +97,7 @@ function empleadoSalioTarde(
     return salioATiempo;
 };
 
-function rangoHoy() {
+function rangoHoy(offset=0) {
     // Instanciamos dos fechas.
     const fechaA = new Date();
     const fechaB = new Date();
@@ -91,6 +107,14 @@ function rangoHoy() {
 
     // La segunda tendra hora de 23:59:59
     fechaB.setHours(23, 59, 59);
+
+    if(offset != 0) {
+        if(offset > 0) {
+            fechaB.setDate(fechaB.getDate() + 1);
+        } else {
+            fechaA.setDate(fechaA.getDate() - 1);
+        }
+    }
 
     // Cambiamos el formato y las retornamos.
     return [
@@ -387,6 +411,7 @@ module.exports = {
     rangoSemana,
     tiempoActual,
     dateDiaSemana,
+    ajustarTimeZone,
     deserealizarSemana,
     empleadoSalioTarde,
     numeroDiaANombreDia,
