@@ -6,10 +6,16 @@ function toSQLDate(fecha, timeOffset=true) {
 
     const fechaAux = new Date(fecha);
 
+    let extra = 1;
+
+    if(process.platform == "win32") {
+        extra = 2;
+    }
+
     if(timeOffset) {
         const timeZone = fechaAux.getTimezoneOffset();
 
-        const offsetHoras = Math.floor(timeZone / 60);
+        const offsetHoras = Math.floor(timeZone / 60) * extra;
         const offsetMinutos = Math.floor(timeZone / (60 * 60));
     
         fechaAux.setHours(
