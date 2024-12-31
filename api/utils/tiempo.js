@@ -4,7 +4,7 @@ const {
 } = require("./utils");
 
 
-function ajustarTimeZone(tiempo) {
+function ajustarTimeZone(fecha) {
     /**
      * Ajusta el time zona offset de la fecha pasada.
      */
