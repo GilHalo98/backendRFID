@@ -5,18 +5,25 @@ const {
 
 
 function ajustarTimeZone(tiempo) {
+    /**
+     * Ajusta el time zona offset de la fecha pasada.
+     */
+
+    // Instanciamos una fecha auxiliar.
+    const fechaAux = new Date(fecha);
+
     // Les quitamos el offset del timezone.
     const timeZone = tiempo.getTimezoneOffset();
 
     const offsetHoras = Math.floor(timeZone / 60);
     const offsetMinutos = Math.floor(timeZone / (60 * 60));
 
-    tiempo.setHours(
-        tiempo.getHours() - offsetHoras,
-        tiempo.getMinutes() - offsetMinutos
+    fechaAux.setHours(
+        fechaAux.getHours() - offsetHoras,
+        fechaAux.getMinutes() - offsetMinutos
     );
 
-    return tiempo
+    return fechaAux
 };
 
 function empleadoLlegoATiempo(

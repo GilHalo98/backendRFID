@@ -353,6 +353,7 @@ module.exports = async function registrarReporteChequeo (
         );
 
         // Detectamos si hubo horas extras pasadas de las 12:59 p.m.
+        // Instanciamos una nueva fecha para poder modificar.
         const extras = ajustarTimeZone(
             fecha
         ) < horaEntradaAjustada;
