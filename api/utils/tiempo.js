@@ -13,7 +13,7 @@ function ajustarTimeZone(fecha) {
     const fechaAux = new Date(fecha);
 
     // Les quitamos el offset del timezone.
-    const timeZone = tiempo.getTimezoneOffset();
+    const timeZone = fecha.getTimezoneOffset();
 
     const offsetHoras = Math.floor(timeZone / 60);
     const offsetMinutos = Math.floor(timeZone / (60 * 60));
