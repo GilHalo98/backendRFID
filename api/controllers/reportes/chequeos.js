@@ -1,3 +1,12 @@
+/**
+ * NOTA: TENEMOS QUE TOMAR EN CUENTA EN EL RANGO DEL DIA
+ * QUE YA SE TOMAN EN CUENTA LOS REGISTROS PASADOS
+ * DE LAS 23:59:59, HAY QUE RECORDAR QUE PARA QUE SE PUEDA
+ * REGISTRAR EL REPORTE DE SALIDA CON HORAS EXTRAS PASADAS
+ * DE LA HORA YA ESTABLECIDA, SE TIENE QUE CHECAR DOS HORAS
+ * ANTES DE LA HORA DE ENTRADA DEL SIGUIENTE DIA.
+ */
+
 // Modelos de la DB
 const db = require("../../models/index");
 
@@ -22,6 +31,7 @@ const {
     rangoDia,
     rangoSemana,
     deserealizarSemana,
+    rangoReporteDiaLaboral
 } = require("../../utils/tiempo");
 
 // Funciones extra.
@@ -31,8 +41,10 @@ const {
 
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
+const Horarios = db.horario;
 const Empleados = db.empleado;
 const TiposReportes = db.tipoReporte;
+const DiasLaborales = db.diaLaboral;
 const ReportesChequeos = db.reporteChequeo;
 
 // Genera un reporte de chequeo de entrada y salida, así como el inico
@@ -72,15 +84,20 @@ module.exports = async function reporteChequeos(
         ) : rangoSemana(false);
 
         // Instanciamos el rango del dia del reporte.
-        const rangoDiaReporte = rangoDia(
+        const rangoReporte = rangoDia(
             consulta.dia,
             semanaReporte
         );
 
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(
-            consulta.idEmpleadoVinculado
-        );
+        const registroVinculado = await Empleados.findOne({
+            where: {
+                id: consulta.idEmpleadoVinculado
+            },
+            include: [{
+                model: Horarios
+            }]
+        });
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -88,6 +105,14 @@ module.exports = async function reporteChequeos(
                 codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
             });
         }
+
+        // Consultamos el dia laboral.
+        const registroDiaLaboral = await DiasLaborales.findOne({
+            where: {
+                idHorarioVinculado: registroVinculado.horario.id,
+                dia: consulta.dia
+            }
+        });
 
         // Buscamos el tipo de reporte para entrada.
         const tipoReporteEntrada = await TiposReportes.findOne({
@@ -128,6 +153,17 @@ module.exports = async function reporteChequeos(
                 codigoRespuesta: CODIGOS.REGISTRO_VINCULADO_NO_EXISTE
             });
         }
+
+        // Instanciamos el rango del reporte.
+        const rangoDiaReporte =  rangoReporteDiaLaboral(
+            consulta.dia,
+            rangoDia(
+                consulta.dia,
+                semanaReporte,
+                false
+            ),
+            registroDiaLaboral
+        );
 
         // Consultamos el reporte de entrada.
         const reporteEntrada = await ReportesChequeos.findOne({

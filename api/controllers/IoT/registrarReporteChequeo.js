@@ -1,3 +1,12 @@
+/**
+ * NOTA: TENEMOS QUE TOMAR EN CUENTA EN EL RANGO DEL DIA
+ * QUE YA SE TOMAN EN CUENTA LOS REGISTROS PASADOS
+ * DE LAS 23:59:59, HAY QUE RECORDAR QUE PARA QUE SE PUEDA
+ * REGISTRAR EL REPORTE DE SALIDA CON HORAS EXTRAS PASADAS
+ * DE LA HORA YA ESTABLECIDA, SE TIENE QUE CHECAR DOS HORAS
+ * ANTES DE LA HORA DE ENTRADA DEL SIGUIENTE DIA.
+ */
+
 // Modelos de la DB
 const db = require("../../models/index");
 
@@ -339,15 +348,13 @@ module.exports = async function registrarReporteChequeo (
          * del empleado del dia.
         */
 
-        // !!!LAS HORAS EXTRA PASADAS DE LAS 12:59 SE TOMAN EN CUENTA
-        // JUSTO ANTES DE LA HORA DE ENTRADA, AQUÍ ES IMPORTANTE AGREGAR
-        // ALGUN MARGEN PARA QUE NO DETECTE MUY JUSTAMENTE COMO SI FUERAN
-        // HORAS EXTRA, ESTO PUEDE SER UNA HORA O MAS ANTES DE LA HORA
-        // DE ENTRADA¡¡¡
+        // Ajustamos la hora de entrada del empleado al timezone.
         const horaEntradaAjustada = ajustarTimeZone(toDateTime(
             registroDiaLaboral.horaEntrada
         ));
 
+        // Se substrae 2 horas de la hora de entrada ajustada para poder
+        // pasar el registro de horas extra despues de las 12:59:59.
         horaEntradaAjustada.setHours(
             horaEntradaAjustada.getHours() - 2
         );
@@ -385,6 +392,27 @@ module.exports = async function registrarReporteChequeo (
             }]
         });
 
+        // Consultamos el rango de la fecha del dia actual, sin
+        // pasarlo de formato a datetime sql.
+        const hoyAux = rangoHoy(offset=0, asSQLDate=false);
+
+        // Indicamos que el limite inferior del rango
+        // del dia es la hora de entrada.
+        hoyAux[0] = toDateTime(
+            registroDiaLaboral.horaEntrada
+        );
+
+        // Se le substrae 2 horas al limite inferior.
+        hoyAux[0].setHours(
+            hoyAux[0].getHours() - 2,
+            hoyAux[0].getMinutes()
+        );
+
+        // Cambiamos el formato a datetime sql.
+        const hoy = [
+            toSQLDate(hoyAux[0]), toSQLDate(hoyAux[1])
+        ];
+
         // Consultamos el ultimo reporte de salida del empleado.
         const registroReporteSalida = await Reportes.findOne({
             where: {
@@ -395,7 +423,7 @@ module.exports = async function registrarReporteChequeo (
                     ]
                 },
                 fechaRegistroReporte: {
-                    [Op.between]: rangoHoy(),
+                    [Op.between]: hoy
                 }
             },
             order: [

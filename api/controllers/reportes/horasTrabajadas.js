@@ -22,6 +22,7 @@ const {
     rangoDia,
     dateDiaSemana,
     deserealizarSemana,
+    rangoReporteDiaLaboral
 } = require("../../utils/tiempo");
 
 // Funciones extra.
@@ -197,10 +198,15 @@ async function generarReporte(
             true
         );
 
-        // Calculamos el rango del dia para el reporte.
-        const rangoDiaReporte = rangoDia(
+        // Instanciamos el rango del reporte.
+        const rangoDiaReporte =  rangoReporteDiaLaboral(
             registroDiaLaboral.dia,
-            semanaReporte
+            rangoDia(
+                registroDiaLaboral.dia,
+                semanaReporte,
+                false
+            ),
+            registroDiaLaboral
         );
 
         // Consultamos los reportes de chequeos.
@@ -322,7 +328,8 @@ module.exports = async function reporteHorasTrabajadas(
                 consulta.offset : parseInt(consulta.offset)
         );
 
-        // Verificamos si se selecciono un maximo de elementos por pagina.
+        // Verificamos si se selecciono un maximo de
+        // elementos por pagina.
         const limit = (
             !consulta.limit?
                 consulta.limit : parseInt(consulta.limit)

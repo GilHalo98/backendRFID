@@ -19,8 +19,9 @@ const {
 
 // Funciones de manipulacion de tiempo.
 const {
+    rangoDia,
     deserealizarSemana,
-    rangoDia
+    rangoReporteDiaLaboral
 } = require("../../utils/tiempo");
 
 // Funciones extra.

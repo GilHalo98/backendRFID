@@ -19,9 +19,10 @@ const {
 
 // Funciones de manipulacion de tiempo.
 const {
-    deserealizarSemana,
+    rangoDia,
     dateDiaSemana,
-    rangoDia
+    deserealizarSemana,
+    rangoReporteDiaLaboral
 } = require("../../utils/tiempo");
 
 // Funciones extra.
@@ -56,10 +57,15 @@ async function calcularDatosRporte(
         descansosLaborados: 0
     };
 
-    // Instanciamos la fecha del dia.
-    const rangoDiaReporte = rangoDia(
+    // Instanciamos el rango del reporte.
+    const rangoDiaReporte =  rangoReporteDiaLaboral(
         diaLaboral.dia,
-        semanaReporte
+        rangoDia(
+            diaLaboral.dia,
+            semanaReporte,
+            false
+        ),
+        diaLaboral
     );
 
     // Fecha del dia del reporte

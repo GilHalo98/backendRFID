@@ -24,6 +24,7 @@ function cargaEstaticaControladores() {
     const reporteChequeosConDescanso = require('./chequeosConDescanso.js');
     const reporteGeneralHorasTrabajadas = require('./generalHorasTrabajadas.js');
     const reporteHorasTrabajadasConDescanso = require('./horasTrabajadasConDescanso.js');
+    const resumenHorasTrabajadasEmpleados = require('./resumenHorasTrabajadasEmpleados.js');
     const reporteGeneralHorasTrabajadasConDescanso = require('./generalHorasTrabajadasConDescanso.js');
 
 
@@ -45,6 +46,7 @@ function cargaEstaticaControladores() {
         reporteChequeosConDescanso,
         reporteActividadesDispositivo,
         reporteGeneralHorasTrabajadas,
+        resumenHorasTrabajadasEmpleados,
         reporteHorasTrabajadasConDescanso,
         reporteGeneralHorasTrabajadasConDescanso
     ];

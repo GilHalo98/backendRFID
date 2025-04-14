@@ -144,7 +144,14 @@ module.exports = (app) => {
         '/horasTrabajadas/dias/horario',
         upload.any(),
         controlador.reporteListarDiasHorario
-    )
+    );
+
+    // Genera un resument de las horas trabajadas de todos los empleados.
+    router.get(
+        '/horasTrabajadas/resumen',
+        upload.any(),
+        controlador.resumenHorasTrabajadasEmpleados
+    );
 
     // Ruta general de reportes.
     app.use(process.env.API_URL + 'reportes', router);

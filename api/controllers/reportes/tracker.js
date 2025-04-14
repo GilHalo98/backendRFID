@@ -19,8 +19,9 @@ const {
 
 // Funciones de manipulacion de tiempo.
 const {
+    rangoDia,
     deserealizarSemana,
-    rangoDia
+    rangoReporteDiaLaboral
 } = require("../../utils/tiempo");
 
 // Funciones extra.
@@ -30,7 +31,9 @@ const {
 
 // Modelos que usara el controlador.
 const Reportes = db.reporte;
+const Horarios = db.horario;
 const Empleados = db.empleado;
+const DiasLaborales = db.diaLaboral;
 const ReportesAccesos = db.reporteAcceso;
 const ReportesChequeos = db.reporteChequeo;
 const ReportesActividades = db.reporteActividad;
@@ -40,7 +43,7 @@ module.exports = async function reporteTracker(
     request,
     respuesta
 ) {
-    // GET Request.
+    // GET Request.rangoReporteDiaLaboral
     const cabecera = request.headers;
     const cuerpo = request.body;
     const parametros = request.params;
@@ -67,15 +70,21 @@ module.exports = async function reporteTracker(
             deserealizarSemana(consulta.semanaReporte) : null;
 
         // Instanciamos el rango del dia del reporte.
-        const rangoDiaReporte = rangoDia(
+        const rangoReporte = rangoDia(
             consulta.dia,
             semanaReporte
         );
 
+
         // Buscamos el registro vinculado del empleado.
-        const registroVinculado = await Empleados.findByPk(
-            consulta.idEmpleadoVinculado
-        );
+        const registroVinculado = await Empleados.findOne({
+            where: {
+                id: consulta.idEmpleadoVinculado
+            },
+            include: [{
+                model: Horarios
+            }]
+        });
 
         // Si el registro vinculado no existe.
         if(!registroVinculado) {
@@ -83,6 +92,25 @@ module.exports = async function reporteTracker(
                 codigoRespuesta: CODIGOS.EMPLEADO_NO_ENCONTRADO
             });
         }
+
+        // Consultamos el dia laboral.
+        const registroDiaLaboral = await DiasLaborales.findOne({
+            where: {
+                idHorarioVinculado: registroVinculado.horario.id,
+                dia: consulta.dia
+            }
+        });
+
+        // Instanciamos el rango del reporte.const Horarios = db.horario;
+        const rangoDiaReporte =  rangoReporteDiaLaboral(
+            consulta.dia,
+            rangoDia(
+                consulta.dia,
+                semanaReporte,
+                false
+            ),
+            registroDiaLaboral
+        );
 
         // Consultamos los registros de los reportes por empleado.
         const reporteChequeo = await ReportesChequeos.findAll({

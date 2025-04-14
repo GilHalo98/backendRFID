@@ -1,3 +1,12 @@
+/**
+ * NOTA: TENEMOS QUE TOMAR EN CUENTA EN EL RANGO DEL DIA
+ * QUE YA SE TOMAN EN CUENTA LOS REGISTROS PASADOS
+ * DE LAS 23:59:59, HAY QUE RECORDAR QUE PARA QUE SE PUEDA
+ * REGISTRAR EL REPORTE DE SALIDA CON HORAS EXTRAS PASADAS
+ * DE LA HORA YA ESTABLECIDA, SE TIENE QUE CHECAR DOS HORAS
+ * ANTES DE LA HORA DE ENTRADA DEL SIGUIENTE DIA.
+ */
+
 // Modelos de la DB
 const db = require("../../models/index");
 
@@ -27,6 +36,7 @@ const {
     rangoDia,
     dateDiaSemana,
     deserealizarSemana,
+    rangoReporteDiaLaboral
 } = require("../../utils/tiempo");
 
 // Modelos que usara el controlador.
@@ -56,14 +66,23 @@ async function formatearRegistros(
         // Desempaquetamos un registro de los dias laborales.
         const diaLaboral = diasLaborales[i];
 
-        // Instanciamos la fecha del dia.
-        const rangoDiaReporte = rangoDia(
+        // Instanciamos el rango del reporte.
+        const rangoDiaReporte =  rangoReporteDiaLaboral(
             diaLaboral.dia,
-            semanaReporte
+            rangoDia(
+                diaLaboral.dia,
+                semanaReporte,
+                false
+            ),
+            diaLaboral
         );
 
         // Instanciamos el dia de la semana.
-        const diaSemana = dateDiaSemana(diaLaboral.dia, semanaReporte, true);
+        const diaSemana = dateDiaSemana(
+            diaLaboral.dia,
+            semanaReporte,
+            true
+        );
 
         // Consultamos el reporte de entrada.
         const reporteEntrada = await ReportesChequeos.findOne({

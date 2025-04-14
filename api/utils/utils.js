@@ -4,26 +4,28 @@ function toSQLDate(fecha, timeOffset=true) {
         return null;
     }
 
+    // Se instancia un objeto fecha auxiliar.
     const fechaAux = new Date(fecha);
 
-    let extra = 1;
-
-    if(process.platform == "win32") {
-        extra = 2;
-    }
-
+    // Si se marca el tomar en cuenta el offset de la zona del tiempo.
     if(timeOffset) {
+        // Se obtiene el offset.
         const timeZone = fechaAux.getTimezoneOffset();
 
-        const offsetHoras = Math.floor(timeZone / 60) * extra;
+        // Se calcula la diferencia del tiempo, NOTA: ES IMPORTANTE
+        // DESFAZARLO POR 2 HORAS PARA QUE PUEDA SER REGISTRADO
+        // CORRECTAMENTE EN LA BASE DE DATOS.
+        const offsetHoras = Math.floor(timeZone / 60) * 2;
         const offsetMinutos = Math.floor(timeZone / (60 * 60));
     
+        // Se substrae la diferencia a la fecha auxiliar.
         fechaAux.setHours(
             fechaAux.getHours() - offsetHoras,
             fechaAux.getMinutes() - offsetMinutos
         );
     }
 
+    // Se formate la fecha auxiliar para poder ser enviada a mysql.
     const fechaFormateada = fechaAux.toISOString().slice(
         0,
         19

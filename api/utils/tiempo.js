@@ -1,16 +1,23 @@
+/**
+ * HAY QUE ESTANDARIZAR LAS FUNCIONES DE TIEMPO Y FECHAS, EN LA API TODAS
+ * LAS FECHAS SE PROCESARAN EN EL OBJETO DE JS, ANTES DE ENVIARLA A LA
+ * DB O AL CLIENTE, SE PASARAN AL FORMATO DE MYSQL.
+ */
+
+
 const {
     toDateTime,
     toSQLDate
 } = require("./utils");
 
 
-function ajustarTimeZone(fecha) {
+function ajustarTimeZone(fecha, inplace=false) {
     /**
      * Ajusta el time zona offset de la fecha pasada.
      */
 
     // Instanciamos una fecha auxiliar.
-    const fechaAux = new Date(fecha);
+    const fechaAux = inplace? fecha : new Date(fecha);
 
     // Les quitamos el offset del timezone.
     const timeZone = fecha.getTimezoneOffset();
@@ -104,7 +111,44 @@ function empleadoSalioTarde(
     return salioATiempo;
 };
 
-function rangoHoy(offset=0) {
+function rangoReporteDiaLaboral(
+    dia,
+    semanaReporte,
+    diaLaboral,
+    asSQLDate=true
+) {
+    // Instanciamos el rango del dia del reporte.
+    const rangoAux = rangoDia(dia, semanaReporte, false);
+
+    if(!diaLaboral.esDescanso) {
+        // Convertimos la hora de entrada en un objeto fecha.
+        const horaEntrada = toDateTime(
+            diaLaboral.horaEntrada
+        );
+
+        // Se le substrae 2 horas al limite inferior.
+        rangoAux[0].setHours(
+            horaEntrada.getHours() - 2,
+            horaEntrada.getMinutes()
+        );
+
+        // Duplicamos la fecha del limite inferior en
+        // el limite superior.
+        rangoAux[1] = new Date(rangoAux[0]);
+
+        // Aumentamos en 1 el dia del limite superior.
+        rangoAux[1].setDate(rangoAux[1].getDate() + 1);
+    }
+
+    // Cambios de formato las fechas del rango de
+    // los reportes de chequeo.
+    return asSQLDate? [
+        toSQLDate(rangoAux[0]),
+        toSQLDate(rangoAux[1])
+    ] : rangoAux;
+}
+
+function rangoHoy(offset=0, asSQLDate=true) {
     // Instanciamos dos fechas.
     const fechaA = new Date();
     const fechaB = new Date();
@@ -118,18 +162,20 @@ function rangoHoy(offset=0) {
     if(offset != 0) {
         if(offset > 0) {
             fechaB.setDate(fechaB.getDate() + 1);
+
         } else {
             fechaA.setDate(fechaA.getDate() - 1);
         }
     }
 
-    // Cambiamos el formato y las retornamos.
-    return [
+    return asSQLDate? [
         toSQLDate(fechaA), toSQLDate(fechaB)
+    ] : [
+        fechaA, fechaB
     ];
 };
 
-function rangoDia(dia, semana=null) {
+function rangoDia(dia, semana=null, asSQLDate=true) {
     // Le quitamos una unidad al dia pasado, si el dia es 7 o domingo,
     // se establece a -1 para empezar con el domingo de
     // la semana pasada.
@@ -151,8 +197,10 @@ function rangoDia(dia, semana=null) {
     fechaB.setHours(23, 59, 59);
 
     // Cambiamos el formato y las retornamos.
-    return [
+    return asSQLDate? [
         toSQLDate(fechaA), toSQLDate(fechaB)
+    ] : [
+        fechaA, fechaB
     ];
 };
 
@@ -348,16 +396,6 @@ function tiempoActual() {
 
     const fechaActual = new Date();
 
-    const timeZone = fechaActual.getTimezoneOffset() * 2;
-
-    const offsetHoras = Math.floor(timeZone / 60);
-    const offsetMinutos = Math.floor(timeZone / (60*60));
-
-    fechaActual.setHours(
-        fechaActual.getHours() - offsetHoras,
-        fechaActual.getMinutes() - offsetMinutos
-    );
-
     return fechaActual;
 };
 
@@ -423,6 +461,7 @@ module.exports = {
     empleadoSalioTarde,
     numeroDiaANombreDia,
     empleadoLlegoATiempo,
+    rangoReporteDiaLaboral,
     empleadoInicioDescansoATiempo,
     empleadoTerminoDescansoATiempo,
 };
